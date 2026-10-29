@@ -224,6 +224,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [08 · Comunicação e arquitetura](docs/08-comunicacao-e-arquitetura.md) | Três modelos de imagem e orientações de divulgação |
 | [09 · Revisão no aplicativo](docs/09-revisao-no-app.md) | Estado da edição, fontes e aprovação de roteiro pelo responsável |
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
+| [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 
 ## Custos
 
@@ -242,7 +243,7 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Gerar voz em segundo plano, ouvir prévia, aprovar áudio e solicitar publicação pela interface.
 - [ ] Permitir edição/rejeição de rascunhos.
 - [ ] Após ajustes finos, ativar publicação automática com limites de custo e notificação de episódio pronto.
-- [ ] Integrar o visual do login à identidade do aplicativo.
+- [x] Aplicar logo e cores do Radar IA ao login Cognito clássico.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [ ] Revisar o repositório e disponibilizar o código publicamente.
 - [ ] Criar um feed RSS público como canal opcional de distribuição.

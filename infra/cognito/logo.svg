@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="350" height="146" viewBox="0 0 350 146">
+  <rect width="350" height="146" fill="#101c2b"/>
+  <g transform="translate(20 17)" fill="none" stroke="#c1ed80" stroke-width="3">
+    <circle cx="27" cy="27" r="25"/><circle cx="27" cy="27" r="16"/>
+    <path d="M27 27V2M27 27L45 9"/><circle cx="27" cy="27" r="4" fill="#c1ed80" stroke="none"/>
+  </g>
+  <text x="90" y="55" fill="#edf2f5" font-family="Arial, sans-serif" font-size="31" font-weight="700" letter-spacing="2">RADAR <tspan fill="#c1ed80">IA</tspan></text>
+  <text x="175" y="94" text-anchor="middle" fill="#a7b6c8" font-family="Arial, sans-serif" font-size="13" letter-spacing="1">IA, ferramentas e mercado.</text>
+  <text x="175" y="122" text-anchor="middle" fill="#c1ed80" font-family="Arial, sans-serif" font-size="11" letter-spacing="2">POR JRSANTOSDEV</text>
+</svg>

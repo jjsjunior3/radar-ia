@@ -33,7 +33,7 @@ Uma tarefa em execução há mais de vinte minutos aparece como resultado incert
 
 1. Validar o fluxo completo no celular com uma edição nova e medir custo/qualidade.
 2. Melhorar confiabilidade do agendamento, diagnóstico e retenção de falhas.
-3. Integrar visualmente a tela de login à identidade do Radar IA, mantendo o login seguro do Cognito.
+3. Identidade visual do login: logo e cores aplicados ao Cognito clássico; ver [guia 11](11-identidade-login.md).
 4. Implementar modo automático com limites de custo/duração, critérios editoriais e tratamento de falhas. Ativá-lo após concluir os ajustes finos.
 5. Notificar somente quando um episódio estiver pronto e confirmado no catálogo; evitar notificações duplicadas para a mesma edição.
 6. Auditar o repositório para abertura pública e finalizar materiais do portfólio/LinkedIn.
