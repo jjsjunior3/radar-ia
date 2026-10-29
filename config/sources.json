@@ -1,0 +1,40 @@
+[
+  {
+    "name": "AWS Machine Learning",
+    "url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+    "domains": [
+      "aws.amazon.com"
+    ]
+  },
+  {
+    "name": "GitHub AI e ML",
+    "url": "https://github.blog/ai-and-ml/feed/",
+    "domains": [
+      "github.blog"
+    ]
+  },
+  {
+    "name": "Google AI",
+    "url": "https://blog.google/technology/ai/rss/",
+    "domains": [
+      "blog.google"
+    ]
+  },
+  {
+    "name": "TechCrunch",
+    "url": "https://techcrunch.com/feed/",
+    "domains": [
+      "techcrunch.com"
+    ],
+    "source_type": "imprensa"
+  },
+  {
+    "name": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml",
+    "domains": [
+      "www.theverge.com",
+      "theverge.com"
+    ],
+    "source_type": "imprensa"
+  }
+]

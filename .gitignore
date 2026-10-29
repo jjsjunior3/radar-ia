@@ -1,0 +1,18 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+local-output/
+
+# Arquivos locais e configuração gerada
+outputs/
+aws
+config/iam-runtime-policy.json
+*.sqlite3
+*.sqlite3-*
+*.wav
+*.mp3
+*.zip

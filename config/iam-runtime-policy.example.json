@@ -1,0 +1,8 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect": "Allow", "Action": ["polly:SynthesizeSpeech"], "Resource": "*"},
+    {"Effect": "Allow", "Action": ["s3:ListBucket", "s3:GetBucketPublicAccessBlock", "s3:GetBucketOwnershipControls", "s3:GetEncryptionConfiguration"], "Resource": "arn:aws:s3:::SEU_BUCKET"},
+    {"Effect": "Allow", "Action": ["s3:GetObject", "s3:PutObject"], "Resource": "arn:aws:s3:::SEU_BUCKET/radar-ia/*"}
+  ]
+}
