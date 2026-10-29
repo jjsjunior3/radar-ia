@@ -23,41 +23,7 @@ def clean_summary(text: str) -> str:
     return " ".join(unescape(text).split())
 
 
-def check_date(entry: dict, now: datetime, hours: int = 48) -> tuple[str, datetime | None]:
-    """Valida publicação; atualização não substitui data ausente."""
-    stamp = entry.get("published_parsed")
-    if not stamp:
-        return "sem data de publicação válida", None
-    try:
-        published = datetime.fromtimestamp(calendar.timegm(stamp), timezone.utc)
-    except (ValueError, OverflowError, TypeError, OSError):
-        return "sem data de publicação válida", None
-    if published > now:
-        return "data futura", published
-    if now - published > timedelta(hours=hours):
-        return "mais antiga que a janela", published
-    return "dentro da janela", published
-
-
-def check_candidate(news: dict, accepted: list[dict], fetch) -> tuple[str, dict | None]:
-    """Normaliza, verifica a página e compara com candidatas desta execução."""
-    title = clean_summary(news.get("title", ""))
-    if not title:
-        return "título ausente", None
-    try:
-        item = {"title": title, "url": canonical(news.get("link", ""))}
-        if any(duplicate(item, other) for other in accepted):
-            return "duplicada por URL ou título semelhante", None
-        _, item["url"] = fetch(item["url"])
-        if any(duplicate(item, other) for other in accepted):
-            return "duplicada após redirecionamento", None
-    except httpx.HTTPStatusError as exc:
-        return f"página retornou HTTP {exc.response.status_code}", None
-    except httpx.HTTPError:
-        return "falha de conexão com a página", None
-    except ValueError as exc:
-        return f"URL ou página rejeitada: {exc}", None
-    return "candidata válida", item
+from radar_ia.collection import check_date, check_candidate
 
 
 def main() -> None:

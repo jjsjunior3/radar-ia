@@ -1,0 +1,71 @@
+name: Produção acompanhada do Radar IA
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: Etapa (aprovações confirmam revisão humana dos arquivos privados)
+        type: choice
+        required: true
+        default: prepare
+        options: [prepare, draft, approve-script, audio, approve-audio, publish, status]
+      date:
+        description: Data da edição (AAAA-MM-DD); vazio usa hoje em São Paulo
+        type: string
+        required: false
+  schedule:
+    - cron: '30 8 * * 1-5'
+      timezone: America/Sao_Paulo
+permissions:
+  contents: read
+concurrency:
+  group: radar-production
+  cancel-in-progress: false
+jobs:
+  production:
+    # O cron fica bloqueado até a primeira execução manual ser validada.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.RADAR_SCHEDULE_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: us-east-1
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      S3_PREFIX: radar-ia
+      LLM_PROVIDER: openrouter
+      OPENROUTER_MODEL: google/gemini-2.5-flash
+      POLLY_VOICE: Camila
+      POLLY_ENGINE: generative
+      STEP: ${{ inputs.step || 'prepare' }}
+      EDITION_DATE: ${{ inputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Instalar projeto
+        run: python -m pip install -e .
+      - name: Autenticar com credenciais temporárias AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: radar-${{ github.run_id }}
+      - name: Executar etapa escolhida
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        shell: bash
+        run: |
+          args=("$STEP")
+          if [[ -n "$EDITION_DATE" ]]; then args+=(--date "$EDITION_DATE"); fi
+          case "$STEP" in
+            draft|audio|publish) args+=(--execute) ;;
+            approve-script|approve-audio) args+=(--reviewed) ;;
+          esac
+          python -m radar_ia.production_cli "${args[@]}"
+      - name: Gerar roteiro para revisão na rotina agendada
+        if: github.event_name == 'schedule'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python -m radar_ia.production_cli draft --execute

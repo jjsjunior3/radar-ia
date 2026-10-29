@@ -13,6 +13,7 @@ test = ["pytest>=8,<10"]
 
 [project.scripts]
 radar-ia = "radar_ia.cli:main"
+radar-ia-production = "radar_ia.production_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
