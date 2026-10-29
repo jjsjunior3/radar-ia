@@ -52,7 +52,13 @@ Abrir WebUrl no Android e fazer login. A senha do app é independente de IAM/roo
 
 SQLite permanece no protótipo local. DynamoDB guarda progresso por usuário/dispositivo compartilhado na versão hospedada; não há migração automática do progresso local. Atualizações concorrentes usam versão condicional; conflito devolve 409 e pede atualização, sem sobrescrever silenciosamente o outro dispositivo.
 
-Access token fica em memória. sessionStorage mantém somente state/verifier PKCE até a troca por token. Recarregar exige novo fluxo de login; a sessão do Cognito pode facilitar a entrada. Refresh tokens não são persistidos nem usados nesta versão. Logout limpa token local e sessão hospedada; avaliar revogação adicional e recuperação de conta antes de abrir acesso a outras pessoas. MFA TOTP configurável, opcional; não alegar que está ativo sem configurar.
+Access token fica em memória, com validade de uma hora. sessionStorage mantém somente state/verifier PKCE até a troca por token. O refresh token fica no localStorage deste navegador, vinculado ao client ID, por até **30 dias a partir do login**. Nenhuma senha é armazenada. Ao reabrir o app, a sessão é restaurada pelo endpoint de tokens do Cognito; chamadas à API renovam o access token quando restam menos de 60 segundos. Requisições simultâneas compartilham a mesma renovação.
+
+**Sair** remove a sessão local imediatamente, tenta revogar o refresh token no Cognito e encerra a sessão hospedada. Outras abas da mesma origem detectam a remoção e ocultam o conteúdo privado. Cada navegador/dispositivo tem sua própria sessão; sair de um não desconecta os demais. Sessão vencida ou rejeitada exige novo login. Falhas temporárias de rede preservam o refresh token para tentar novamente. Limpar os dados do navegador ou usar navegação privada pode impedir a persistência.
+
+O refresh token persistente é uma credencial acessível ao JavaScript desta origem: a aplicação mantém CSP restritiva, não carrega scripts de terceiros e renderiza conteúdo editorial como texto. A opção foi adotada para este cliente web estático; um backend com cookie HttpOnly pode ser avaliado numa arquitetura futura. A revogação impede novas renovações; o authorizer JWT do API Gateway valida o token localmente, portanto um access token já emitido e copiado pode continuar válido até expirar. O app remove sua cópia ao sair.
+
+MFA TOTP configurável, opcional; não alegar que está ativo sem configurar. Referências: [renovação de tokens](https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html) e [revogação](https://docs.aws.amazon.com/cognito/latest/developerguide/revocation-endpoint.html).
 
 ## Custos e operação
 
@@ -112,3 +118,8 @@ Correção publicada somente nos arquivos web: preparar botão Entrar antes de v
 Verificação: 138 testes Python + três testes JavaScript do fluxo expirado/state incorreto/timestamp futuro passaram. auth.js atualizado confirmado via HTTPS; invalidação CloudFront solicitada. Login autenticado e reprodução após correção ainda dependem do teste do proprietário, sem compartilhar credenciais.
 
 Atualizações futuras de interface usam examples/publicar_interface.py --publish, sem reaplicar infraestrutura ou políticas IAM/Cognito. Recomeçar login pelo endereço raiz do aplicativo; não reutilizar um link Cognito antigo com state/code_challenge vencidos.
+
+
+## Validação da sessão persistente (29/10/2026)
+
+Dez testes JavaScript cobrem PKCE, gravação somente do refresh token, restauração, renovação concorrente, expiração/revogação, falha temporária, logout e resposta tardia após logout em outra aba. Um teste isolado no Chrome percorreu login, fechamento da página, abertura de outra página no mesmo contexto, API autenticada e saída da conta, com serviços simulados. A configuração de 30 dias e revogação foi consultada no Cognito após a stack concluir a atualização. A senha do proprietário não foi solicitada nem usada nos testes; o primeiro login real após a atualização inicia a persistência em cada dispositivo.

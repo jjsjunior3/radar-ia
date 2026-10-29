@@ -15,7 +15,7 @@ window.radarProduction=(()=>{
     return `${value('year')}-${value('month')}-${value('day')}`;
   }
   async function request(path,options={}){
-    const response=await fetch(window.radarAuth.url(path),{...options,cache:'no-store',headers:window.radarAuth.headers(options.headers||{})});
+    const response=await fetch(window.radarAuth.url(path),{...options,cache:'no-store',headers:await window.radarAuth.headers(options.headers||{})});
     const data=await response.json();
     if(!response.ok){const error=Error(data.error||'Não foi possível consultar a edição.');error.status=response.status;throw error;}
     return data;

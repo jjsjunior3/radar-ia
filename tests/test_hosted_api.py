@@ -66,6 +66,9 @@ def test_template_disables_signup_and_requires_jwt_scopes():
     assert r['UserPool']['Properties']['AdminCreateUserConfig']['AllowAdminCreateUserOnly'] is True
     assert r['WebClient']['Properties']['GenerateSecret'] is False
     assert r['WebClient']['Properties']['AllowedOAuthFlows']==['code']
+    assert r['WebClient']['Properties']['RefreshTokenValidity']==30
+    assert r['WebClient']['Properties']['TokenValidityUnits']['RefreshToken']=='days'
+    assert r['WebClient']['Properties']['EnableTokenRevocation'] is True
     routes=[v['Properties'] for v in r.values() if v['Type']=='AWS::ApiGatewayV2::Route']
     assert len(routes)==10
     assert all(route['AuthorizationType']=='JWT' and route['AuthorizationScopes']==['openid'] for route in routes)

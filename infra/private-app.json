@@ -294,7 +294,7 @@
         "EnableTokenRevocation": true,
         "AccessTokenValidity": 60,
         "IdTokenValidity": 60,
-        "RefreshTokenValidity": 1,
+        "RefreshTokenValidity": 30,
         "TokenValidityUnits": {
           "AccessToken": "minutes",
           "IdToken": "minutes",

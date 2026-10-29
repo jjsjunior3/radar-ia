@@ -168,7 +168,7 @@ As etapas seguintes são explícitas e devem ser usadas após a revisão corresp
 ## Confiabilidade, privacidade e limites
 
 - Buckets privados, bloqueio de acesso público, ACLs desativadas e criptografia S3 configurada.
-- Cadastro público do app desativado; tokens de acesso em memória e autorização na API.
+- Cadastro público do app desativado; tokens de acesso em memória, renovação de sessão por até 30 dias neste navegador e autorização na API.
 - Progresso separado pelo identificador autenticado do usuário, com atualização condicional.
 - Gravações condicionais com ETag evitam sobrescrever catálogo/estado lidos em versão antiga.
 - Resultado pago incerto bloqueia repetição automática; isso reduz duplicações, mas não garante cobrança única pelo provedor.
