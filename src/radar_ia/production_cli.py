@@ -46,7 +46,10 @@ def execute(args, output, now=None):
     prefix = os.environ.get('S3_PREFIX', 'radar-ia').strip('/')
     region = os.environ.get('AWS_REGION', 'us-east-1')
     session = boto3.Session(region_name=region)
-    config = Config(signature_version='s3v4', retries={'total_max_attempts': 1}, connect_timeout=10, read_timeout=90)
+    # Evita upload opcional aws-chunked em transportes que encerram essa conexão.
+    # Checksums exigidos pelo serviço continuam habilitados.
+    config = Config(signature_version='s3v4', retries={'total_max_attempts': 1}, connect_timeout=10, read_timeout=90,
+                    request_checksum_calculation='when_required', response_checksum_validation='when_required')
     s3 = session.client('s3', config=config)
     verify_private(s3, bucket)
     store = None
