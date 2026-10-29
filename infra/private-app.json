@@ -20,6 +20,22 @@
     },
     "WorkerCodeKey": {
       "Type": "String"
+    },
+    "EditorialCodeKey": {
+      "Type": "String",
+      "Default": ""
+    },
+    "OpenRouterSecretArn": {
+      "Type": "String",
+      "Default": ""
+    },
+    "EditorialScheduleEnabled": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
     }
   },
   "Resources": {
@@ -1027,6 +1043,319 @@
           "openid"
         ]
       }
+    },
+    "EditorialFailureQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "SqsManagedSseEnabled": true,
+        "MessageRetentionPeriod": 1209600
+      }
+    },
+    "EditorialRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "runtime",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/catalog.json"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket",
+                    "s3:GetBucketPublicAccessBlock",
+                    "s3:GetBucketOwnershipControls",
+                    "s3:GetEncryptionConfiguration"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:PutItem"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "JobsTable",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-editorial:*"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue",
+                    "secretsmanager:DescribeSecret"
+                  ],
+                  "Resource": {
+                    "Ref": "OpenRouterSecretArn"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "EditorialFailureQueue",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "EditorialLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-editorial"
+        },
+        "RetentionInDays": 14
+      }
+    },
+    "EditorialFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Condition": "EditorialConfigured",
+      "DependsOn": "EditorialLogs",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-editorial"
+        },
+        "Runtime": "python3.12",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "radar_ia.scheduled_editorial.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "EditorialRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 900,
+        "MemorySize": 512,
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AudioBucket"
+          },
+          "S3Key": {
+            "Ref": "EditorialCodeKey"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "S3_BUCKET": {
+              "Ref": "AudioBucket"
+            },
+            "S3_PREFIX": {
+              "Ref": "AudioPrefix"
+            },
+            "JOBS_TABLE": {
+              "Ref": "JobsTable"
+            },
+            "REVIEWER_SUB": {
+              "Ref": "ReviewerSub"
+            },
+            "OPENROUTER_SECRET_ARN": {
+              "Ref": "OpenRouterSecretArn"
+            },
+            "OPENROUTER_MODEL": "google/gemini-2.5-flash"
+          }
+        }
+      }
+    },
+    "EditorialAsyncConfig": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "EditorialFunction"
+        },
+        "Qualifier": "$LATEST",
+        "MaximumRetryAttempts": 0,
+        "MaximumEventAgeInSeconds": 3600,
+        "DestinationConfig": {
+          "OnFailure": {
+            "Destination": {
+              "Fn::GetAtt": [
+                "EditorialFailureQueue",
+                "Arn"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "SchedulerRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule-group/default"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "invoke-editorial",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "EditorialFunction",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "EditorialFailureQueue",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "EditorialSchedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "Condition": "EditorialConfigured",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-weekday-editorial"
+        },
+        "Description": "Preparar pauta e roteiro do Radar IA para revisao; nao gera voz nem publica.",
+        "ScheduleExpression": "cron(30 8 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "America/Sao_Paulo",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "State": {
+          "Fn::If": [
+            "EditorialEnabled",
+            "ENABLED",
+            "DISABLED"
+          ]
+        },
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "EditorialFunction",
+              "Arn"
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRole",
+              "Arn"
+            ]
+          },
+          "Input": "{\"scheduled_time\":\"<aws.scheduler.scheduled-time>\",\"source\":\"eventbridge\"}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 2
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "EditorialFailureQueue",
+                "Arn"
+              ]
+            }
+          }
+        }
+      }
     }
   },
   "Outputs": {
@@ -1087,6 +1416,69 @@
       "Value": {
         "Ref": "WorkerFunction"
       }
+    },
+    "EditorialSchedule": {
+      "Condition": "EditorialConfigured",
+      "Value": {
+        "Ref": "EditorialSchedule"
+      }
+    },
+    "EditorialFunction": {
+      "Condition": "EditorialConfigured",
+      "Value": {
+        "Ref": "EditorialFunction"
+      }
+    },
+    "EditorialFailureQueue": {
+      "Condition": "EditorialConfigured",
+      "Value": {
+        "Ref": "EditorialFailureQueue"
+      }
+    }
+  },
+  "Conditions": {
+    "EditorialConfigured": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "EditorialCodeKey"
+                },
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "OpenRouterSecretArn"
+                },
+                ""
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "EditorialEnabled": {
+      "Fn::And": [
+        {
+          "Condition": "EditorialConfigured"
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "EditorialScheduleEnabled"
+            },
+            "true"
+          ]
+        }
+      ]
     }
   }
 }

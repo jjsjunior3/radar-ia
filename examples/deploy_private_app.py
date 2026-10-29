@@ -101,6 +101,9 @@ def main():
     if exists:
         current=cf.describe_stacks(StackName=stack)['Stacks'][0]
         old={item['OutputKey']:item['OutputValue'] for item in current['Outputs']}
+        for parameter in current.get('Parameters',[]):
+            if parameter['ParameterKey'] in ('EditorialCodeKey','OpenRouterSecretArn','EditorialScheduleEnabled'):
+                parameters.append({'ParameterKey':parameter['ParameterKey'],'UsePreviousValue':True})
         email=os.getenv('APP_LOGIN_EMAIL','').strip()
         if email:
             user=session.client('cognito-idp',config=config).admin_get_user(UserPoolId=old['UserPoolId'],Username=email)

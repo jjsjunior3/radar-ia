@@ -70,7 +70,7 @@ def architecture():
 
     a.rect(80,430,1440,560,'#101F32','#24374D',32)
     a.text(112,478,'01  PRODUÇÃO ACOMPANHADA',27,a.accent,700)
-    a.text(112,517,'GitHub Actions • seg–sex, 8h30 • America/Sao_Paulo',25,a.muted)
+    a.text(112,517,'EventBridge Scheduler • seg–sex, 8h30 • America/Sao_Paulo',25,a.muted)
     cards=[(112,552,400,'Fontes RSS',['httpx + feedparser','Publicação declarada no feed']),
            (600,552,400,'Python: curadoria',['Datas, HTTPS e deduplicação','Grade semanal + pauta variável']),
            (1088,552,400,'OpenRouter + Gemini',['Roteiro JSON + Pydantic','Português com inglês explicado']),
@@ -80,7 +80,7 @@ def architecture():
     for x,y,w,title,body in cards:a.card(x,y,w,title,body,'#172A40','#30465E',h=148,title_size=29)
     a.path('M 523 625 H 584');a.path('M 1011 625 H 1072')
     a.path('M 1288 708 V 746');a.path('M 1076 836 H 1016');a.path('M 588 836 H 528')
-    a.text(112,960,'IAM + OIDC: sessão temporária AWS para o workflow; catálogo com gravação condicional.',24,a.muted)
+    a.text(112,960,'IAM por função • Secrets Manager para a LLM • GitHub Actions para CI e operação manual.',24,a.muted)
 
     a.rect(80,1030,1440,652,'#101F32','#24374D',32)
     a.text(112,1080,'02  APLICATIVO E ACESSO',27,a.accent,700)
@@ -133,7 +133,7 @@ def journey():
         a.text(950,y+33,tech,21,a.muted,500)
     a.rect(80,1680,1440,145,'#DDEDE6')
     a.text(112,1725,'AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO',26,a.accent,700)
-    a.text(112,1765,'Coleta e roteiro automáticos; voz e publicação após revisão.',28,weight=600)
+    a.text(112,1765,'Coleta e roteiro na AWS; voz e publicação após revisão.',28,weight=600)
     a.text(112,1803,'Open source em preparação • licença MIT • sem preenchimento artificial.',24,a.muted)
     a.footer('02 / 03');a.save('02-fluxo-editorial.svg')
 
@@ -146,7 +146,7 @@ def modules():
     a.text(80,309,'Automação modular + geração com LLM + serviços AWS.',31,a.muted)
     a.rect(80,364,1440,118,'#26213E','#53446E')
     a.text(112,413,'ORQUESTRAÇÃO EM PYTHON',26,a.accent,700)
-    a.text(112,454,'production.py + GitHub Actions • checkpoints S3 • identidade AWS via IAM/OIDC',27)
+    a.text(112,454,'production.py + Lambda + EventBridge Scheduler • checkpoints S3 • IAM por função',27)
     cards=[
         (80,550,'01  Coletor RSS','CÓDIGO PYTHON',['collection.py • httpx • feedparser','Datas, URLs e domínios permitidos','Resumos e referências preservados']),
         (840,550,'02  Curadoria','CÓDIGO PYTHON',['weekly.py + brief.py','Grade semanal e fila de candidatas','Deduplicação e seleção de 1 a 7 itens']),

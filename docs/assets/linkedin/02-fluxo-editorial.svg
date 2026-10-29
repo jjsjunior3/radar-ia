@@ -59,7 +59,7 @@
 <text x="950" y="1505" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">AWS • web app no Android</text>
 <rect x="80" y="1680" width="1440" height="145" rx="24" fill="#DDEDE6" stroke="none" stroke-width="2"/>
 <text x="112" y="1725" fill="#117E74" font-size="26" font-weight="700" letter-spacing="0">AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO</text>
-<text x="112" y="1765" fill="#102B2B" font-size="28" font-weight="600" letter-spacing="0">Coleta e roteiro automáticos; voz e publicação após revisão.</text>
+<text x="112" y="1765" fill="#102B2B" font-size="28" font-weight="600" letter-spacing="0">Coleta e roteiro na AWS; voz e publicação após revisão.</text>
 <text x="112" y="1803" fill="#526561" font-size="24" font-weight="400" letter-spacing="0">Open source em preparação • licença MIT • sem preenchimento artificial.</text>
 <path d="M 80 1880 H 1520" fill="none" stroke="#526561" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="80" y="1932" fill="#102B2B" font-size="28" font-weight="650" letter-spacing="0">Feito por jrsantosdev</text>

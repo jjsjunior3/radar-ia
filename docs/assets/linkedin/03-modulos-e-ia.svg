@@ -9,7 +9,7 @@
 <text x="80" y="309" fill="#BFB8D4" font-size="31" font-weight="400" letter-spacing="0">Automação modular + geração com LLM + serviços AWS.</text>
 <rect x="80" y="364" width="1440" height="118" rx="24" fill="#26213E" stroke="#53446E" stroke-width="2"/>
 <text x="112" y="413" fill="#BBA3FF" font-size="26" font-weight="700" letter-spacing="0">ORQUESTRAÇÃO EM PYTHON</text>
-<text x="112" y="454" fill="#F6F3FF" font-size="27" font-weight="400" letter-spacing="0">production.py + GitHub Actions • checkpoints S3 • identidade AWS via IAM/OIDC</text>
+<text x="112" y="454" fill="#F6F3FF" font-size="27" font-weight="400" letter-spacing="0">production.py + Lambda + EventBridge Scheduler • checkpoints S3 • IAM por função</text>
 <rect x="80" y="550" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
 <text x="104" y="582" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">CÓDIGO PYTHON</text>
 <text x="104" y="627" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">01  Coletor RSS</text>

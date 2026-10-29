@@ -13,7 +13,7 @@ Desenvolvido por **[jrsantosdev](https://github.com/jjsjunior3)** como projeto d
 
 [Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
 
-> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o agendamento está habilitado e a primeira produção agendada de uma edição nova ainda aguarda validação. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
+> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o disparo diário foi transferido para o EventBridge Scheduler e a primeira edição nova desse agendamento ainda aguarda validação. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
 
 ## O problema
 
@@ -37,15 +37,20 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 ```mermaid
 flowchart TB
     subgraph PROD[Produção acompanhada]
-        GH[GitHub Actions / orquestrador Python]
+        SCHED[EventBridge Scheduler / 8h30 São Paulo]
+        EDIT[Lambda editorial Python]
+        GH[GitHub Actions / testes e operação manual]
         RSS[Fontes RSS] --> COLETA[Coleta e curadoria em Python]
-        GH --> COLETA
+        SCHED --> EDIT --> COLETA
+        GH -. operação manual .-> COLETA
         COLETA --> LLM[OpenRouter / Gemini / JSON validado]
         LLM --> R1[Revisão humana do roteiro]
         R1 --> POLLY[Amazon Polly / Leo / SSML]
         POLLY --> R2[Escuta e aprovação humana]
         R2 --> AUDIO[S3 privado: áudio e catálogo]
-        GH <--> STATE[S3 privado: checkpoints]
+        EDIT <--> STATE[S3 privado: checkpoints]
+        SECRET[Secrets Manager / OpenRouter] --> EDIT
+        GH <--> STATE
         OIDC[IAM + OIDC: sessão temporária] -. autentica .-> GH
     end
     subgraph APP[Aplicativo e consumo]
@@ -101,7 +106,7 @@ O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega
 6. O episódio entra no catálogo privado. Somente depois da confirmação, o histórico editorial avança.
 7. O aplicativo permite ouvir, marcar e retomar, com progresso sincronizado.
 
-**Agendamento:** segunda a sexta, às **8h30 em `America/Sao_Paulo`**. A rotina agendada prepara o roteiro e aguarda revisão. Voz e publicação exigem confirmação no modo acompanhado. O fluxo automático com notificação está planejado para depois dos ajustes finos. O GitHub pode atrasar eventos; o horário indica início previsto da produção.
+**Agendamento:** EventBridge Scheduler, de segunda a sexta, às **8h30 em `America/Sao_Paulo`**, sem janela flexível. Uma Lambda prepara pauta e roteiro e aguarda revisão. Voz e publicação exigem confirmação no modo acompanhado. O fluxo automático com notificação está planejado para depois dos ajustes finos. O horário indica o disparo previsto, não a conclusão do episódio. O cron de produção no GitHub fica bloqueado por variável; execução manual e testes continuam disponíveis. Veja o [guia do agendamento AWS](docs/12-agendamento-aws.md).
 
 ### Grade editorial
 
@@ -225,6 +230,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [09 · Revisão no aplicativo](docs/09-revisao-no-app.md) | Estado da edição, fontes e aprovação de roteiro pelo responsável |
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
+| [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
 
 ## Custos
 

@@ -12,6 +12,10 @@ from .audio import DEFAULT_VOICE
 def utcnow():return datetime.now(timezone.utc)
 
 
+def editorial_job_id(day):
+    return hashlib.sha256(('editorial-v1:'+day).encode()).hexdigest()
+
+
 def job_id(summary, action):
     binding={'date':summary['date'],'action':action,'script':summary.get('digest'),
         'revision':summary.get('audio_revision','initial'),'voice':DEFAULT_VOICE,

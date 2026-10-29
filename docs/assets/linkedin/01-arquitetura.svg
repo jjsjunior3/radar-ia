@@ -13,7 +13,7 @@
 <text x="418" y="372" fill="#CBDCF3" font-size="22" font-weight="600" letter-spacing="0">PT-BR + INGLÊS TÉCNICO</text>
 <rect x="80" y="430" width="1440" height="560" rx="32" fill="#101F32" stroke="#24374D" stroke-width="2"/>
 <text x="112" y="478" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="0">01  PRODUÇÃO ACOMPANHADA</text>
-<text x="112" y="517" fill="#B0C0D2" font-size="25" font-weight="400" letter-spacing="0">GitHub Actions • seg–sex, 8h30 • America/Sao_Paulo</text>
+<text x="112" y="517" fill="#B0C0D2" font-size="25" font-weight="400" letter-spacing="0">EventBridge Scheduler • seg–sex, 8h30 • America/Sao_Paulo</text>
 <rect x="112" y="552" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
 <text x="136" y="598" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Fontes RSS</text>
 <text x="136" y="638" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">httpx + feedparser</text>
@@ -43,7 +43,7 @@
 <path d="M 1288 708 V 746" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 1076 836 H 1016" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 588 836 H 528" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="112" y="960" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">IAM + OIDC: sessão temporária AWS para o workflow; catálogo com gravação condicional.</text>
+<text x="112" y="960" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">IAM por função • Secrets Manager para a LLM • GitHub Actions para CI e operação manual.</text>
 <rect x="80" y="1030" width="1440" height="652" rx="32" fill="#101F32" stroke="#24374D" stroke-width="2"/>
 <text x="112" y="1080" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="0">02  APLICATIVO E ACESSO</text>
 <rect x="112" y="1128" width="400" height="150" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>

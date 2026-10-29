@@ -1,5 +1,7 @@
 # Produção acompanhada e GitHub Actions
 
+> A rotina diária passou para o EventBridge Scheduler. Este guia continua válido para operação manual e recuperação pelo GitHub/terminal. O cron do GitHub permanece bloqueado por variável para evitar duas produções. Veja o [guia 12](12-agendamento-aws.md).
+
 ## O que foi implementado
 
 O comando `radar-ia production` conecta coleta, grade semanal, roteiro OpenRouter, revisão humana, Polly Leo generativa e publicação no catálogo privado existente. O comando sem argumentos agora mostra ajuda: o fluxo antigo de cinco notícias não é mais executado por padrão.
