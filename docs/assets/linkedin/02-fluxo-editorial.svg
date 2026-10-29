@@ -55,8 +55,8 @@
 <rect x="224" y="1472" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
 <text x="250" y="1503" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">PUBLICAÇÃO PRIVADA</text>
 <text x="250" y="1547" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Dar play, pausar e retomar</text>
-<text x="250" y="1591" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Catálogo S3 e aplicativo com login e progresso.</text>
-<text x="950" y="1505" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">AWS • web app no Android</text>
+<text x="250" y="1591" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Catálogo privado, progresso e aviso por dispositivo.</text>
+<text x="950" y="1505" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">AWS • Android • Web Push</text>
 <rect x="80" y="1680" width="1440" height="145" rx="24" fill="#DDEDE6" stroke="none" stroke-width="2"/>
 <text x="112" y="1725" fill="#117E74" font-size="26" font-weight="700" letter-spacing="0">AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO</text>
 <text x="112" y="1765" fill="#102B2B" font-size="28" font-weight="600" letter-spacing="0">Coleta e roteiro na AWS; voz e publicação após revisão.</text>

@@ -16,3 +16,13 @@ config/iam-runtime-policy.json
 *.wav
 *.mp3
 *.zip
+
+# Credenciais e configuracoes particulares adicionais
+.env.*
+!.env.example
+.aws/
+*.pem
+*.key
+*.p12
+.coverage
+htmlcov/

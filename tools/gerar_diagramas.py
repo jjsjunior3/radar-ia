@@ -80,7 +80,7 @@ def architecture():
     for x,y,w,title,body in cards:a.card(x,y,w,title,body,'#172A40','#30465E',h=148,title_size=29)
     a.path('M 523 625 H 584');a.path('M 1011 625 H 1072')
     a.path('M 1288 708 V 746');a.path('M 1076 836 H 1016');a.path('M 588 836 H 528')
-    a.text(112,960,'IAM por função • Secrets Manager para a LLM • GitHub Actions para CI e operação manual.',24,a.muted)
+    a.text(112,960,'IAM por função • segredos LLM/VAPID • CI e operação manual no GitHub Actions.',24,a.muted)
 
     a.rect(80,1030,1440,652,'#101F32','#24374D',32)
     a.text(112,1080,'02  APLICATIVO E ACESSO',27,a.accent,700)
@@ -99,7 +99,8 @@ def architecture():
     for x,title,body in row:a.card(x,1370,272,title,body,'#172A40','#30465E',h=160,title_size=29)
     for x in (764,1132):a.path(f'M {x} 1450 H {x+68}')
     a.text(112,1582,'Acesso ao áudio: app → API → link assinado → S3 de áudio privado.',27,a.ink)
-    a.text(112,1631,'CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs da API.',24,a.muted)
+    a.text(112,1625,'CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs.',24,a.muted)
+    a.text(112,1660,'Após publicar: SQS + Lambda → Web Push; assinaturas privadas no DynamoDB.',22,a.muted)
 
     a.rect(80,1722,1440,112,'#153430')
     a.text(112,1765,'OPEN SOURCE EM PREPARAÇÃO',27,a.accent,700,1)
@@ -119,7 +120,7 @@ def journey():
           ('04','REVISÃO HUMANA','Conferir o conteúdo','Revisar o roteiro antes de autorizar a voz.','Aprovação vinculada ao texto',True),
           ('05','VOZ SINTÉTICA','Transformar texto em áudio','Pausas e inglês via SSML; WAV de até 600 segundos.','Amazon Polly • Leo generativa',False),
           ('06','ESCUTA HUMANA','Ouvir antes de publicar','Aprovar o áudio que será enviado ao catálogo.','Aprovação vinculada ao áudio',True),
-          ('07','PUBLICAÇÃO PRIVADA','Dar play, pausar e retomar','Catálogo S3 e aplicativo com login e progresso.','AWS • web app no Android',False)]
+          ('07','PUBLICAÇÃO PRIVADA','Dar play, pausar e retomar','Catálogo privado, progresso e aviso por dispositivo.','AWS • Android • Web Push',False)]
     a.path('M 143 490 V 1638',False,'#AFC9C0')
     for i,(number,label,title,body,tech,human) in enumerate(rows):
         y=440+i*172
@@ -153,7 +154,7 @@ def modules():
         (840,950,'03  Roteirista','GERAÇÃO COM LLM',['script.py • OpenRouter • Gemini','JSON estruturado + validação Pydantic','Português e glossário técnico em inglês']),
         (80,950,'04  Narrador','SERVIÇO TTS + REVISÃO DO ROTEIRO',['Polly • Leo generativa • SSML','Pausas e pronúncia de termos em inglês','Duração medida: até 10 minutos']),
         (80,1350,'05  Publicador','CÓDIGO PYTHON + APROVAÇÃO DO ÁUDIO',['catalog.py • Amazon S3 privado','Hash de conteúdo + gravação com ETag','Publicação idempotente do mesmo áudio']),
-        (840,1350,'06  Player privado','APLICATIVO WEB',['CloudFront • Cognito • API Gateway','Lambda Python • S3 • DynamoDB','Ouvidos, pendentes e posição de escuta'])]
+        (840,1350,'06  Player privado','APLICATIVO WEB',['CloudFront • Cognito • API Gateway','Lambda • S3 • DynamoDB • Web Push','Ouvidos, pendentes e posição de escuta'])]
     for x,y,title,tag,body in cards:
         a.card(x,y,680,title,body,'#26213E','#51446B',tag=tag,h=280,title_size=37)
     a.path('M 776 690 H 824')
@@ -162,7 +163,7 @@ def modules():
     a.path('M 420 1246 V 1334')
     a.path('M 776 1490 H 824')
     a.text(80,881,'Regras de software coletam e selecionam; a LLM produz o roteiro.',27,a.muted)
-    a.text(560,1280,'Texto e áudio passam por aprovação humana.',27,a.muted)
+    a.text(560,1280,'Revisão provisória • avisos via SQS + Web Push.',27,a.muted)
     a.rect(80,1690,1440,136,'#30264B')
     a.text(112,1736,'OPEN SOURCE EM PREPARAÇÃO • MIT',27,a.accent,700)
     a.text(112,1778,'Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.',26)

@@ -60,6 +60,11 @@ flowchart TB
         CLIENT -->|Access token| API[API Gateway / validação JWT]
         API --> FN[Lambda Python]
         FN <--> DDB[DynamoDB / progresso por usuário]
+        FN <--> SUBS[DynamoDB / assinaturas push]
+        FN --> QUEUE[SQS / tarefas de áudio e avisos]
+        QUEUE --> WORK[Lambda worker Python]
+        WORK -->|Após confirmar publicação| PUSH[Web Push / VAPID]
+        PUSH --> CLIENT
         FN -->|Consulta catálogo / emite link temporário| AUDIO
         CLIENT -->|Link assinado| AUDIO
     end
@@ -136,6 +141,8 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[test]"
 ```
 
+Atualize o pip da venv com `python -m pip install --upgrade pip` antes de instalar dependências. Node 22 é usado nos testes JavaScript e na configuração inicial de VAPID.
+
 Na primeira configuração, copie `.env.example` para `.env` e preencha suas variáveis. Preserve um `.env` existente. O arquivo real é ignorado pelo Git; variáveis já definidas no terminal têm precedência.
 
 ### Explorar sem gerar conteúdo pago
@@ -173,6 +180,7 @@ As etapas seguintes são explícitas e devem ser usadas após a revisão corresp
 ## Confiabilidade, privacidade e limites
 
 - Buckets privados, bloqueio de acesso público, ACLs desativadas e criptografia S3 configurada.
+- Avisos Web Push opcionais por dispositivo após publicação pelo app; recebimento em Android real ainda aguarda confirmação.
 - Cadastro público do app desativado; tokens de acesso em memória, renovação de sessão por até 30 dias neste navegador e autorização na API.
 - Progresso separado pelo identificador autenticado do usuário, com atualização condicional.
 - Gravações condicionais com ETag evitam sobrescrever catálogo/estado lidos em versão antiga.
@@ -231,6 +239,8 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 | [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
+| [13 · Avisos e painel](docs/13-notificacoes-painel.md) | Web Push no Android, teste por dispositivo e estado da produção |
+| [14 · Preparação para código aberto](docs/14-preparacao-open-source.md) | Auditoria, contribuição, privacidade e checklist de abertura |
 
 ## Custos
 
@@ -248,7 +258,8 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Mostrar a edição e permitir aprovação do roteiro pelo responsável no aplicativo.
 - [x] Gerar voz em segundo plano, ouvir prévia, aprovar áudio e solicitar publicação pela interface.
 - [ ] Permitir edição/rejeição de rascunhos.
-- [ ] Após ajustes finos, ativar publicação automática com limites de custo e notificação de episódio pronto.
+- [x] Preparar avisos Web Push e painel de produção; validar recebimento no Android.
+- [ ] Após ajustes finos, ativar publicação totalmente automática com limites de custo.
 - [x] Aplicar logo e cores do Radar IA ao login Cognito clássico.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [ ] Revisar o repositório e disponibilizar o código publicamente.
@@ -263,3 +274,8 @@ O código é distribuído sob a [licença MIT](LICENSE). O repositório está pr
 Ao abrir o repositório, contribuições poderão focar melhorias reproduzíveis, correções de bugs e documentação. Issues e pull requests devem usar dados fictícios e preservar informações de conta. Alterações de privacidade, custos e publicação precisam explicar seu impacto.
 
 **Feito por jrsantosdev.**
+
+
+## Contribuição e abertura do código
+
+Veja [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md) e [PRIVACY](PRIVACY.md). A demonstração e os testes podem rodar sem AWS ou chave LLM. A auditoria de preparação não alterou a visibilidade: o repositório continua privado, aguardando decisão do proprietário. Os relatórios de segurança e dados de produção ficam fora do Git.

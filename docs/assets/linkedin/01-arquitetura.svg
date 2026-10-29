@@ -43,7 +43,7 @@
 <path d="M 1288 708 V 746" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 1076 836 H 1016" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 588 836 H 528" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="112" y="960" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">IAM por função • Secrets Manager para a LLM • GitHub Actions para CI e operação manual.</text>
+<text x="112" y="960" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">IAM por função • segredos LLM/VAPID • CI e operação manual no GitHub Actions.</text>
 <rect x="80" y="1030" width="1440" height="652" rx="32" fill="#101F32" stroke="#24374D" stroke-width="2"/>
 <text x="112" y="1080" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="0">02  APLICATIVO E ACESSO</text>
 <rect x="112" y="1128" width="400" height="150" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
@@ -83,7 +83,8 @@
 <path d="M 764 1450 H 832" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 1132 1450 H 1200" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="112" y="1582" fill="#F3F7FC" font-size="27" font-weight="400" letter-spacing="0">Acesso ao áudio: app → API → link assinado → S3 de áudio privado.</text>
-<text x="112" y="1631" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs da API.</text>
+<text x="112" y="1625" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs.</text>
+<text x="112" y="1660" fill="#B0C0D2" font-size="22" font-weight="400" letter-spacing="0">Após publicar: SQS + Lambda → Web Push; assinaturas privadas no DynamoDB.</text>
 <rect x="80" y="1722" width="1440" height="112" rx="24" fill="#153430" stroke="none" stroke-width="2"/>
 <text x="112" y="1765" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="1">OPEN SOURCE EM PREPARAÇÃO</text>
 <text x="112" y="1805" fill="#C7E6DF" font-size="26" font-weight="400" letter-spacing="0">Licença MIT. Código e dados privados têm ciclos de publicação separados.</text>
