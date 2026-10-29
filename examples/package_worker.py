@@ -7,14 +7,17 @@ import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-MODULES=('audio','brief','catalog','collection','editorial','jobs','news','production','production_store','review','review_api','script','speech_markup','weekly','windows','worker')
+MODULES=('audio','brief','catalog','collection','editorial','jobs','news','production','production_store','review','review_api','script','speech_markup','weekly','windows','worker','push','notifications')
 
 
 def package_runtime(name='worker',requirements_file='worker-requirements.txt',extra_modules=()):
     folder=ROOT/'local-output/deploy';folder.mkdir(parents=True,exist_ok=True)
     wheels=folder/'linux-wheels';wheels.mkdir(exist_ok=True)
     requirements=ROOT/'infra'/requirements_file
-    build_env=dict(os.environ,TEMP=str(folder),TMP=str(folder))
+    build_temp=Path(os.getenv('RADAR_BUILD_TEMP',str(folder)));build_temp.mkdir(parents=True,exist_ok=True)
+    build_env=dict(os.environ,TEMP=str(build_temp),TMP=str(build_temp))
+    if name=='worker':
+        subprocess.run([sys.executable,'-m','pip','wheel','--disable-pip-version-check','--quiet','--no-deps','--wheel-dir',str(wheels),'http-ece==1.2.1'],check=True,env=build_env)
     subprocess.run([sys.executable,'-m','pip','download','--disable-pip-version-check','--quiet','--only-binary=:all:',
         '--platform','manylinux2014_x86_64','--implementation','cp','--python-version','3.12',
         '--dest',str(wheels),'--find-links',str(wheels),'-r',str(requirements)],check=True,env=build_env)

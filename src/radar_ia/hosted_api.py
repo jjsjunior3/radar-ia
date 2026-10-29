@@ -3,14 +3,15 @@ import base64
 import json
 import math
 import os
-from datetime import datetime, timezone
+from datetime import date,datetime,timedelta,timezone
 from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from botocore.config import Config
 from .review_api import ReviewStore, ReviewConflict
-from .jobs import JobStore, JobQueue, job_id, public_job
+from .jobs import JobStore, JobQueue, job_id, public_job, editorial_job_id
+from .push import PushStore,test_notice
 
 
 class Conflict(Exception): pass
@@ -43,6 +44,14 @@ class Backend:
     def production(self,edition):
         summary=ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
         summary['jobs']=[public_job(self.jobs.get(job_id(summary,action))) for action in ('audio','publish')]
+        editorial=self.jobs.get(editorial_job_id(edition))
+        summary['editorial_job']=public_job(editorial)
+        previous=editorial
+        for offset in range(1,8):
+            if previous:break
+            previous=self.jobs.get(editorial_job_id((date.fromisoformat(edition)-timedelta(days=offset)).isoformat()))
+        summary['last_editorial_job']=public_job(previous)
+        summary['schedule_enabled']=os.getenv('EDITORIAL_SCHEDULE_ENABLED')=='true'
         return summary
 
     def approve_script(self,edition,data,user_id):
@@ -67,6 +76,18 @@ class Backend:
         key=f"{self.prefix}/production/previews/{edition}/{summary['audio_digest']}.wav"
         self.s3.head_object(Bucket=self.bucket,Key=key)
         return {'url':self.s3.generate_presigned_url('get_object',Params={'Bucket':self.bucket,'Key':key},ExpiresIn=300),'expires_in':300}
+
+    def push(self,user_id,action,data=None):
+        if not os.getenv('VAPID_PUBLIC_KEY'):
+            if action=='config':return {'enabled':False}
+            raise ValueError('Avisos nao configurados')
+        store=PushStore(boto3.resource('dynamodb').Table(os.environ['PUSH_TABLE']))
+        if action=='config':return {'public_key':os.environ['VAPID_PUBLIC_KEY'],'count':len(store.devices(user_id).get('devices',{}))}
+        if action=='subscribe':return store.subscribe(user_id,data)
+        if not isinstance(data,dict) or set(data)!={'id'}:raise ValueError('Dispositivo invalido')
+        if action=='unsubscribe':return store.change(user_id,data['id'])
+        if data['id'] not in store.devices(user_id).get('devices',{}):raise ValueError('Dispositivo nao cadastrado')
+        return test_notice(boto3.client('sqs'),os.environ['NOTIFICATION_QUEUE_URL'],user_id,data['id'])
 
     def episodes(self):
         response=self.s3.get_object(Bucket=self.bucket,Key=f'{self.prefix}/catalog.json')
@@ -118,6 +139,17 @@ def handle(event,backend):
     method=event.get('requestContext',{}).get('http',{}).get('method','')
     route=event.get('routeKey','')
     try:
+        push_routes={'GET /api/push/config':'config','POST /api/push/subscribe':'subscribe',
+            'POST /api/push/unsubscribe':'unsubscribe','POST /api/push/test':'test'}
+        if route in push_routes:
+            if not backend.can_review(user_id):return reply(403,{'error':'Avisos disponiveis somente para a conta responsavel.'})
+            data=None
+            if method=='POST':
+                body=event.get('body') or ''
+                if event.get('isBase64Encoded'):body=base64.b64decode(body,validate=True).decode()
+                if len(body.encode())>4096:raise ValueError('Requisicao excede limite')
+                data=json.loads(body)
+            return reply(200,backend.push(user_id,push_routes[route],data))
         actions={'POST /api/production/{date}/approve-script':'approve-script',
             'POST /api/production/{date}/generate-audio':'audio',
             'POST /api/production/{date}/approve-audio':'approve-audio',

@@ -8,7 +8,7 @@ import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
 ROOT=Path(__file__).resolve().parents[1]
-ASSETS={'production.js':'text/javascript; charset=utf-8','index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','auth.js':'text/javascript; charset=utf-8','app.js':'text/javascript; charset=utf-8','icon.svg':'image/svg+xml','manifest.webmanifest':'application/manifest+json'}
+ASSETS={'notifications.js':'text/javascript; charset=utf-8','sw.js':'text/javascript; charset=utf-8','production.js':'text/javascript; charset=utf-8','index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','auth.js':'text/javascript; charset=utf-8','app.js':'text/javascript; charset=utf-8','icon.svg':'image/svg+xml','manifest.webmanifest':'application/manifest+json'}
 
 
 def main():

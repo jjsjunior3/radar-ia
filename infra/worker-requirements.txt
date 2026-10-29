@@ -1,3 +1,2 @@
-pydantic==2.12.3
-httpx==0.28.1
-tzdata==2025.2
+-r base-requirements.txt
+pywebpush==2.5.0

@@ -22,7 +22,7 @@ def package():
         # Lista permitida: nunca empacotar .env, credenciais ou dados locais.
         z.writestr('radar_ia/__init__.py','')
         z.write(ROOT/'src/radar_ia/hosted_api.py','radar_ia/hosted_api.py')
-        for module in ('review_api','jobs','audio','speech_markup'):
+        for module in ('review_api','jobs','audio','speech_markup','push'):
             z.write(ROOT/f'src/radar_ia/{module}.py',f'radar_ia/{module}.py')
     return archive
 
@@ -102,7 +102,7 @@ def main():
         current=cf.describe_stacks(StackName=stack)['Stacks'][0]
         old={item['OutputKey']:item['OutputValue'] for item in current['Outputs']}
         for parameter in current.get('Parameters',[]):
-            if parameter['ParameterKey'] in ('EditorialCodeKey','OpenRouterSecretArn','EditorialScheduleEnabled'):
+            if parameter['ParameterKey'] in ('EditorialCodeKey','OpenRouterSecretArn','EditorialScheduleEnabled','VapidSecretArn','VapidPublicKey'):
                 parameters.append({'ParameterKey':parameter['ParameterKey'],'UsePreviousValue':True})
         email=os.getenv('APP_LOGIN_EMAIL','').strip()
         if email:
@@ -143,7 +143,7 @@ def main():
     (ROOT/'local-output/deploy/outputs.json').write_text(json.dumps(outputs,ensure_ascii=False,indent=2),encoding='utf-8')
     public={'apiBase':outputs['ApiUrl'],'authDomain':outputs['AuthDomain'],'clientId':outputs['ClientId']}
     # Somente arquivos web explicitamente selecionados. Código do app é público; dados exigem login.
-    assets=['production.js','index.html','style.css','auth.js','app.js','icon.svg','manifest.webmanifest']
+    assets=['notifications.js','sw.js','production.js','index.html','style.css','auth.js','app.js','icon.svg','manifest.webmanifest']
     mimes={'html':'text/html; charset=utf-8','css':'text/css; charset=utf-8','js':'text/javascript; charset=utf-8','svg':'image/svg+xml','webmanifest':'application/manifest+json'}
     for name in assets:
         s3.put_object(Bucket=outputs['WebBucket'],Key=name,Body=(ROOT/'src/radar_ia/web'/name).read_bytes(),ContentType=mimes[name.rsplit('.',1)[1]],CacheControl='no-cache',ServerSideEncryption='AES256')

@@ -82,7 +82,7 @@ def handler_for(library,port):
                     episode=library.episode(unquote(path[len('/api/audio/'):]))
                     if not episode: return self.reply(404,{'error':'Episódio não encontrado'})
                     return self.reply(200,{'url':library.audio_url(episode),'expires_in':300})
-                assets={'/production.js':('production.js','text/javascript; charset=utf-8'),'/':('index.html','text/html; charset=utf-8'),'/auth.js':('auth.js','text/javascript; charset=utf-8'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/app.js':('app.js','text/javascript; charset=utf-8'),'/style.css':('style.css','text/css; charset=utf-8')}
+                assets={'/notifications.js':('notifications.js','text/javascript; charset=utf-8'),'/sw.js':('sw.js','text/javascript; charset=utf-8'),'/production.js':('production.js','text/javascript; charset=utf-8'),'/':('index.html','text/html; charset=utf-8'),'/auth.js':('auth.js','text/javascript; charset=utf-8'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/app.js':('app.js','text/javascript; charset=utf-8'),'/style.css':('style.css','text/css; charset=utf-8')}
                 if path not in assets: return self.reply(404,{'error':'Página não encontrada'})
                 name,mime=assets[path]
                 return self.reply(200,(web/name).read_bytes(),mime)

@@ -24,6 +24,14 @@ window.radarProduction=(()=>{
     const oldDigest=current?.audio_digest;current=data;panel.hidden=false;
     if(oldDigest!==data.audio_digest){find('player').pause();find('player').removeAttribute('src');find('player').hidden=true;}
     find('date').textContent=new Date(data.date+'T12:00:00-03:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',timeZone:'America/Sao_Paulo'});
+    const operation=data.last_editorial_job;
+    find('schedule').textContent=data.schedule_enabled?'Seg–sex, 8h30 · São Paulo':'Disparo diário desativado';
+    find('last-run').textContent=operation?.started_at||operation?.updated_at?new Date(operation.started_at||operation.updated_at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'}):'Aguardando primeira execução';
+    const operations={queued:'Na fila',running:'Preparando pauta e roteiro',succeeded:'Execução concluída',failed:'Execução interrompida',needs_review:'Resultado incerto'};
+    find('operation-result').textContent=operation?operations[operation.status]||'Consultar edição':'Ainda sem execução registrada';
+    const warning=operation&&['failed','needs_review'].includes(operation.status)&&data.stage!=='completed';
+    find('operation-alert').hidden=!warning;
+    find('operation-alert').textContent=warning?'A produção encontrou um problema. A tentativa foi preservada e não haverá repetição automática de uma chamada paga.':'';
     find('state').textContent=states[data.stage]||'Em preparação';
     find('theme').textContent=data.theme||'Seu próximo episódio';
     const notes={new:'A edição de hoje ainda não foi preparada.',no_content:'Nenhum conteúdo elegível foi selecionado para hoje.',
@@ -44,7 +52,7 @@ window.radarProduction=(()=>{
     }
     find('confirmation').hidden=!data.can_approve_script;
     find('confirm').checked=false;find('approve').disabled=true;
-    activeJob=(data.jobs||[]).filter(Boolean).find(job=>job.status!=='succeeded')||null;
+    activeJob=[...(data.jobs||[]),...(['queued','running'].includes(data.editorial_job?.status)?[data.editorial_job]:[])].filter(Boolean).find(job=>job.status!=='succeeded')||null;
     const busy=activeJob&&['queued','running','needs_review'].includes(activeJob.status);
     find('audio-action').hidden=!data.can_generate_audio||Boolean(activeJob);
     find('listen').hidden=!data.audio_digest||data.stage==='completed';
@@ -62,7 +70,7 @@ window.radarProduction=(()=>{
     const labels={queued:'Na fila. Você pode fechar o app.',running:'Processando em segundo plano.',succeeded:'Tarefa concluída.',failed:'A tarefa falhou.',needs_review:'Resultado incerto. A repetição foi bloqueada; precisamos revisar o checkpoint.'};
     const progress=job.total_chunks?` Trechos: ${job.completed_chunks}/${job.total_chunks}.`:'';
     find('job-state').textContent=(labels[job.status]||'Consultando tarefa.')+progress;
-    find('retry').hidden=!job.can_retry;
+    find('retry').hidden=!job.can_retry||!['audio','publish'].includes(job.action);
     if(['queued','running'].includes(job.status)&&!document.hidden)timer=setTimeout(poll,5000);
   }
   async function poll(){

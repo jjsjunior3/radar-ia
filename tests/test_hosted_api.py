@@ -70,7 +70,7 @@ def test_template_disables_signup_and_requires_jwt_scopes():
     assert r['WebClient']['Properties']['TokenValidityUnits']['RefreshToken']=='days'
     assert r['WebClient']['Properties']['EnableTokenRevocation'] is True
     routes=[v['Properties'] for v in r.values() if v['Type']=='AWS::ApiGatewayV2::Route']
-    assert len(routes)==10
+    assert len(routes)==14
     assert all(route['AuthorizationType']=='JWT' and route['AuthorizationScopes']==['openid'] for route in routes)
     assert all(r['WebBucket']['Properties']['PublicAccessBlockConfiguration'].values())
 

@@ -140,3 +140,17 @@ def test_audio_approval_verifies_wave_and_binds_exact_version(store):
     before=store.s3.writes
     store.approve_audio('2026-10-29',{'digest':digest,'confirmed':True},'owner')
     assert before==store.s3.writes
+
+def test_panel_reports_last_editorial_execution_without_exposing_private_job_fields(store,monkeypatch):
+    from radar_ia.hosted_api import Backend
+    from radar_ia.jobs import JobStore,editorial_job_id
+    from test_jobs import Table
+    backend=Backend.__new__(Backend);backend.s3=store.s3;backend.bucket='bucket';backend.prefix='radar';backend.jobs=JobStore(Table())
+    backend.jobs.create({'job_id':editorial_job_id('2026-10-28'),'date':'2026-10-28','action':'editorial','status':'failed','user_id':'owner',
+        'updated_at':'2026-10-28T11:31:00+00:00','started_at':'2026-10-28T11:30:02+00:00','error_code':'TimeoutError','private_field':'not-public'})
+    monkeypatch.setenv('EDITORIAL_SCHEDULE_ENABLED','true')
+    summary=backend.production('2026-10-29')
+    assert summary['schedule_enabled'] is True
+    assert summary['editorial_job'] is None and summary['last_editorial_job']['date']=='2026-10-28'
+    assert summary['last_editorial_job']['status']=='failed' and 'private_field' not in summary['last_editorial_job']
+    assert 'user_id' not in summary['last_editorial_job']

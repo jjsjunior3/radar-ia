@@ -42,6 +42,7 @@ window.radarAuth={ready:false,config:null,token:null,expiresAt:0,refreshing:null
     this.ready=false;this.token=null;this.expiresAt=0;
     const audio=document.querySelector('#audio');if(audio&&typeof audio.pause==='function'){audio.pause();audio.removeAttribute('src');}
     const preview=document.querySelector('#production-player');if(preview&&typeof preview.pause==='function'){preview.pause();preview.removeAttribute('src');}
+    const notices=document.querySelector('#notifications-panel');if(notices)notices.hidden=true;
     const production=document.querySelector('#production-panel');if(production)production.hidden=true;
     document.querySelector('#auth-panel').hidden=false;
     document.querySelector('#library-section').hidden=true;
@@ -101,6 +102,7 @@ window.radarAuth={ready:false,config:null,token:null,expiresAt:0,refreshing:null
     try{return await task;}finally{if(this.refreshing===task)this.refreshing=null;}
   },
   async logout(){
+    try{await window.radarNotifications?.disable();}catch{}
     const saved=this.readSession();this.generation++;
     this.clearSession();sessionStorage.removeItem('radar-pkce');this.showSignedOut();
     if(saved){

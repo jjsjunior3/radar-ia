@@ -54,7 +54,10 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
             def upload(audio,payload,narration,brief,edition):
                 return upload_episode(s3,bucket,prefix,audio=audio,script=payload,narration=narration,brief=brief,
                     date=edition,title=f"Radar IA — {brief['theme']}")[0]
-            run.publish(upload);store.save_editorial()
+            episode=run.publish(upload);store.save_editorial()
+            if os.getenv("NOTIFICATION_QUEUE_URL"):
+                from .push import episode_notice
+                episode_notice(boto3.client("sqs"),os.environ["NOTIFICATION_QUEUE_URL"],episode["id"])
             jobs.update(identifier,'succeeded')
         return 'succeeded'
     except Exception as exc:
@@ -71,6 +74,9 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
 
 
 def handler(event,context):
+    if event=={"push_diagnostic":True}:
+        from .notifications import diagnostic
+        return diagnostic()
     cfg=Config(signature_version='s3v4',connect_timeout=10,read_timeout=90,retries={'total_max_attempts':1},
         request_checksum_calculation='when_required',response_checksum_validation='when_required')
     s3=boto3.client('s3',config=cfg);polly=boto3.client('polly',config=cfg)
@@ -79,6 +85,10 @@ def handler(event,context):
     results=[]
     for record in event.get('Records',[]):
         data=json.loads(record['body'])
+        if 'kind' in data:
+            from .notifications import dispatch
+            results.append(dispatch(data,s3,jobs,os.environ['S3_BUCKET'],os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB']))
+            continue
         if set(data)!={'job_id'}:raise ValueError('Mensagem inválida')
         results.append(process(data['job_id'],jobs,s3,polly,os.environ['S3_BUCKET'],os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB'],sources))
     return {'processed':len(results),'results':results}

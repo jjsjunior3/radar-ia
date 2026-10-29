@@ -4,6 +4,7 @@ import json
 from datetime import datetime,timezone
 from pathlib import Path
 import boto3
+from dotenv import load_dotenv
 from botocore.config import Config
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -21,6 +22,7 @@ def main():
     if not args.apply:
         print('Nenhuma alteracao AWS. --apply envia a identidade visual para o login existente.')
         return
+    load_dotenv(ROOT/'.env')
     outputs=json.loads((ROOT/'local-output/deploy/outputs.json').read_text(encoding='utf-8'))
     client=boto3.Session(region_name='us-east-1').client('cognito-idp',config=Config(connect_timeout=10,read_timeout=40,retries={'total_max_attempts':1}))
     domain=outputs['AuthDomain'].split('://')[1].split('.')[0]

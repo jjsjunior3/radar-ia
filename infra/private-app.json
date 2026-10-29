@@ -36,6 +36,14 @@
         "true",
         "false"
       ]
+    },
+    "VapidSecretArn": {
+      "Type": "String",
+      "Default": ""
+    },
+    "VapidPublicKey": {
+      "Type": "String",
+      "Default": ""
     }
   },
   "Resources": {
@@ -467,6 +475,31 @@
                       "Arn"
                     ]
                   }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "PushTable",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "NotificationQueue",
+                      "Arn"
+                    ]
+                  }
                 }
               ]
             }
@@ -526,6 +559,26 @@
             },
             "AUDIO_QUEUE_URL": {
               "Ref": "AudioQueue"
+            },
+            "PUSH_TABLE": {
+              "Ref": "PushTable"
+            },
+            "NOTIFICATION_QUEUE_URL": {
+              "Fn::If": [
+                "PushConfigured",
+                {
+                  "Ref": "NotificationQueue"
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            "VAPID_PUBLIC_KEY": {
+              "Ref": "VapidPublicKey"
+            },
+            "EDITORIAL_SCHEDULE_ENABLED": {
+              "Ref": "EditorialScheduleEnabled"
             }
           }
         }
@@ -836,7 +889,8 @@
                   "Effect": "Allow",
                   "Action": [
                     "dynamodb:GetItem",
-                    "dynamodb:UpdateItem"
+                    "dynamodb:UpdateItem",
+                    "dynamodb:PutItem"
                   ],
                   "Resource": {
                     "Fn::GetAtt": [
@@ -852,12 +906,20 @@
                     "sqs:DeleteMessage",
                     "sqs:GetQueueAttributes"
                   ],
-                  "Resource": {
-                    "Fn::GetAtt": [
-                      "AudioQueue",
-                      "Arn"
-                    ]
-                  }
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "AudioQueue",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
+                        "NotificationQueue",
+                        "Arn"
+                      ]
+                    }
+                  ]
                 },
                 {
                   "Effect": "Allow",
@@ -868,6 +930,48 @@
                   "Resource": {
                     "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-worker:*"
                   }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "PushTable",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "NotificationQueue",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Fn::If": [
+                    "PushConfigured",
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "secretsmanager:GetSecretValue"
+                      ],
+                      "Resource": {
+                        "Ref": "VapidSecretArn"
+                      }
+                    },
+                    {
+                      "Ref": "AWS::NoValue"
+                    }
+                  ]
                 }
               ]
             }
@@ -925,6 +1029,31 @@
             },
             "REVIEWER_SUB": {
               "Ref": "ReviewerSub"
+            },
+            "PUSH_TABLE": {
+              "Ref": "PushTable"
+            },
+            "NOTIFICATION_QUEUE_URL": {
+              "Fn::If": [
+                "PushConfigured",
+                {
+                  "Ref": "NotificationQueue"
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            "VAPID_SECRET_ARN": {
+              "Fn::If": [
+                "PushConfigured",
+                {
+                  "Ref": "VapidSecretArn"
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
             }
           }
         }
@@ -1356,6 +1485,140 @@
           }
         }
       }
+    },
+    "PushTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "user_id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "user_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true
+        }
+      }
+    },
+    "NotificationQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "SqsManagedSseEnabled": true,
+        "VisibilityTimeout": 5400,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "AudioDeadLetterQueue",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 3
+        }
+      }
+    },
+    "NotificationQueueMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "NotificationQueue",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Ref": "WorkerFunction"
+        },
+        "BatchSize": 1,
+        "ScalingConfig": {
+          "MaximumConcurrency": 2
+        },
+        "Enabled": true
+      }
+    },
+    "PushConfigRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/push/config",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "PushSubscribeRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/push/subscribe",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "PushUnsubscribeRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/push/unsubscribe",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "PushTestRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/push/test",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
     }
   },
   "Outputs": {
@@ -1434,6 +1697,16 @@
       "Value": {
         "Ref": "EditorialFailureQueue"
       }
+    },
+    "PushTable": {
+      "Value": {
+        "Ref": "PushTable"
+      }
+    },
+    "NotificationQueue": {
+      "Value": {
+        "Ref": "NotificationQueue"
+      }
     }
   },
   "Conditions": {
@@ -1476,6 +1749,34 @@
               "Ref": "EditorialScheduleEnabled"
             },
             "true"
+          ]
+        }
+      ]
+    },
+    "PushConfigured": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "VapidSecretArn"
+                },
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "VapidPublicKey"
+                },
+                ""
+              ]
+            }
           ]
         }
       ]

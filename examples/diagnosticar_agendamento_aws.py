@@ -4,6 +4,7 @@ from datetime import datetime,timezone,timedelta,time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import boto3
+from dotenv import load_dotenv
 from botocore.config import Config
 from radar_ia.jobs import editorial_job_id,public_job
 from radar_ia.review_api import ReviewStore
@@ -12,6 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def main():
+    load_dotenv(ROOT/'.env')
     outputs=json.loads((ROOT/'local-output/deploy/outputs.json').read_text(encoding='utf-8'))
     if not outputs.get('EditorialSchedule'):raise SystemExit('Agendamento AWS ainda nao instalado; atualizar outputs da stack.')
     session=boto3.Session(region_name='us-east-1');config=Config(connect_timeout=10,read_timeout=60,retries={'total_max_attempts':1})

@@ -67,9 +67,14 @@ def public_job(item,now=None):
     now=now or utcnow();status=item['status']
     age=(now-datetime.fromisoformat(item['updated_at'])).total_seconds()
     if status=='running' and age>1200:status='needs_review'
-    return {'id':item['job_id'],'action':item['action'],'status':status,'updated_at':item['updated_at'],
+    result={'id':item['job_id'],'action':item['action'],'status':status,'updated_at':item['updated_at'],
         'completed_chunks':int(item.get('completed_chunks',0)),'total_chunks':int(item.get('total_chunks',0)),
         'can_retry':bool(status=='failed' and item.get('can_retry') or status=='queued' and age>120)}
+    for key in ('date','started_at','scheduled_at','edition_stage','error_code'):
+        if key in item:result[key]=str(item[key])
+    if 'delay_seconds' in item:result['delay_seconds']=int(item['delay_seconds'])
+    if item.get('action') not in ('audio','publish'):result['can_retry']=False
+    return result
 
 
 class JobQueue:
