@@ -191,7 +191,7 @@ Os testes cobrem regras de coleta, curadoria, roteiro, áudio, catálogo, progre
 
 O [workflow de testes](.github/workflows/tests.yml) não exige chaves de provedores. Testes locais e simulados não substituem a validação de IAM, quotas, custos ou uma edição real no Actions.
 
-**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário; execução manual `prepare` no Actions concluída com acesso ao S3 e reconhecimento de um episódio existente. Uma nova edição completa produzida pelo workflow ainda precisa ser validada.
+**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário; episódio de 29/10/2026 produzido pelo fluxo acompanhado e publicado com Leo após aprovação do roteiro e áudio. O evento agendado desse dia foi registrado às 14h29 de São Paulo, em vez das 8h30 previstas, e reaproveitou o roteiro já existente. Uma edição nova preparada pelo agendamento desde o início ainda precisa ser validada; sucesso do workflow não comprova pontualidade nem publicação automática.
 
 ## Estrutura do repositório
 

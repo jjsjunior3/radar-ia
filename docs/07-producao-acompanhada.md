@@ -121,6 +121,10 @@ Para conferir o arquivo efetivamente presente na branch padrão, o estado do wor
 
 O diagnóstico não altera configuração, não imprime segredos e salva o relatório em `local-output/diagnostico-agendamento.json`. Não assumir que o fuso é inválido nem mudar o cron antes de examinar esses dados. O suporte a `timezone` está documentado pelo GitHub; eventos também podem atrasar ou ser descartados sob carga.
 
+O relatório compara o commit e o arquivo do workflow local com a branch padrão remota, usa o horário de São Paulo para reconhecer o dia e distingue espera pelo horário, fim de semana, execução em andamento, falha e sucesso. Quando um evento existe, mostra a diferença entre seu horário de registro e as 8h30 configuradas. Isso não atribui uma causa ao atraso. O CLI trata a saída UTF-8 do GitHub explicitamente no Windows; se uma variável de token antiga retornar 401, tenta o login armazenado do gh sem imprimir credenciais.
+
+Validação de 29/10/2026: o evento `schedule` 40921894034 foi criado às 17:29:58 UTC (14h29 de São Paulo), quase seis horas após o previsto. Terminou com sucesso e os logs mostraram `awaiting_audio_review` nas duas etapas: havia roteiro salvo, que foi reaproveitado. Portanto, o disparo foi observado, mas não houve uma produção nova e pontual iniciada por ele. A causa do atraso não foi confirmada. O episódio do dia foi publicado posteriormente pelo fluxo acompanhado e o proprietário confirmou o funcionamento.
+
 Se for preciso recuperar a edição do dia, `production prepare` prepara a pauta e `production draft --execute` solicita o roteiro. Voz e publicação continuam dependendo das aprovações humanas. Uma recuperação local não confirma o funcionamento do disparo agendado.
 
 Se uma correção das regras editoriais for necessária depois da coleta e antes da geração, `production replan` reaplica as regras à fila salva. Mantém o horário original da coleta, preserva o briefing anterior e rejeita coleta de mais de 24 horas ou edição cujo roteiro já começou. Replanejar não chama a LLM.
