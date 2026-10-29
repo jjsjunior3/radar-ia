@@ -10,6 +10,7 @@ from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from botocore.config import Config
 from .review_api import ReviewStore, ReviewConflict
+from .jobs import JobStore, JobQueue, job_id, public_job
 
 
 class Conflict(Exception): pass
@@ -33,15 +34,39 @@ class Backend:
         self.reviewer_sub=os.getenv('REVIEWER_SUB','')
         self.s3=boto3.client('s3',config=Config(signature_version='s3v4'))
         self.table=boto3.resource('dynamodb').Table(os.environ['PROGRESS_TABLE'])
+        self.jobs=JobStore(boto3.resource('dynamodb').Table(os.environ['JOBS_TABLE']))
+        self.queue=JobQueue(self.jobs,boto3.client('sqs'),os.environ['AUDIO_QUEUE_URL'])
 
     def can_review(self,user_id):
         return bool(self.reviewer_sub and user_id==self.reviewer_sub)
 
     def production(self,edition):
-        return ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
+        summary=ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
+        summary['jobs']=[public_job(self.jobs.get(job_id(summary,action))) for action in ('audio','publish')]
+        return summary
 
     def approve_script(self,edition,data,user_id):
         return ReviewStore(self.s3,self.bucket,self.prefix).approve_script(edition,data,user_id)
+
+    def approve_audio(self,edition,data,user_id):
+        return ReviewStore(self.s3,self.bucket,self.prefix).approve_audio(edition,data,user_id)
+
+    def start_job(self,edition,action,data,user_id):
+        summary=ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
+        return self.queue.start(summary,action,data,user_id)
+
+    def job(self,identifier,user_id):
+        item=self.jobs.get(identifier)
+        if not item or item['user_id']!=user_id:raise ReviewConflict()
+        return public_job(item)
+
+    def preview(self,edition):
+        summary=ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
+        if not summary.get('audio_digest') or summary['stage'] not in ('awaiting_audio_review','audio_approved','completed'):raise ReviewConflict()
+        # WAV privado vem do checkpoint aprovado; sem link permanente ou acesso público.
+        key=f"{self.prefix}/production/previews/{edition}/{summary['audio_digest']}.wav"
+        self.s3.head_object(Bucket=self.bucket,Key=key)
+        return {'url':self.s3.generate_presigned_url('get_object',Params={'Bucket':self.bucket,'Key':key},ExpiresIn=300),'expires_in':300}
 
     def episodes(self):
         response=self.s3.get_object(Bucket=self.bucket,Key=f'{self.prefix}/catalog.json')
@@ -93,15 +118,25 @@ def handle(event,backend):
     method=event.get('requestContext',{}).get('http',{}).get('method','')
     route=event.get('routeKey','')
     try:
-        if route in ('GET /api/production/{date}','POST /api/production/{date}/approve-script'):
+        actions={'POST /api/production/{date}/approve-script':'approve-script',
+            'POST /api/production/{date}/generate-audio':'audio',
+            'POST /api/production/{date}/approve-audio':'approve-audio',
+            'POST /api/production/{date}/publish':'publish'}
+        if route in actions or route in ('GET /api/production/{date}','GET /api/production/{date}/preview','GET /api/jobs/{job_id}'):
             if not backend.can_review(user_id):return reply(403,{'error':'Revisão disponível somente para o responsável pela edição.'})
             edition=event.get('pathParameters',{}).get('date')
-            if route=='GET /api/production/{date}' and method=='GET':return reply(200,backend.production(edition))
-            if route=='POST /api/production/{date}/approve-script' and method=='POST':
+            if method=='GET':
+                if route=='GET /api/production/{date}':return reply(200,backend.production(edition))
+                if route=='GET /api/production/{date}/preview':return reply(200,backend.preview(edition))
+                return reply(200,backend.job(event.get('pathParameters',{}).get('job_id'),user_id))
+            if method=='POST' and route in actions:
                 body=event.get('body') or ''
                 if event.get('isBase64Encoded'):body=base64.b64decode(body,validate=True).decode()
                 if len(body.encode())>4096:raise ValueError('Requisição excede limite')
-                return reply(200,backend.approve_script(edition,json.loads(body),user_id))
+                data=json.loads(body);action=actions[route]
+                if action=='approve-script':return reply(200,backend.approve_script(edition,data,user_id))
+                if action=='approve-audio':return reply(200,backend.approve_audio(edition,data,user_id))
+                return reply(202,backend.start_job(edition,action,data,user_id))
             return reply(404,{'error':'Rota não encontrada'})
         episodes=backend.episodes()
         if route=='GET /api/episodes' and method=='GET':

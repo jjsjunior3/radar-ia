@@ -6,7 +6,6 @@ from difflib import SequenceMatcher
 from html import unescape
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-import feedparser
 import httpx
 
 
@@ -67,6 +66,7 @@ class Fetcher:
 
 
 def collect(feeds, fetch, now, hours, keywords):
+    import feedparser  # Apenas coleta RSS; worker de voz não precisa deste pacote.
     candidates, errors = [], []
     for feed in feeds:
         try:

@@ -1,12 +1,14 @@
 # Revisão de roteiro pelo aplicativo
 
+> Este guia registra a primeira etapa da interface. A geração em segundo plano, prévia, aprovação de áudio e publicação estão descritas no [guia 10](10-tarefas-e-automacao.md). A revisão humana é provisória durante os ajustes finos; o objetivo final é publicação automática com notificação.
+
 ## O que esta etapa entrega
 
 Depois do login, a conta responsável vê o painel **Edição de hoje**, calculado no fuso America/Sao_Paulo. Ele mostra o tema, estado atual, texto da narração e links das fontes. A biblioteca e o player existentes continuam disponíveis.
 
 Quando o estado é `awaiting_script_review`, o painel permite marcar **Li o roteiro e conferi as fontes desta versão** e selecionar **Aprovar roteiro**. O resultado é `script_approved` no mesmo checkpoint S3 utilizado pelo fluxo de produção. Não é uma aprovação simulada nem uma segunda base de dados.
 
-**Aprovar o texto não chama LLM, não gera voz e não publica o episódio.** A geração de áudio continua sendo uma ação do fluxo acompanhado. Revisão de áudio, edição/rejeição do roteiro e disparos dessas etapas pelo app são evoluções posteriores.
+**Aprovar o texto não chama LLM, não gera voz e não publica o episódio.** A geração de áudio exige outra confirmação explícita no modo acompanhado. Veja o guia 10 para executá-la pelo app. Edição/rejeição do roteiro ainda é uma evolução posterior.
 
 Se a edição já foi publicada, o painel informa **Publicado** e mantém o texto/fontes para consulta, sem oferecer uma aprovação desnecessária. Se não há edição salva para hoje, informa que ela ainda não foi preparada.
 

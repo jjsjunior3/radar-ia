@@ -2,7 +2,7 @@
 window.radarProduction=(()=>{
   const find=id=>document.querySelector('#production-'+id);
   const panel=find('panel');
-  let current=null;
+  let current=null, activeJob=null, timer=null;
   const states={new:'Ainda não preparado',prepared:'Pauta preparada',no_content:'Sem conteúdo para esta edição',
     draft_in_progress:'Preparando o roteiro',draft_failed:'Geração do roteiro interrompida',
     awaiting_script_review:'Aguardando sua revisão',script_approved:'Roteiro aprovado',
@@ -21,7 +21,8 @@ window.radarProduction=(()=>{
     return data;
   }
   function render(data){
-    current=data;panel.hidden=false;
+    const oldDigest=current?.audio_digest;current=data;panel.hidden=false;
+    if(oldDigest!==data.audio_digest){find('player').pause();find('player').removeAttribute('src');find('player').hidden=true;}
     find('date').textContent=new Date(data.date+'T12:00:00-03:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',timeZone:'America/Sao_Paulo'});
     find('state').textContent=states[data.stage]||'Em preparação';
     find('theme').textContent=data.theme||'Seu próximo episódio';
@@ -43,7 +44,61 @@ window.radarProduction=(()=>{
     }
     find('confirmation').hidden=!data.can_approve_script;
     find('confirm').checked=false;find('approve').disabled=true;
+    activeJob=(data.jobs||[]).filter(Boolean).find(job=>job.status!=='succeeded')||null;
+    const busy=activeJob&&['queued','running','needs_review'].includes(activeJob.status);
+    find('audio-action').hidden=!data.can_generate_audio||Boolean(activeJob);
+    find('listen').hidden=!data.audio_digest||data.stage==='completed';
+    find('audio-confirmation').hidden=!data.can_approve_audio||Boolean(busy);
+    find('publish-action').hidden=!data.can_publish||Boolean(activeJob?.action==='publish');
+    for(const [check,button] of [['cost','generate'],['audio-confirm','approve-audio'],['publish-confirm','publish']]){
+      find(check).checked=false;find(button).disabled=true;
+    }
+    showJob(activeJob);
+
   }
+  function showJob(job){
+    clearTimeout(timer);activeJob=job;find('job').hidden=!job;
+    if(!job)return;
+    const labels={queued:'Na fila. Você pode fechar o app.',running:'Processando em segundo plano.',succeeded:'Tarefa concluída.',failed:'A tarefa falhou.',needs_review:'Resultado incerto. A repetição foi bloqueada; precisamos revisar o checkpoint.'};
+    const progress=job.total_chunks?` Trechos: ${job.completed_chunks}/${job.total_chunks}.`:'';
+    find('job-state').textContent=(labels[job.status]||'Consultando tarefa.')+progress;
+    find('retry').hidden=!job.can_retry;
+    if(['queued','running'].includes(job.status)&&!document.hidden)timer=setTimeout(poll,5000);
+  }
+  async function poll(){
+    if(!activeJob||document.hidden||panel.hidden)return;
+    try{const job=await request('/api/jobs/'+activeJob.id);showJob(job);
+      if(job.status==='succeeded'){await load();if(job.action==='publish')window.dispatchEvent(new Event('radar-episode-published'));}
+    }catch(error){find('feedback').textContent=error.message;}
+  }
+  async function action(path,digest){
+    return request('/api/production/'+current.date+'/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({digest,confirmed:true})});
+  }
+  async function start(actionName){
+    const path=actionName==='audio'?'generate-audio':'publish';
+    find(actionName==='audio'?'generate':'publish').disabled=true;
+    try{const job=await action(path,actionName==='audio'?current.digest:current.audio_digest);await load();showJob(job);}
+    catch(error){find('feedback').textContent=error.message;await load();}
+  }
+  for(const [check,button] of [['cost','generate'],['audio-confirm','approve-audio'],['publish-confirm','publish']]){
+    find(check).onchange=()=>{find(button).disabled=!find(check).checked;};
+  }
+  find('generate').onclick=()=>{if(current?.can_generate_audio&&find('cost').checked)start('audio');};
+  find('publish').onclick=()=>{if(current?.can_publish&&find('publish-confirm').checked)start('publish');};
+  find('retry').onclick=()=>{if(activeJob?.can_retry)start(activeJob.action);};
+  find('preview').onclick=async()=>{
+    find('preview').disabled=true;
+    try{const data=await request('/api/production/'+current.date+'/preview');find('player').src=data.url;find('player').hidden=false;}
+    catch(error){find('feedback').textContent=error.message;}
+    finally{find('preview').disabled=false;}
+  };
+  find('approve-audio').onclick=async()=>{
+    if(!current?.can_approve_audio||!find('audio-confirm').checked)return;
+    find('approve-audio').disabled=true;
+    try{render(await action('approve-audio',current.audio_digest));find('feedback').textContent='Áudio aprovado. Agora você pode publicar na biblioteca privada.';}
+    catch(error){await load();find('feedback').textContent=error.message;}
+  };
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(!panel.hidden)load();});
   async function load(){
     find('refresh').disabled=true;find('feedback').textContent='';
     try{render(await request('/api/production/'+today()));}

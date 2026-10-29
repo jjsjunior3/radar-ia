@@ -13,7 +13,7 @@ Desenvolvido por **[jrsantosdev](https://github.com/jjsjunior3)** como projeto d
 
 [Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
 
-> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o agendamento está habilitado e a primeira produção agendada de uma edição nova ainda aguarda validação. Roteiro e áudio passam por revisão humana antes da publicação.
+> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o agendamento está habilitado e a primeira produção agendada de uma edição nova ainda aguarda validação. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
 
 ## O problema
 
@@ -101,7 +101,7 @@ O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega
 6. O episódio entra no catálogo privado. Somente depois da confirmação, o histórico editorial avança.
 7. O aplicativo permite ouvir, marcar e retomar, com progresso sincronizado.
 
-**Agendamento:** segunda a sexta, às **8h30 em `America/Sao_Paulo`**. A rotina agendada prepara o roteiro e aguarda revisão. Voz e publicação continuam manuais. O GitHub pode atrasar eventos; o horário indica início previsto da produção.
+**Agendamento:** segunda a sexta, às **8h30 em `America/Sao_Paulo`**. A rotina agendada prepara o roteiro e aguarda revisão. Voz e publicação exigem confirmação no modo acompanhado. O fluxo automático com notificação está planejado para depois dos ajustes finos. O GitHub pode atrasar eventos; o horário indica início previsto da produção.
 
 ### Grade editorial
 
@@ -223,6 +223,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [07 · Produção acompanhada](docs/07-producao-acompanhada.md) | Checkpoints, IAM/OIDC e GitHub Actions |
 | [08 · Comunicação e arquitetura](docs/08-comunicacao-e-arquitetura.md) | Três modelos de imagem e orientações de divulgação |
 | [09 · Revisão no aplicativo](docs/09-revisao-no-app.md) | Estado da edição, fontes e aprovação de roteiro pelo responsável |
+| [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 
 ## Custos
 
@@ -238,7 +239,10 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Agendamento configurado e habilitado.
 - [ ] Validar a primeira edição nova pelo fluxo agendado completo.
 - [x] Mostrar a edição e permitir aprovação do roteiro pelo responsável no aplicativo.
-- [ ] Permitir edição/rejeição de rascunhos e revisão/publicação do áudio pela interface.
+- [x] Gerar voz em segundo plano, ouvir prévia, aprovar áudio e solicitar publicação pela interface.
+- [ ] Permitir edição/rejeição de rascunhos.
+- [ ] Após ajustes finos, ativar publicação automática com limites de custo e notificação de episódio pronto.
+- [ ] Integrar o visual do login à identidade do aplicativo.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [ ] Revisar o repositório e disponibilizar o código publicamente.
 - [ ] Criar um feed RSS público como canal opcional de distribuição.

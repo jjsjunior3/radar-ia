@@ -2,7 +2,6 @@
 import calendar
 from datetime import datetime, timedelta, timezone
 from collections import Counter
-import feedparser
 import httpx
 from .news import Fetcher, canonical, duplicate, clean
 
@@ -50,6 +49,7 @@ def check_candidate(news: dict, accepted: list[dict], fetch) -> tuple[str, dict 
 
 
 def collect_sources(sources, now, since, fetcher_factory=Fetcher):
+    import feedparser  # Carregar somente durante coleta RSS.
     accepted,rejected,results=[],[],[]
     hours=(now-since).total_seconds()/3600
     if hours<=0:raise ValueError('Janela de coleta inválida')

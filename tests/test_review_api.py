@@ -121,3 +121,22 @@ def test_absent_edition_is_new_and_invalid_path_never_reaches_s3(store):
     previous=store.s3.reads
     response=handle(event(edition='../2026-10-29'),backend(store))
     assert response['statusCode']==400 and store.s3.reads==previous
+
+
+def test_audio_approval_verifies_wave_and_binds_exact_version(store):
+    from radar_ia.audio import wav_from_pcm
+    data={'digest':store.summary('2026-10-29')['digest'],'confirmed':True}
+    store.approve_script('2026-10-29',data,'owner')
+    raw,_=store.load('2026-10-29')
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:files={name:archive.read(name) for name in archive.namelist()}
+    audio,_=wav_from_pcm(bytes(32000));digest=hashlib.sha256(audio).hexdigest()
+    text=store.summary('2026-10-29')['narration']
+    files.update({'episode.wav':audio,'metadados-audio.json':json.dumps({'audio_sha256':digest,'script_sha256':hashlib.sha256(text.encode()).hexdigest(),'duration_seconds':1,'voice':'Leo'}),
+        'checkpoint.json':json.dumps({'date':'2026-10-29','stage':'awaiting_audio_review'})})
+    store.s3.objects[store.key('2026-10-29')]=pack(files)
+    with pytest.raises(ReviewConflict):store.approve_audio('2026-10-29',{'digest':'b'*64,'confirmed':True},'owner')
+    approved=store.approve_audio('2026-10-29',{'digest':digest,'confirmed':True},'owner')
+    assert approved['stage']=='audio_approved' and approved['can_publish']
+    before=store.s3.writes
+    store.approve_audio('2026-10-29',{'digest':digest,'confirmed':True},'owner')
+    assert before==store.s3.writes

@@ -17,6 +17,9 @@
       "Default": "",
       "AllowedPattern": "(^$|[a-f0-9-]{36})",
       "Description": "Cognito sub do responsavel por revisar roteiros; vazio desativa revisao."
+    },
+    "WorkerCodeKey": {
+      "Type": "String"
     }
   },
   "Resources": {
@@ -368,6 +371,9 @@
                     },
                     {
                       "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/previews/*"
                     }
                   ]
                 },
@@ -421,6 +427,30 @@
                       "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "JobsTable",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "sqs:SendMessage",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "AudioQueue",
+                      "Arn"
+                    ]
+                  }
                 }
               ]
             }
@@ -474,6 +504,12 @@
             },
             "REVIEWER_SUB": {
               "Ref": "ReviewerSub"
+            },
+            "JOBS_TABLE": {
+              "Ref": "JobsTable"
+            },
+            "AUDIO_QUEUE_URL": {
+              "Ref": "AudioQueue"
             }
           }
         }
@@ -668,6 +704,329 @@
           "openid"
         ]
       }
+    },
+    "JobsTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "job_id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "job_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "expires_at",
+          "Enabled": true
+        }
+      }
+    },
+    "AudioDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "SqsManagedSseEnabled": true,
+        "MessageRetentionPeriod": 1209600
+      }
+    },
+    "AudioQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "SqsManagedSseEnabled": true,
+        "VisibilityTimeout": 5400,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "AudioDeadLetterQueue",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 3
+        }
+      }
+    },
+    "WorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "runtime",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/episodes/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/catalog.json"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket",
+                    "s3:GetBucketPublicAccessBlock",
+                    "s3:GetBucketOwnershipControls",
+                    "s3:GetEncryptionConfiguration"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "polly:SynthesizeSpeech",
+                  "Resource": "*",
+                  "Condition": {
+                    "StringEquals": {
+                      "aws:RequestedRegion": "us-east-1"
+                    }
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "JobsTable",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "AudioQueue",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-worker:*"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "WorkerLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-worker"
+        },
+        "RetentionInDays": 14
+      }
+    },
+    "WorkerFunction": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "WorkerLogs",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-worker"
+        },
+        "Runtime": "python3.12",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "radar_ia.worker.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkerRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 900,
+        "MemorySize": 512,
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AudioBucket"
+          },
+          "S3Key": {
+            "Ref": "WorkerCodeKey"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "S3_BUCKET": {
+              "Ref": "AudioBucket"
+            },
+            "S3_PREFIX": {
+              "Ref": "AudioPrefix"
+            },
+            "JOBS_TABLE": {
+              "Ref": "JobsTable"
+            },
+            "REVIEWER_SUB": {
+              "Ref": "ReviewerSub"
+            }
+          }
+        }
+      }
+    },
+    "WorkerQueueMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "AudioQueue",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Ref": "WorkerFunction"
+        },
+        "BatchSize": 1,
+        "ScalingConfig": {
+          "MaximumConcurrency": 2
+        },
+        "Enabled": true
+      }
+    },
+    "GenerateAudioRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/production/{date}/generate-audio",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "ApproveAudioRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/production/{date}/approve-audio",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "PublishRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/production/{date}/publish",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "PreviewRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/production/{date}/preview",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "JobRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/jobs/{job_id}",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
     }
   },
   "Outputs": {
@@ -712,6 +1071,21 @@
     "ProgressTable": {
       "Value": {
         "Ref": "ProgressTable"
+      }
+    },
+    "JobsTable": {
+      "Value": {
+        "Ref": "JobsTable"
+      }
+    },
+    "AudioQueue": {
+      "Value": {
+        "Ref": "AudioQueue"
+      }
+    },
+    "WorkerFunction": {
+      "Value": {
+        "Ref": "WorkerFunction"
       }
     }
   }

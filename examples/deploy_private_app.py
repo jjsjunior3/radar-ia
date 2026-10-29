@@ -22,7 +22,8 @@ def package():
         # Lista permitida: nunca empacotar .env, credenciais ou dados locais.
         z.writestr('radar_ia/__init__.py','')
         z.write(ROOT/'src/radar_ia/hosted_api.py','radar_ia/hosted_api.py')
-        z.write(ROOT/'src/radar_ia/review_api.py','radar_ia/review_api.py')
+        for module in ('review_api','jobs','audio','speech_markup'):
+            z.write(ROOT/f'src/radar_ia/{module}.py',f'radar_ia/{module}.py')
     return archive
 
 
@@ -79,6 +80,8 @@ def main():
     if not (args.deploy or args.plan):
         print('Nenhuma alteração AWS. --deploy cria/atualiza CloudFront, Cognito, API Gateway, Lambda, DynamoDB e permissões IAM de execução.')
         return
+    from package_worker import package_worker
+    worker_archive=package_worker()
     region=os.getenv('AWS_REGION','us-east-1')
     if region!='us-east-1': raise SystemExit('Este template inicial foi preparado e restringido a us-east-1.')
     bucket=os.getenv('S3_BUCKET','').strip()
@@ -90,7 +93,9 @@ def main():
     stack='radar-ia-private-app'
     key='radar-ia/deployments/'+hashlib.sha256(archive.read_bytes()).hexdigest()[:24]+'/api.zip'
     s3.put_object(Bucket=bucket,Key=key,Body=archive.read_bytes(),ServerSideEncryption='AES256',ContentType='application/zip')
-    parameters=[{'ParameterKey':'AudioBucket','ParameterValue':bucket},{'ParameterKey':'AudioPrefix','ParameterValue':os.getenv('S3_PREFIX','radar-ia')},{'ParameterKey':'ApiCodeKey','ParameterValue':key}]
+    worker_key='radar-ia/deployments/'+hashlib.sha256(worker_archive.read_bytes()).hexdigest()[:24]+'/worker.zip'
+    s3.put_object(Bucket=bucket,Key=worker_key,Body=worker_archive.read_bytes(),ServerSideEncryption='AES256',ContentType='application/zip')
+    parameters=[{'ParameterKey':'WorkerCodeKey','ParameterValue':worker_key},{'ParameterKey':'AudioBucket','ParameterValue':bucket},{'ParameterKey':'AudioPrefix','ParameterValue':os.getenv('S3_PREFIX','radar-ia')},{'ParameterKey':'ApiCodeKey','ParameterValue':key}]
     exists=stack_exists_or_recover(cf,stack,args.recover_failed,ROOT/'local-output/deploy')
     reviewer=os.getenv('APP_REVIEWER_SUB','').strip()
     if exists:

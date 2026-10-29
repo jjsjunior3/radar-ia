@@ -4,6 +4,7 @@ import io
 import json
 import re
 import zipfile
+import wave
 from datetime import date, datetime, timezone
 from urllib.parse import urlsplit
 
@@ -59,6 +60,7 @@ class ReviewStore:
             if 'briefing.json' in archive.namelist():
                 brief=json.loads(archive.read('briefing.json'))
                 result['theme']=brief.get('theme','')
+                result['planned_for']=brief.get('planned_for')
                 for news in brief.get('news',[]):
                     url=news.get('url','');parsed=urlsplit(url)
                     if parsed.scheme!='https' or not parsed.hostname or parsed.username or parsed.password:
@@ -74,6 +76,19 @@ class ReviewStore:
                 if not narration.strip() or len(narration)>20000:raise ValueError('Narração inválida')
                 result.update(narration=narration,digest=digest_script(brief,script),
                     can_approve_script=checkpoint['stage']=='awaiting_script_review')
+            names=archive.namelist()
+            approved='aprovacao-roteiro.json' in names and json.loads(archive.read('aprovacao-roteiro.json')).get('digest')==result.get('digest')
+            result['can_generate_audio']=bool(approved and checkpoint['stage']=='script_approved')
+            result['audio_revision']=str(checkpoint.get('audio_revision','initial'))
+            result['can_approve_audio']=False;result['can_publish']=False
+            if 'metadados-audio.json' in names and 'episode.wav' in names:
+                metadata=json.loads(archive.read('metadados-audio.json'))
+                digest=metadata.get('audio_sha256','')
+                if not re.fullmatch('[a-f0-9]{64}',digest):raise ValueError('Hash de áudio inválido')
+                result.update(audio_digest=digest,voice=metadata.get('voice'),duration_seconds=metadata.get('duration_seconds'))
+                result['can_approve_audio']=bool(approved and checkpoint['stage']=='awaiting_audio_review')
+                audio_approved='aprovacao-audio.json' in names and json.loads(archive.read('aprovacao-audio.json')).get('sha256')==digest
+                result['can_publish']=bool(approved and audio_approved and checkpoint['stage']=='audio_approved')
             return result
 
     def approve_script(self, edition, data, user_id):
@@ -107,5 +122,35 @@ class ReviewStore:
         except ClientError as exc:
             if exc.response['Error']['Code'] in ('PreconditionFailed','412','ConditionalRequestConflict'):
                 raise ReviewConflict() from None
+            raise
+        return self.summary(edition,output.getvalue())
+
+    def approve_audio(self, edition, data, user_id):
+        if not isinstance(data,dict) or set(data)!={'digest','confirmed'} or data['confirmed'] is not True:
+            raise ValueError('Confirmação inválida')
+        raw,etag=self.load(edition)
+        if raw is None:raise ReviewConflict()
+        summary=self.summary(edition,raw)
+        if not summary.get('audio_digest') or data['digest']!=summary['audio_digest']:raise ReviewConflict()
+        if summary.get('can_publish'):return summary
+        if not summary.get('can_approve_audio'):raise ReviewConflict()
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            audio=archive.read('episode.wav');metadata=json.loads(archive.read('metadados-audio.json'))
+            if hashlib.sha256(audio).hexdigest()!=data['digest'] or metadata['script_sha256']!=hashlib.sha256(summary['narration'].encode()).hexdigest():
+                raise ReviewConflict()
+            with wave.open(io.BytesIO(audio)) as wav:
+                if (wav.getnchannels(),wav.getsampwidth(),wav.getframerate())!=(1,2,16000) or not 0<wav.getnframes()/16000<=600:
+                    raise ValueError('Áudio inválido')
+            now=datetime.now(timezone.utc).isoformat()
+            checkpoint=json.loads(archive.read('checkpoint.json'));checkpoint.update(stage='audio_approved',updated_at=now)
+            replacements={'checkpoint.json':checkpoint,'aprovacao-audio.json':{'sha256':data['digest'],'approved_at':now,'approved_by':user_id,'channel':'web'}}
+            output=io.BytesIO()
+            with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=1) as target:
+                for name in archive.namelist():
+                    if name not in replacements:target.writestr(name,archive.read(name))
+                for name,value in replacements.items():target.writestr(name,json.dumps(value,ensure_ascii=False).encode())
+        try:self.s3.put_object(Bucket=self.bucket,Key=self.key(edition),Body=output.getvalue(),ContentType='application/zip',ServerSideEncryption='AES256',IfMatch=etag)
+        except ClientError as exc:
+            if exc.response['Error']['Code'] in ('PreconditionFailed','412','ConditionalRequestConflict'):raise ReviewConflict() from None
             raise
         return self.summary(edition,output.getvalue())
