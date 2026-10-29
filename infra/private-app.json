@@ -11,6 +11,12 @@
     },
     "ApiCodeKey": {
       "Type": "String"
+    },
+    "ReviewerSub": {
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "(^$|[a-f0-9-]{36})",
+      "Description": "Cognito sub do responsavel por revisar roteiros; vazio desativa revisao."
     }
   },
   "Resources": {
@@ -359,6 +365,9 @@
                     },
                     {
                       "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/episodes/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
                     }
                   ]
                 },
@@ -385,6 +394,33 @@
                   "Resource": {
                     "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-api:*"
                   }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}"
+                  },
+                  "Condition": {
+                    "StringLike": {
+                      "s3:prefix": {
+                        "Fn::Sub": "${AudioPrefix}/production/editions/*"
+                      }
+                    }
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
+                    }
+                  ]
                 }
               ]
             }
@@ -435,6 +471,9 @@
             },
             "PROGRESS_TABLE": {
               "Ref": "ProgressTable"
+            },
+            "REVIEWER_SUB": {
+              "Ref": "ReviewerSub"
             }
           }
         }
@@ -590,6 +629,44 @@
         "SourceArn": {
           "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*/*"
         }
+      }
+    },
+    "ProductionRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "GET /api/production/{date}",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
+      }
+    },
+    "ApproveScriptRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /api/production/{date}/approve-script",
+        "Target": {
+          "Fn::Sub": "integrations/${Integration}"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "AuthorizationScopes": [
+          "openid"
+        ]
       }
     }
   },

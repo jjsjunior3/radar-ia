@@ -9,6 +9,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from botocore.config import Config
+from .review_api import ReviewStore, ReviewConflict
 
 
 class Conflict(Exception): pass
@@ -29,8 +30,18 @@ class Backend:
     def __init__(self):
         self.bucket=os.environ['S3_BUCKET']
         self.prefix=os.getenv('S3_PREFIX','radar-ia').strip('/')
+        self.reviewer_sub=os.getenv('REVIEWER_SUB','')
         self.s3=boto3.client('s3',config=Config(signature_version='s3v4'))
         self.table=boto3.resource('dynamodb').Table(os.environ['PROGRESS_TABLE'])
+
+    def can_review(self,user_id):
+        return bool(self.reviewer_sub and user_id==self.reviewer_sub)
+
+    def production(self,edition):
+        return ReviewStore(self.s3,self.bucket,self.prefix).summary(edition)
+
+    def approve_script(self,edition,data,user_id):
+        return ReviewStore(self.s3,self.bucket,self.prefix).approve_script(edition,data,user_id)
 
     def episodes(self):
         response=self.s3.get_object(Bucket=self.bucket,Key=f'{self.prefix}/catalog.json')
@@ -82,6 +93,16 @@ def handle(event,backend):
     method=event.get('requestContext',{}).get('http',{}).get('method','')
     route=event.get('routeKey','')
     try:
+        if route in ('GET /api/production/{date}','POST /api/production/{date}/approve-script'):
+            if not backend.can_review(user_id):return reply(403,{'error':'Revisão disponível somente para o responsável pela edição.'})
+            edition=event.get('pathParameters',{}).get('date')
+            if route=='GET /api/production/{date}' and method=='GET':return reply(200,backend.production(edition))
+            if route=='POST /api/production/{date}/approve-script' and method=='POST':
+                body=event.get('body') or ''
+                if event.get('isBase64Encoded'):body=base64.b64decode(body,validate=True).decode()
+                if len(body.encode())>4096:raise ValueError('Requisição excede limite')
+                return reply(200,backend.approve_script(edition,json.loads(body),user_id))
+            return reply(404,{'error':'Rota não encontrada'})
         episodes=backend.episodes()
         if route=='GET /api/episodes' and method=='GET':
             states=backend.states(user_id)
@@ -99,6 +120,7 @@ def handle(event,backend):
             if not episode: return reply(404,{'error':'Episódio não encontrado'})
             return reply(200,backend.save(user_id,episode,data))
         return reply(404,{'error':'Rota não encontrada'})
+    except ReviewConflict:return reply(409,{'error':'A edição mudou. Atualize o roteiro e revise a versão atual antes de aprovar.'})
     except Conflict:return reply(409,{'error':'O progresso mudou em outro dispositivo. Atualize a biblioteca antes de salvar novamente.'})
     except (ValueError,TypeError):return reply(400,{'error':'Requisição ou dados inválidos'})
     except Exception:return reply(503,{'error':'Serviço indisponível. Tente novamente mais tarde.'})

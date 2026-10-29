@@ -1,0 +1,111 @@
+"""Revisão de roteiro sobre checkpoint privado; somente stdlib e cliente S3."""
+import hashlib
+import io
+import json
+import re
+import zipfile
+from datetime import date, datetime, timezone
+from urllib.parse import urlsplit
+
+from botocore.exceptions import ClientError
+
+MAX_BYTES = 50 * 1024 * 1024
+
+
+class ReviewConflict(Exception):
+    pass
+
+
+def digest_script(brief, script):
+    return hashlib.sha256(json.dumps({'brief':brief,'script':script},ensure_ascii=False,sort_keys=True).encode()).hexdigest()
+
+
+class ReviewStore:
+    def __init__(self, s3, bucket, prefix):
+        self.s3, self.bucket, self.prefix = s3, bucket, prefix.strip('/')
+
+    def key(self, edition):
+        if not isinstance(edition,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',edition) or date.fromisoformat(edition).isoformat()!=edition:
+            raise ValueError('Data inválida')
+        return f'{self.prefix}/production/editions/{edition}.zip'
+
+    def load(self, edition):
+        key=self.key(edition)
+        listing=self.s3.list_objects_v2(Bucket=self.bucket,Prefix=key,MaxKeys=1)
+        if not any(item['Key']==key for item in listing.get('Contents',[])):
+            return None,None
+        response=self.s3.get_object(Bucket=self.bucket,Key=key)
+        with response['Body'] as body:raw=body.read(MAX_BYTES+1)
+        if len(raw)>MAX_BYTES:raise ValueError('Checkpoint excede limite')
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            members=archive.infolist()
+            if len(members)>1000 or sum(item.file_size for item in members)>MAX_BYTES:
+                raise ValueError('Checkpoint excede limite')
+            names=[item.filename for item in members]
+            if len(set(names))!=len(names) or any(name.startswith('/') or '..' in name.split('/') or '\\' in name or ':' in name for name in names):
+                raise ValueError('Checkpoint inválido')
+            checkpoint=json.loads(archive.read('checkpoint.json'))
+            if checkpoint.get('date')!=edition:raise ValueError('Data divergente')
+        return raw,response['ETag']
+
+    def summary(self, edition, raw=None):
+        if raw is None:raw,_=self.load(edition)
+        if raw is None:
+            return {'date':edition,'stage':'new','can_approve_script':False,'narration':'','sources':[]}
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            checkpoint=json.loads(archive.read('checkpoint.json'))
+            result={'date':edition,'stage':checkpoint['stage'],'updated_at':checkpoint.get('updated_at'),
+                'can_approve_script':False,'narration':'','sources':[]}
+            if 'briefing.json' in archive.namelist():
+                brief=json.loads(archive.read('briefing.json'))
+                result['theme']=brief.get('theme','')
+                for news in brief.get('news',[]):
+                    url=news.get('url','');parsed=urlsplit(url)
+                    if parsed.scheme!='https' or not parsed.hostname or parsed.username or parsed.password:
+                        raise ValueError('Fonte inválida')
+                    result['sources'].append({'title':news['title_original'],'source':news['source'],'url':url,'published':news.get('published')})
+            if 'roteiro.json' in archive.namelist():
+                script=json.loads(archive.read('roteiro.json'))
+                if not isinstance(script,dict) or set(script)!={'intro_pt','stories','glossary','outro_pt'}:
+                    raise ValueError('Roteiro inválido')
+                if [s['news_id'] for s in script['stories']]!=[n['id'] for n in brief['news']]:
+                    raise ValueError('Referências divergentes')
+                narration=archive.read('narracao.txt').decode('utf-8-sig').replace('\r\n','\n')
+                if not narration.strip() or len(narration)>20000:raise ValueError('Narração inválida')
+                result.update(narration=narration,digest=digest_script(brief,script),
+                    can_approve_script=checkpoint['stage']=='awaiting_script_review')
+            return result
+
+    def approve_script(self, edition, data, user_id):
+        if not isinstance(data,dict) or set(data)!={'digest','confirmed'} or data['confirmed'] is not True or not isinstance(data['digest'],str) or not re.fullmatch('[a-f0-9]{64}',data['digest']):
+            raise ValueError('Aprovação inválida')
+        raw,etag=self.load(edition)
+        if raw is None:raise ReviewConflict()
+        summary=self.summary(edition,raw)
+        if data['digest']!=summary.get('digest'):raise ReviewConflict()
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            if summary['stage']!='awaiting_script_review':
+                if 'aprovacao-roteiro.json' in archive.namelist() and json.loads(archive.read('aprovacao-roteiro.json')).get('digest')==data['digest']:
+                    return summary
+                raise ReviewConflict()
+            if 'episode.wav' in archive.namelist() or any(name.startswith('audio-chunks/') for name in archive.namelist()):
+                raise ReviewConflict()
+            now=datetime.now(timezone.utc).isoformat()
+            checkpoint=json.loads(archive.read('checkpoint.json'))
+            checkpoint.update(stage='script_approved',updated_at=now)
+            replacements={'checkpoint.json':checkpoint,'aprovacao-roteiro.json':{
+                'digest':data['digest'],'approved_at':now,'approved_by':user_id,'channel':'web'}}
+            output=io.BytesIO()
+            with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as target:
+                for name in archive.namelist():
+                    if name not in replacements:target.writestr(name,archive.read(name))
+                for name,value in replacements.items():
+                    target.writestr(name,json.dumps(value,ensure_ascii=False,indent=2).encode())
+        try:
+            self.s3.put_object(Bucket=self.bucket,Key=self.key(edition),Body=output.getvalue(),
+                ContentType='application/zip',ServerSideEncryption='AES256',IfMatch=etag)
+        except ClientError as exc:
+            if exc.response['Error']['Code'] in ('PreconditionFailed','412','ConditionalRequestConflict'):
+                raise ReviewConflict() from None
+            raise
+        return self.summary(edition,output.getvalue())

@@ -28,6 +28,7 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 - **Roteiro em português:** geração estruturada via OpenRouter, validação com Pydantic, glossário e termos em inglês contextualizados.
 - **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
 - **Biblioteca privada:** player web instalável no Android, filtros de ouvidos/pendentes e progresso por usuário.
+- **Revisão pelo app:** responsável acompanha a edição, lê roteiro/fontes e aprova a versão exibida, sem disparar voz ou publicação.
 - **Operação acompanhada:** checkpoints privados no S3, retomada de resultados salvos e aprovações vinculadas ao conteúdo revisado.
 - **Infraestrutura reproduzível:** template CloudFormation e acesso temporário do GitHub à AWS via OIDC.
 
@@ -221,6 +222,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [06 · App hospedado](docs/06-app-hospedado.md) | Arquitetura AWS, implantação e operação |
 | [07 · Produção acompanhada](docs/07-producao-acompanhada.md) | Checkpoints, IAM/OIDC e GitHub Actions |
 | [08 · Comunicação e arquitetura](docs/08-comunicacao-e-arquitetura.md) | Três modelos de imagem e orientações de divulgação |
+| [09 · Revisão no aplicativo](docs/09-revisao-no-app.md) | Estado da edição, fontes e aprovação de roteiro pelo responsável |
 
 ## Custos
 
@@ -235,7 +237,8 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Checkpoints privados e autenticação AWS via OIDC no Actions.
 - [x] Agendamento configurado e habilitado.
 - [ ] Validar a primeira edição nova pelo fluxo agendado completo.
-- [ ] Oferecer revisão, correção e rejeição de rascunhos pela interface.
+- [x] Mostrar a edição e permitir aprovação do roteiro pelo responsável no aplicativo.
+- [ ] Permitir edição/rejeição de rascunhos e revisão/publicação do áudio pela interface.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [ ] Revisar o repositório e disponibilizar o código publicamente.
 - [ ] Criar um feed RSS público como canal opcional de distribuição.

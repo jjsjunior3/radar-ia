@@ -8,7 +8,7 @@ import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
 ROOT=Path(__file__).resolve().parents[1]
-ASSETS={'index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','auth.js':'text/javascript; charset=utf-8','app.js':'text/javascript; charset=utf-8','icon.svg':'image/svg+xml','manifest.webmanifest':'application/manifest+json'}
+ASSETS={'production.js':'text/javascript; charset=utf-8','index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','auth.js':'text/javascript; charset=utf-8','app.js':'text/javascript; charset=utf-8','icon.svg':'image/svg+xml','manifest.webmanifest':'application/manifest+json'}
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
         print('Sem alterações AWS; --publish envia somente esses arquivos e invalida cache CloudFront.')
         return
     session=boto3.Session(region_name=os.getenv('AWS_REGION','us-east-1'))
-    config=Config(retries={'total_max_attempts':1},connect_timeout=10,read_timeout=30)
+    config=Config(retries={'total_max_attempts':1},connect_timeout=10,read_timeout=30,request_checksum_calculation='when_required',response_checksum_validation='when_required')
     s3=session.client('s3',config=config)
     for name,mime in ASSETS.items():
         s3.put_object(Bucket=outputs['WebBucket'],Key=name,Body=(ROOT/'src/radar_ia/web'/name).read_bytes(),ContentType=mime,CacheControl='no-cache',ServerSideEncryption='AES256')

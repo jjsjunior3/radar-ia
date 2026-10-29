@@ -67,15 +67,17 @@ def test_template_disables_signup_and_requires_jwt_scopes():
     assert r['WebClient']['Properties']['GenerateSecret'] is False
     assert r['WebClient']['Properties']['AllowedOAuthFlows']==['code']
     routes=[v['Properties'] for v in r.values() if v['Type']=='AWS::ApiGatewayV2::Route']
-    assert len(routes)==3
+    assert len(routes)==5
     assert all(route['AuthorizationType']=='JWT' and route['AuthorizationScopes']==['openid'] for route in routes)
     assert all(r['WebBucket']['Properties']['PublicAccessBlockConfiguration'].values())
 
 
-def test_runtime_role_cannot_write_audio_or_generate_voice():
+def test_runtime_role_cannot_publish_audio_or_generate_voice():
     template=json.loads((Path(__file__).parents[1]/'infra/private-app.json').read_text(encoding='utf-8'))
     statements=template['Resources']['ApiRole']['Properties']['Policies'][0]['PolicyDocument']['Statement']
     actions=[action for s in statements for action in s['Action']]
-    assert 's3:PutObject' not in actions
+    writes=[s for s in statements if 's3:PutObject' in s['Action']]
+    assert len(writes)==1
+    assert all(item['Fn::Sub'].endswith('/production/editions/*') for item in writes[0]['Resource'])
     assert 'polly:SynthesizeSpeech' not in actions
     assert 'dynamodb:PutItem' in actions

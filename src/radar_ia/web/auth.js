@@ -38,6 +38,7 @@ window.radarAuth={ready:false,config:null,token:null,expiresAt:0,
   },
   showSignedOut(){
     this.ready=false;this.token=null;this.expiresAt=0;
+    const production=document.querySelector('#production-panel');if(production)production.hidden=true;
     document.querySelector('#auth-panel').hidden=false;
     document.querySelector('#library-section').hidden=true;
     document.querySelector('#player-panel').hidden=true;

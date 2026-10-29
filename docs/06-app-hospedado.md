@@ -6,7 +6,7 @@
 - S3 separado: arquivos públicos da interface (HTML, CSS, JS, ícone). Bucket privado acessível pelo CloudFront via OAC.
 - Cognito: tela de login com cadastro público desativado. Fluxo authorization code + PKCE, sem client secret no navegador.
 - API Gateway: valida assinatura, emissor, audiência, validade e escopo openid do access token antes de chamar o Lambda. Lambda rejeita ID tokens.
-- Lambda Python: consulta catálogo, emite link temporário para episódio e grava progresso. Papel não pode gerar voz ou gravar áudio no S3.
+- Lambda Python: consulta catálogo, emite link temporário para episódio e grava progresso. O papel não pode gerar voz nem escrever no catálogo/áudios publicados; a revisão de roteiro permite escrever somente nos checkpoints de produção, com autorização do responsável.
 - DynamoDB: progresso por identificador sub do Cognito e episódio; usuário não escolhe user_id no corpo da requisição.
 - S3 de áudio existente: continua privado, sem conceder leitura pública ao CloudFront da interface.
 
