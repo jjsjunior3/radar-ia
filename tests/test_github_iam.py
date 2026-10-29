@@ -1,5 +1,5 @@
 import pytest
-from radar_ia.github_iam import oidc_subject,documents
+from radar_ia.github_iam import oidc_subject,documents,is_listbucket_migration
 
 
 def test_new_repo_subject_has_immutable_ids_and_main_only():
@@ -12,6 +12,8 @@ def test_new_repo_subject_has_immutable_ids_and_main_only():
     assert 'polly:SynthesizeSpeech' in actions
     assert all(not a.startswith(('iam:','cognito','dynamodb:')) for a in actions)
     assert 's3:DeleteObject' not in actions
+    listing=[s for s in policy['Statement'] if s['Action']=='s3:ListBucket']
+    assert len(listing)==1 and listing[0]['Resource']=='arn:aws:s3:::radar-private'
     assert policy['Statement'][1]['Resource']==[
         'arn:aws:s3:::radar-private/radar-ia/catalog.json',
         'arn:aws:s3:::radar-private/radar-ia/episodes/*',
@@ -25,3 +27,14 @@ def test_older_repo_uses_name_subject():
 @pytest.mark.parametrize('prefix',['*','../other','radar?'])
 def test_invalid_prefix_rejected(prefix):
     with pytest.raises(ValueError):documents('123456789012','radar-private',prefix,'subject')
+
+
+def test_update_accepts_only_exact_known_previous_policy():
+    import copy
+    _,desired=documents('123456789012','radar-private','radar-ia','subject')
+    old=copy.deepcopy(desired)
+    old['Statement']=old['Statement'][:-1]
+    assert is_listbucket_migration(old,desired)
+    old['Statement'][1]['Resource']=['*']
+    assert not is_listbucket_migration(old,desired)
+    assert not is_listbucket_migration(desired,desired)

@@ -120,7 +120,10 @@ def main(argv=None):
                         target = Path(os.getenv('OUTPUT_DIR','local-output'))/'revisoes-remotas'/day/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
                         shutil.copytree(source, target)
                         print('Cópia local para revisão:', target.resolve())
-    except (ValueError, OSError, BotoCoreError, ClientError, OpenAIError, httpx.HTTPError) as exc:
+    except ClientError as exc:
+        # Operação e código ajudam o diagnóstico sem expor mensagens/credenciais.
+        raise SystemExit(f"Etapa interrompida: AWS {exc.operation_name} retornou {exc.response['Error']['Code']}. Nenhuma nova tentativa automática.") from None
+    except (ValueError, OSError, BotoCoreError, OpenAIError, httpx.HTTPError) as exc:
         # Não imprimir respostas do provedor, tokens, URLs assinadas ou configuração de credenciais.
         if isinstance(exc, ValueError):
             raise SystemExit(str(exc)) from None

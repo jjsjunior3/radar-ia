@@ -10,13 +10,14 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
-from radar_ia.github_iam import documents, oidc_subject
+from radar_ia.github_iam import documents, oidc_subject, is_listbucket_migration
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', default='jjsjunior3/radar-ia')
     parser.add_argument('--create', action='store_true')
+    parser.add_argument('--update', action='store_true', help='Corrige somente a permissão ListBucket da política anterior conhecida')
     args = parser.parse_args()
     load_dotenv()
     # O comando roda no terminal autenticado do proprietário. Nunca captura tokens.
@@ -38,7 +39,7 @@ def main():
     print('Repositório:',repo['full_name'],'| Branch: main')
     print('Subject exato:',subject)
     print('Documentos IAM:',target.resolve())
-    if not args.create:
+    if not (args.create or args.update):
         print('Nenhuma alteração na AWS. --create cria a função restrita ao projeto.')
         return
     iam=session.client('iam',config=cfg)
@@ -49,6 +50,7 @@ def main():
             raise SystemExit('Provedor OIDC existente sem audiência STS; revisar antes de alterar recurso compartilhado.')
     except ClientError as exc:
         if exc.response['Error']['Code']!='NoSuchEntity':raise
+        if args.update:raise SystemExit('Provedor OIDC não encontrado; --update não cria recursos novos.') from None
         iam.create_open_id_connect_provider(Url='https://token.actions.githubusercontent.com',ClientIDList=['sts.amazonaws.com'],Tags=[{'Key':'Project','Value':'radar-ia'}])
     name='radar-ia-github-production'
     try:
@@ -65,12 +67,21 @@ def main():
         except ClientError as exc:
             if exc.response['Error']['Code']!='NoSuchEntity':raise
             existing=None
-        if current['AssumeRolePolicyDocument']!=trust or (existing is not None and existing!=policy):
+        if current['AssumeRolePolicyDocument']!=trust:
             raise SystemExit('Função existente diverge dos documentos gerados. Revisar diferenças antes de atualizar.')
+        if existing is not None and existing!=policy:
+            if not (args.update and is_listbucket_migration(existing,policy)):
+                raise SystemExit('Política existente diverge. --update aceita somente a correção conhecida de ListBucket; outras diferenças exigem revisão.')
+            (target/'permissions-before-update.json').write_text(json.dumps(existing,indent=2),encoding='utf-8')
+            iam.put_role_policy(RoleName=name,PolicyName='RadarProduction',PolicyDocument=json.dumps(policy))
+            print('Correção aplicada: s3:ListBucket somente no bucket do projeto. Confiança OIDC preservada.')
         if existing is None:
+            if args.update:raise SystemExit('Política anterior não encontrada; --update exige a versão conhecida existente.')
             # Recupera criação interrompida entre a função e sua política restrita.
             iam.put_role_policy(RoleName=name,PolicyName='RadarProduction',PolicyDocument=json.dumps(policy))
     else:
+        if args.update:
+            raise SystemExit('Função não encontrada; --update não cria uma função nova.')
         iam.create_role(RoleName=name,AssumeRolePolicyDocument=json.dumps(trust),MaxSessionDuration=3600,
             Description='Radar IA: GitHub Actions main, dados privados e Polly',Tags=[{'Key':'Project','Value':'radar-ia'}])
         iam.put_role_policy(RoleName=name,PolicyName='RadarProduction',PolicyDocument=json.dumps(policy))

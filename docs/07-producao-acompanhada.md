@@ -109,6 +109,24 @@ Isso não cancela uma execução já iniciada.
 
 ## Recuperação e limites
 
+### Primeira execução: OIDC aceito e AccessDenied no S3
+
+A política inclui `s3:ListBucket` no bucket do projeto. Essa permissão permite distinguir arquivo ausente (404) de acesso negado (403) durante a primeira consulta ao estado. Ela não concede leitura do conteúdo de outros objetos, escrita em outros buckets ou acesso público. A política de objetos continua restrita aos caminhos do Radar IA.
+
+Se a função foi criada com a primeira versão da política, aplique a migração:
+
+```bat
+.\.venv\Scripts\python.exe examples\configurar_github_aws.py --update
+```
+
+O comando aceita somente a política anterior exata, salva uma cópia local e adiciona essa permissão no bucket do projeto. Não altera a confiança OIDC, não recria recursos e rejeita outras divergências. Não é necessário cadastrar novamente variáveis ou segredos.
+
+Depois de enviar o código corrigido com `git push`, inicie uma nova execução usando `gh workflow run production.yml --ref main -f step=prepare`. O erro agora informa operação e código AWS, sem imprimir a resposta completa. O AccessDenied original não informava a operação; por isso a nova execução ainda precisa confirmar a resolução.
+
+Referência: [GetObject e diferença entre 403 e 404 no S3](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html).
+
+### Outros casos
+
 - Após uma falha, consulte `status`. Não remova marcadores de tentativa incerta sem examinar o que aconteceu e o custo registrado pelo provedor.
 - Falha ao publicar não avança cobertura/uso editorial. O catálogo S3 é a confirmação de que o episódio existe.
 - Se o catálogo foi confirmado, mas houve falha ao salvar o histórico editorial compartilhado, reexecute `publish --execute` para reconciliar; o upload identifica o mesmo episódio e não gera áudio nem roteiro novamente.

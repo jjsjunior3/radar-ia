@@ -31,5 +31,15 @@ def documents(account, bucket, prefix, subject, region='us-east-1'):
         {'Effect':'Allow','Action':['s3:GetObject','s3:PutObject'],'Resource':[
             f'{arn}/{prefix}/catalog.json',f'{arn}/{prefix}/episodes/*',f'{arn}/{prefix}/production/*']},
         {'Effect':'Allow','Action':'polly:SynthesizeSpeech','Resource':'*',
-            'Condition':{'StringEquals':{'aws:RequestedRegion':region}}}]}
+            'Condition':{'StringEquals':{'aws:RequestedRegion':region}}},
+        {'Sid':'DiscoverMissingProductionObjects','Effect':'Allow','Action':'s3:ListBucket','Resource':arn}]}
     return trust, policy
+
+
+def is_listbucket_migration(existing, desired):
+    """Autoriza somente a inclusão conhecida; outras divergências são rejeitadas."""
+    statements=desired.get('Statement',[])
+    addition=[s for s in statements if s.get('Sid')=='DiscoverMissingProductionObjects']
+    if len(addition)!=1 or addition[0].get('Action')!='s3:ListBucket':return False
+    previous=dict(desired,Statement=[s for s in statements if s not in addition])
+    return existing==previous
