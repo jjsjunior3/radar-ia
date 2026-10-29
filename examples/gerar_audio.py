@@ -9,7 +9,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 from dotenv import load_dotenv
-from radar_ia.audio import make_audio
+from radar_ia.audio import make_audio, DEFAULT_VOICE
 from radar_ia.speech_markup import speech_chunks
 
 
@@ -27,7 +27,7 @@ def main():
     structured = json.loads(structured_path.read_text(encoding="utf-8"))
     english_terms = [term["term_en"] for term in structured.get("glossary", [])]
     region = os.getenv("AWS_REGION", "").strip()
-    voice, engine = os.getenv("POLLY_VOICE", "Camila"), os.getenv("POLLY_ENGINE", "generative")
+    voice, engine = os.getenv("POLLY_VOICE", DEFAULT_VOICE), os.getenv("POLLY_ENGINE", "generative")
     print("Palavras:", len(text.split()), "| Trechos:", len(parts))
     print("Região:", region or "não configurada", "| Voz:", voice, "| Engine:", engine)
     print("SSML: pausas por parágrafo; termos ingleses:", ", ".join(english_terms) or "nenhum")

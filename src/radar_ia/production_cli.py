@@ -18,6 +18,7 @@ from .llm_config import settings_from_env
 from .production import Production, read_json
 from .production_store import ProductionStore
 from .script import generate_script
+from .audio import DEFAULT_VOICE
 
 STEPS = ('status', 'prepare', 'replan', 'draft', 'approve-script', 'audio', 'approve-audio', 'publish')
 
@@ -29,12 +30,15 @@ def parser():
     result.add_argument('--execute', action='store_true', help='Autoriza chamada paga em draft/audio ou publicação em publish')
     result.add_argument('--reviewed', action='store_true', help='Confirma revisão humana em approve-script/approve-audio')
     result.add_argument('--local', action='store_true', help='Estado local; não combinar com Actions para a mesma edição')
+    result.add_argument('--new-audio-revision',action='store_true',help='Em audio --execute, preserva a versão anterior e gera nova voz/ritmo')
     return result
 
 
 def execute(args, output, now=None):
     now = now or datetime.now(timezone.utc)
     day = (args.date or now.astimezone(ZoneInfo('America/Sao_Paulo')).date()).isoformat()
+    if args.new_audio_revision and args.step!='audio':
+        raise ValueError('--new-audio-revision disponível somente na etapa audio')
     if args.step in ('draft', 'audio', 'publish') and not args.execute:
         print('Nenhuma chamada executada. Adicione --execute para esta etapa.')
         return
@@ -80,8 +84,10 @@ def execute(args, output, now=None):
         run.approve_script()
     elif args.step == 'audio':
         run.revalidate(sources)
+        if args.new_audio_revision:
+            run.restart_audio(store.archive_audio_revision if store else None)
         run.synthesize(session.client('polly', config=config),
-            voice=os.getenv('POLLY_VOICE', 'Camila'), engine=os.getenv('POLLY_ENGINE', 'generative'))
+            voice=os.getenv('POLLY_VOICE', DEFAULT_VOICE), engine=os.getenv('POLLY_ENGINE', 'generative'))
     elif args.step == 'approve-audio':
         run.approve_audio()
     elif args.step == 'publish':

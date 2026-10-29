@@ -2,7 +2,7 @@
 
 ## O que foi implementado
 
-O comando `radar-ia production` conecta coleta, grade semanal, roteiro OpenRouter, revisão humana, Polly Camila generativa e publicação no catálogo privado existente. O comando sem argumentos agora mostra ajuda: o fluxo antigo de cinco notícias não é mais executado por padrão.
+O comando `radar-ia production` conecta coleta, grade semanal, roteiro OpenRouter, revisão humana, Polly Leo generativa e publicação no catálogo privado existente. O comando sem argumentos agora mostra ajuda: o fluxo antigo de cinco notícias não é mais executado por padrão.
 
 A rotina usa quantidade variável de notícias e mede o WAV final, com limite de 600 segundos. Uma edição sem conteúdo suficiente termina sem inventar notícias, gerar voz ou avançar a cobertura editorial.
 
@@ -142,6 +142,8 @@ Depois de enviar o código corrigido com `git push`, inicie uma nova execução 
 Referência: [GetObject e diferença entre 403 e 404 no S3](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html).
 
 ### Outros casos
+
+- Voz atual: Leo generativo com pausas explícitas entre frases e parágrafos. Para uma troca de voz/ritmo em áudio completo ainda não aprovado, use `production audio --execute --new-audio-revision`. O snapshot anterior é arquivado antes da nova síntese. Há nova cobrança de TTS, sem nova geração de roteiro. Se a execução nova falhar, retome com `audio --execute`, sem iniciar outra revisão. No Actions, a opção `new_audio_revision` está disponível para a etapa `audio`.
 
 - Após uma falha, consulte `status`. Não remova marcadores de tentativa incerta sem examinar o que aconteceu e o custo registrado pelo provedor.
 - Falha ao publicar não avança cobertura/uso editorial. O catálogo S3 é a confirmação de que o episódio existe.

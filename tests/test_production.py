@@ -123,3 +123,40 @@ def test_replan_does_not_refresh_expired_collection(tmp_path):
     run.stage('prepared')
     write_json(run.folder/'coleta.json',{'collected_at':'2026-10-27T15:00:00+00:00'})
     with pytest.raises(ValueError,match='Coleta antiga'):run.replan()
+
+
+def test_voice_revision_preserves_old_audio_and_script_approval(run):
+    run.approve_script()
+    class Polly:
+        def synthesize_speech(self,**kwargs):return {'AudioStream':io.BytesIO(b'\0\0'*16000)}
+    run.synthesize(Polly(),voice='Camila')
+    old=(run.folder/'episode.wav').read_bytes()
+    called=[]
+    def archive():
+        assert (run.folder/'episode.wav').read_bytes()==old
+        called.append(True)
+        return {'key':'private-backup'}
+    run.restart_audio(archive)
+    assert called==[True] and run.state['stage']=='script_approved'
+    assert not (run.folder/'episode.wav').exists()
+    assert list((run.output/'audio-backups').rglob('episode.wav'))[0].read_bytes()==old
+    run.approved_bundle()
+    metadata=run.synthesize(Polly())
+    assert metadata['voice']=='Leo'
+    assert run.state['stage']=='awaiting_audio_review'
+
+
+def test_failed_archive_keeps_existing_audio(run):
+    run.approve_script()
+    class Polly:
+        def synthesize_speech(self,**kwargs):return {'AudioStream':io.BytesIO(b'\0\0'*16000)}
+    run.synthesize(Polly())
+    def fail():raise OSError('Backup indisponível')
+    with pytest.raises(OSError):run.restart_audio(fail)
+    assert (run.folder/'episode.wav').exists()
+    assert run.state['stage']=='awaiting_audio_review'
+
+
+def test_cannot_replace_audio_after_approval(run):
+    run.stage('audio_approved')
+    with pytest.raises(ValueError,match='ainda não aprovado'):run.restart_audio()

@@ -3,6 +3,8 @@ import io
 import wave
 from contextlib import closing
 
+DEFAULT_VOICE = 'Leo'
+
 
 def chunks(text: str, limit: int = 2500) -> list[str]:
     words = text.split()
@@ -38,7 +40,7 @@ def wav_from_pcm(pcm: bytes, max_seconds: int = 600) -> tuple[bytes, float]:
     return output.getvalue(), seconds
 
 
-def make_audio(polly, text: str, voice: str = "Camila", engine: str = "generative", *, english_terms: list[str] | None = None, use_ssml: bool = True) -> tuple[bytes, dict]:
+def make_audio(polly, text: str, voice: str = DEFAULT_VOICE, engine: str = "generative", *, english_terms: list[str] | None = None, use_ssml: bool = True) -> tuple[bytes, dict]:
     from .speech_markup import speech_chunks, bilingual_ssml, RENDERER_VERSION
     parts = speech_chunks(text) if use_ssml else chunks(text)
     requests = [bilingual_ssml(part, english_terms or []) for part in parts] if use_ssml else parts

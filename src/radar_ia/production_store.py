@@ -2,6 +2,7 @@
 import io
 import json
 import zipfile
+import hashlib
 from contextlib import closing
 from pathlib import Path, PurePosixPath
 
@@ -82,3 +83,14 @@ class ProductionStore:
         path = self.root / 'editorial-state.json'
         if path.exists():
             self.global_etag = self.put(self.global_key, path.read_bytes(), self.global_etag, 'application/json')
+
+    def archive_audio_revision(self):
+        raw,etag=self.get(self.key)
+        if raw is None or etag!=self.etag:
+            raise ValueError('Edição remota mudou; não iniciar nova versão de áudio')
+        digest=hashlib.sha256(raw).hexdigest()
+        key=f'{self.base}/audio-archives/{self.folder.name}/{digest}.zip'
+        previous,_=self.get(key)
+        if previous is None:self.put(key,raw,None,'application/zip')
+        elif previous!=raw:raise ValueError('Backup de áudio divergente; interrompido')
+        return {'key':key,'sha256':digest}

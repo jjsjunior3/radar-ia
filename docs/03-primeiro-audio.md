@@ -39,3 +39,11 @@ O renderizador é identificado como `bilingual-pauses-v2` nos metadados dos novo
 A API `describe-voices`, em us-east-1, confirmou a voz masculina **Leo** com suporte generative, além de Thiago neural e Ricardo standard. Foram geradas amostras Leo e Camila, ambas generativas, com o mesmo trecho do roteiro e as mesmas pausas, em `local-output/comparacao-vozes/2026-10-29-pausas-v2/`. Durações medidas: Leo 64,8 s e Camila 63,0 s. São amostras para escolha, não uma troca da voz padrão nem uma publicação.
 
 Referências: [pausas explícitas no Polly](https://docs.aws.amazon.com/polly/latest/dg/break-tag.html) e [vozes disponíveis](https://docs.aws.amazon.com/polly/latest/dg/available-voices.html). A disponibilidade foi conferida na API porque as tabelas da documentação podem estar defasadas durante lançamentos.
+
+## Voz padrão escolhida: Leo generativo
+
+Após comparar as amostras de 29/10/2026, o proprietário escolheu **Leo de agora em diante**. Configuração local, exemplo de ambiente, código, workflow e material de arquitetura passam a usar Leo com engine generative, mantendo as pausas e o inglês da marcação v2. Camila permanece registrada acima como escolha histórica.
+
+Trocar a voz de um áudio completo ainda em revisão exige uma nova versão. A opção `production audio --execute --new-audio-revision` arquiva primeiro o snapshot remoto anterior em `production/audio-archives/`, move o cache de voz para backup local e preserva o roteiro aprovado. Depois gera o novo áudio em checkpoints separados. Cada versão precisa de sua própria escuta e aprovação; uma voz escolhida não aprova a publicação automaticamente.
+
+Tentativas incertas, áudios já aprovados e episódios publicados não podem ser reiniciados por essa opção. Se o backup falhar, o áudio existente permanece. O arquivo arquivado fica separado do snapshot ativo para não somar dois WAVs e caches PCM no limite de 50 MiB por edição. Rascunhos arquivados ocupam armazenamento e ainda não têm retenção automática.

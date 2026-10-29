@@ -12,6 +12,10 @@ on:
         description: Data da edição (AAAA-MM-DD); vazio usa hoje em São Paulo
         type: string
         required: false
+      new_audio_revision:
+        description: Em audio, preservar a versão anterior e sintetizar novamente (gera custo)
+        type: boolean
+        default: false
   schedule:
     - cron: '30 8 * * 1-5'
       timezone: America/Sao_Paulo
@@ -35,10 +39,11 @@ jobs:
       S3_PREFIX: radar-ia
       LLM_PROVIDER: openrouter
       OPENROUTER_MODEL: google/gemini-2.5-flash
-      POLLY_VOICE: Camila
+      POLLY_VOICE: Leo
       POLLY_ENGINE: generative
       STEP: ${{ inputs.step || 'prepare' }}
       EDITION_DATE: ${{ inputs.date }}
+      NEW_AUDIO_REVISION: ${{ inputs.new_audio_revision }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -63,6 +68,7 @@ jobs:
             draft|audio|publish) args+=(--execute) ;;
             approve-script|approve-audio) args+=(--reviewed) ;;
           esac
+          if [[ "$STEP" == "audio" && "$NEW_AUDIO_REVISION" == "true" ]]; then args+=(--new-audio-revision); fi
           python -m radar_ia.production_cli "${args[@]}"
       - name: Gerar roteiro para revisão na rotina agendada
         if: github.event_name == 'schedule'

@@ -108,3 +108,16 @@ def test_whole_edition_survives_fresh_runner_between_steps(tmp_path):
     assert len(read_catalog(s3,'bucket','radar/catalog.json')[0]['episodes'])==1
     assert read_json(run.global_path)['last_covered_at']==now.isoformat()
     assert run.state['stage']=='completed'
+
+
+def test_audio_archive_keeps_previous_snapshot_outside_current_edition(tmp_path):
+    s3=S3();store=ProductionStore(s3,'bucket','radar',tmp_path,'2026-10-28')
+    store.load();store.folder.mkdir(parents=True)
+    write_json(store.folder/'checkpoint.json',{'stage':'awaiting_audio_review'})
+    (store.folder/'episode.wav').write_bytes(b'old audio')
+    store.save()
+    original=s3.objects[store.key]
+    receipt=store.archive_audio_revision()
+    assert s3.objects[receipt['key']]==original
+    assert store.archive_audio_revision()==receipt
+    assert '/audio-archives/2026-10-28/' in receipt['key']

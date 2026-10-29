@@ -75,7 +75,7 @@ def architecture():
            (600,552,400,'Python: curadoria',['Datas, HTTPS e deduplicação','Grade semanal + pauta variável']),
            (1088,552,400,'OpenRouter + Gemini',['Roteiro JSON + Pydantic','Português com inglês explicado']),
            (1088,762,400,'Revisão humana',['Texto antes da voz','Escuta antes da publicação']),
-           (600,762,400,'Amazon Polly',['Camila • engine generative','SSML + duração medida']),
+           (600,762,400,'Amazon Polly',['Leo • engine generative','SSML + duração medida']),
            (112,762,400,'Amazon S3 privado',['Áudio, fontes e catálogo','Checkpoints para retomada'])]
     for x,y,w,title,body in cards:a.card(x,y,w,title,body,'#172A40','#30465E',h=148,title_size=29)
     a.path('M 523 625 H 584');a.path('M 1011 625 H 1072')
@@ -117,7 +117,7 @@ def journey():
           ('02','CURADORIA','Selecionar o que importa','Grade semanal, deduplicação e quantidade variável.','Python • fila editorial',False),
           ('03','ROTEIRO COM LLM','Explicar em português','Inglês técnico contextualizado e saída validada.','OpenRouter • Gemini • Pydantic',False),
           ('04','REVISÃO HUMANA','Conferir o conteúdo','Revisar o roteiro antes de autorizar a voz.','Aprovação vinculada ao texto',True),
-          ('05','VOZ SINTÉTICA','Transformar texto em áudio','Pausas e inglês via SSML; WAV de até 600 segundos.','Amazon Polly • Camila generativa',False),
+          ('05','VOZ SINTÉTICA','Transformar texto em áudio','Pausas e inglês via SSML; WAV de até 600 segundos.','Amazon Polly • Leo generativa',False),
           ('06','ESCUTA HUMANA','Ouvir antes de publicar','Aprovar o áudio que será enviado ao catálogo.','Aprovação vinculada ao áudio',True),
           ('07','PUBLICAÇÃO PRIVADA','Dar play, pausar e retomar','Catálogo S3 e aplicativo com login e progresso.','AWS • web app no Android',False)]
     a.path('M 143 490 V 1638',False,'#AFC9C0')
@@ -151,7 +151,7 @@ def modules():
         (80,550,'01  Coletor RSS','CÓDIGO PYTHON',['collection.py • httpx • feedparser','Datas, URLs e domínios permitidos','Resumos e referências preservados']),
         (840,550,'02  Curadoria','CÓDIGO PYTHON',['weekly.py + brief.py','Grade semanal e fila de candidatas','Deduplicação e seleção de 1 a 7 itens']),
         (840,950,'03  Roteirista','GERAÇÃO COM LLM',['script.py • OpenRouter • Gemini','JSON estruturado + validação Pydantic','Português e glossário técnico em inglês']),
-        (80,950,'04  Narrador','SERVIÇO TTS + REVISÃO DO ROTEIRO',['Polly • Camila generativa • SSML','Pausas e pronúncia de termos em inglês','Duração medida: até 10 minutos']),
+        (80,950,'04  Narrador','SERVIÇO TTS + REVISÃO DO ROTEIRO',['Polly • Leo generativa • SSML','Pausas e pronúncia de termos em inglês','Duração medida: até 10 minutos']),
         (80,1350,'05  Publicador','CÓDIGO PYTHON + APROVAÇÃO DO ÁUDIO',['catalog.py • Amazon S3 privado','Hash de conteúdo + gravação com ETag','Publicação idempotente do mesmo áudio']),
         (840,1350,'06  Player privado','APLICATIVO WEB',['CloudFront • Cognito • API Gateway','Lambda Python • S3 • DynamoDB','Ouvidos, pendentes e posição de escuta'])]
     for x,y,title,tag,body in cards:

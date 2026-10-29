@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from .audio import wav_from_pcm
+from .audio import wav_from_pcm, DEFAULT_VOICE
 from .brief import build_brief
 from .collection import collect_sources
 from .news import canonical, duplicate, Fetcher
@@ -182,7 +182,28 @@ class Production:
                 if canonical(final)!=canonical(news['url']):raise ValueError('URL mudou: revisar notícia novamente')
             finally:fetcher.close()
 
-    def synthesize(self,polly,voice='Camila',engine='generative'):
+    def restart_audio(self,archive=None):
+        """Nova voz/ritmo só após áudio completo; nunca apaga tentativa incerta."""
+        if self.state['stage']!='awaiting_audio_review':
+            raise ValueError('Nova versão somente para áudio completo ainda não aprovado')
+        _,_,text=self.approved_bundle()
+        previous=self.validate_audio(text)
+        # Backup remoto deve existir antes de remover qualquer arquivo do snapshot.
+        receipt=archive() if archive else None
+        revision=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+        backup=self.output/'audio-backups'/self.day/revision
+        root=self.output.resolve()
+        sources=[self.folder/name for name in ('episode.wav','metadados-audio.json','audio-chunks','aprovacao-audio.json')]
+        if not backup.resolve().is_relative_to(root) or any(not p.resolve().is_relative_to(root) or p.is_symlink() for p in sources):
+            raise ValueError('Caminho de revisão fora da pasta de saída')
+        backup.mkdir(parents=True,exist_ok=False)
+        for source in sources:
+            if source.exists():source.rename(backup/source.name)
+        write_json(self.folder/'revisao-voz.json',{'revision':revision,'previous_voice':previous['voice'],
+            'previous_audio_sha256':previous['audio_sha256'],'archive':receipt})
+        self.stage('script_approved',audio_revision=revision)
+
+    def synthesize(self,polly,voice=DEFAULT_VOICE,engine='generative'):
         brief,script,text=self.approved_bundle()
         if (self.folder/'episode.wav').exists():
             metadata=self.validate_audio(text)

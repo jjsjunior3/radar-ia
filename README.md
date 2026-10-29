@@ -26,7 +26,7 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 - **Coleta RSS:** fontes configuráveis, datas declaradas de publicação, URLs HTTPS e domínios permitidos.
 - **Curadoria editorial:** deduplicação por URL/título semelhante, grade semanal e seleção variável de uma a sete notícias.
 - **Roteiro em português:** geração estruturada via OpenRouter, validação com Pydantic, glossário e termos em inglês contextualizados.
-- **Áudio:** Amazon Polly, voz Camila generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
+- **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
 - **Biblioteca privada:** player web instalável no Android, filtros de ouvidos/pendentes e progresso por usuário.
 - **Operação acompanhada:** checkpoints privados no S3, retomada de resultados salvos e aprovações vinculadas ao conteúdo revisado.
 - **Infraestrutura reproduzível:** template CloudFormation e acesso temporário do GitHub à AWS via OIDC.
@@ -41,7 +41,7 @@ flowchart TB
         GH --> COLETA
         COLETA --> LLM[OpenRouter / Gemini / JSON validado]
         LLM --> R1[Revisão humana do roteiro]
-        R1 --> POLLY[Amazon Polly / Camila / SSML]
+        R1 --> POLLY[Amazon Polly / Leo / SSML]
         POLLY --> R2[Escuta e aprovação humana]
         R2 --> AUDIO[S3 privado: áudio e catálogo]
         GH <--> STATE[S3 privado: checkpoints]
@@ -81,7 +81,7 @@ O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega
 | Coleta | Python, httpx, feedparser | Ler feeds e verificar páginas sob domínios permitidos |
 | Curadoria | Python, grade editorial e heurísticas | Selecionar candidatas, deduplicar e organizar pauta |
 | Geração de texto | OpenRouter, Gemini 2.5 Flash, Pydantic | Produzir e validar o roteiro estruturado |
-| Síntese de voz | Amazon Polly, Camila generativa, SSML | Narrar em português e contextualizar termos em inglês |
+| Síntese de voz | Amazon Polly, Leo generativa, SSML | Narrar em português e contextualizar termos em inglês |
 | Armazenamento | Amazon S3 | Guardar áudio, fontes, catálogo e checkpoints privados |
 | Interface | HTML, CSS, JavaScript, CloudFront, S3 + OAC | Entregar o player web por HTTPS |
 | Autenticação | Amazon Cognito, OAuth 2.0 + PKCE | Autenticar sem segredo de cliente no navegador |
