@@ -44,3 +44,13 @@ Código aberto e acesso público aos episódios são decisões distintas: o cód
 
 - [Empacotamento Python na Lambda](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html).
 - [Lambda com SQS e processamento idempotente](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html).
+
+
+## Validação do incremento (29/10/2026)
+
+- 211 testes Python e três testes JavaScript passaram localmente; o workflow de testes do commit de implementação também passou.
+- Teste integrado com serviços simulados percorreu aprovação do texto, síntese, checkpoint, aprovação do WAV e publicação real pelo módulo de catálogo; uma entrega duplicada não chamou Polly novamente.
+- Navegador isolado verificou as quatro confirmações, prévia, payloads e layout de 390 pixels. As chamadas desse teste foram simuladas.
+- CloudFormation concluiu a atualização sem substituir recursos existentes. O worker Linux foi invocado na AWS, e uma tarefa de diagnóstico percorreu SQS, reivindicação condicional e atualização DynamoDB. A tarefa foi rejeitada antes da síntese e removida após o teste.
+- A API implantada respondeu ao responsável, recusou outro usuário com 403 e recusou acesso sem login com 401. Arquivos do CloudFront foram comparados aos arquivos locais.
+- Nenhum episódio novo foi gerado para testar a implantação. A primeira geração e publicação de uma edição nova pelo aplicativo ainda requer validação no uso acompanhado.
