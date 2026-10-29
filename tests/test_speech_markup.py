@@ -13,7 +13,7 @@ def test_english_tagged_and_paragraphs_preserved():
 def test_input_xml_is_escaped():
     markup=bilingual_ssml('Exemplo <break/> & teste.',[])
     root=ET.fromstring(markup)
-    assert root.find('.//break') is None
+    assert [node.attrib for node in root.findall('.//break')]==[{'time':'950ms'}]
     assert '<break/>' in ''.join(root.itertext())
 
 
@@ -30,3 +30,14 @@ def test_chunks_keep_paragraphs_and_english_inside_one_request():
 def test_chunks_prefer_paragraph_boundary():
     from radar_ia.speech_markup import speech_chunks
     assert speech_chunks('Primeiro.\n\nSegundo.', limit=15)==['Primeiro.', 'Segundo.']
+
+
+def test_explicit_sentence_and_paragraph_pauses_preserve_english():
+    root=ET.fromstring(bilingual_ssml('Usamos prompt caching. Ele reutiliza contexto.\n\nAgora, observability.', ['prompt caching','observability']))
+    assert [b.attrib['time'] for b in root.findall('.//break')]==['450ms','950ms','950ms']
+    assert [t.text for t in root.findall('.//lang')]==['prompt caching','observability']
+
+
+def test_decimal_and_abbreviation_do_not_split_mid_sentence():
+    from radar_ia.speech_markup import sentences
+    assert sentences('O Dr. Silva usa a versão 2.5. A próxima é nova.')==['O Dr. Silva usa a versão 2.5.','A próxima é nova.']

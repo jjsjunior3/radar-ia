@@ -2,6 +2,24 @@
 import re
 from html import escape
 
+RENDERER_VERSION = 'bilingual-pauses-v2'
+SENTENCE_PAUSE_MS = 450
+PARAGRAPH_PAUSE_MS = 950
+ABBREVIATIONS = ('sr.', 'sra.', 'dr.', 'dra.', 'prof.', 'profa.', 'etc.', 'vs.', 'e.g.', 'i.e.', 'u.s.', 'u.k.', 'ex.', 'art.', 'fig.')
+
+
+def sentences(paragraph: str) -> list[str]:
+    """Separa frases sem tratar decimal ou abreviação conhecida como fim."""
+    result, start = [], 0
+    for boundary in re.finditer(r'(?<=[.!?])\s+', paragraph):
+        prefix = paragraph[start:boundary.start()]
+        if prefix.split() and prefix.split()[-1].casefold() in ABBREVIATIONS:
+            continue
+        result.append(prefix)
+        start = boundary.end()
+    if paragraph[start:].strip():result.append(paragraph[start:])
+    return result
+
 
 def bilingual_ssml(text: str, terms: list[str]) -> str:
     terms = sorted({term.strip() for term in terms if term.strip()}, key=len, reverse=True)
@@ -10,14 +28,17 @@ def bilingual_ssml(text: str, terms: list[str]) -> str:
     for paragraph in text.split("\n\n"):
         if not paragraph.strip():
             continue
-        pieces, position = [], 0
-        if pattern:
-            for match in pattern.finditer(paragraph):
-                pieces.append(escape(paragraph[position:match.start()]))
-                pieces.append('<lang xml:lang="en-US">' + escape(match.group()) + '</lang>')
-                position = match.end()
-        pieces.append(escape(paragraph[position:]))
-        paragraphs.append('<p>' + ''.join(pieces) + '</p>')
+        rendered = []
+        for sentence in sentences(paragraph.strip()):
+            pieces, position = [], 0
+            if pattern:
+                for match in pattern.finditer(sentence):
+                    pieces.append(escape(sentence[position:match.start()]))
+                    pieces.append('<lang xml:lang="en-US">' + escape(match.group()) + '</lang>')
+                    position = match.end()
+            pieces.append(escape(sentence[position:]))
+            rendered.append('<s>' + ''.join(pieces) + '</s>')
+        paragraphs.append('<p>' + f'<break time="{SENTENCE_PAUSE_MS}ms"/>'.join(rendered) + '</p>' + f'<break time="{PARAGRAPH_PAUSE_MS}ms"/>')
     return '<speak>' + ''.join(paragraphs) + '</speak>'
 
 

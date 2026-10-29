@@ -17,7 +17,7 @@ from .collection import collect_sources
 from .news import canonical, duplicate, Fetcher
 from .review import render_report
 from .script import validate_script, spoken_text, render_script, assemble_script
-from .speech_markup import speech_chunks,bilingual_ssml
+from .speech_markup import speech_chunks,bilingual_ssml,RENDERER_VERSION
 from .weekly import plan,merge_queue
 from .windows import collection_start
 
@@ -221,7 +221,7 @@ class Production:
                 except Exception:self.stage('audio_failed');raise
             pcm.extend(data)
         audio,duration=wav_from_pcm(bytes(pcm))
-        metadata={'duration_seconds':duration,'voice':voice,'engine':engine,'duration_verified':True,'script_sha256':hashlib.sha256(text.encode()).hexdigest(),'audio_sha256':hashlib.sha256(audio).hexdigest()}
+        metadata={'duration_seconds':duration,'voice':voice,'engine':engine,'renderer':RENDERER_VERSION,'duration_verified':True,'script_sha256':hashlib.sha256(text.encode()).hexdigest(),'audio_sha256':hashlib.sha256(audio).hexdigest()}
         # Metadados primeiro; áudio é o marcador de cache concluído.
         write_json(self.folder/'metadados-audio.json',metadata)
         temporary=self.folder/'episode.wav.tmp'

@@ -29,3 +29,13 @@ Fontes oficiais: https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html 
 Usuário escolheu amostra C: Camila generativa com SSML de parágrafos e lang en-US para termos ingleses. .env e .env.example atualizados para generative. make_audio agora usa SSML por padrão e recebe termos do glossário. gerar_audio.py carrega roteiro.json ao lado da narração para identificar esses termos. Cortes preferem parágrafos/frases; frases excepcionalmente longas usam divisão por palavras. O limite por requisição considera texto e marcação separadamente.
 
 O episódio completo ainda usa PCM/WAV 16kHz para montagem e medição sem dependência externa; as amostras comparadas eram MP3 24kHz. Motor/marcação foram adotados, mas o resultado completo precisa de escuta porque formato e múltiplas requisições diferem da amostra. MP3 final de distribuição fica pendente. Nenhuma nova síntese ocorreu ao aplicar a preferência.
+
+## Ajuste de ritmo e comparação masculina — 29/10/2026
+
+Na escuta do episódio de 29/10, o proprietário aprovou a pronúncia inglesa, mas pediu mais separação entre frases. A marcação passa a envolver frases com `<s>`, inserir `<break time="450ms"/>` entre elas e `<break time="950ms"/>` após parágrafos. Esses tempos são marcações solicitadas; o resultado percebido precisa de escuta e pode incluir pausas naturais do motor. Decimais e abreviações comuns não disparam cortes de frase. A marcação `<lang xml:lang="en-US">` dos termos ingleses foi preservada.
+
+O renderizador é identificado como `bilingual-pauses-v2` nos metadados dos novos áudios. Áudios prontos não são substituídos automaticamente; trechos em produção mantêm a proteção por digest do SSML. Uma comparação usa arquivos locais separados da edição, sem aprovar ou publicar o episódio.
+
+A API `describe-voices`, em us-east-1, confirmou a voz masculina **Leo** com suporte generative, além de Thiago neural e Ricardo standard. Foram geradas amostras Leo e Camila, ambas generativas, com o mesmo trecho do roteiro e as mesmas pausas, em `local-output/comparacao-vozes/2026-10-29-pausas-v2/`. Durações medidas: Leo 64,8 s e Camila 63,0 s. São amostras para escolha, não uma troca da voz padrão nem uma publicação.
+
+Referências: [pausas explícitas no Polly](https://docs.aws.amazon.com/polly/latest/dg/break-tag.html) e [vozes disponíveis](https://docs.aws.amazon.com/polly/latest/dg/available-voices.html). A disponibilidade foi conferida na API porque as tabelas da documentação podem estar defasadas durante lançamentos.

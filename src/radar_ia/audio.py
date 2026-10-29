@@ -39,7 +39,7 @@ def wav_from_pcm(pcm: bytes, max_seconds: int = 600) -> tuple[bytes, float]:
 
 
 def make_audio(polly, text: str, voice: str = "Camila", engine: str = "generative", *, english_terms: list[str] | None = None, use_ssml: bool = True) -> tuple[bytes, dict]:
-    from .speech_markup import speech_chunks, bilingual_ssml
+    from .speech_markup import speech_chunks, bilingual_ssml, RENDERER_VERSION
     parts = speech_chunks(text) if use_ssml else chunks(text)
     requests = [bilingual_ssml(part, english_terms or []) for part in parts] if use_ssml else parts
     if any(len(part) > 6000 for part in requests):
@@ -57,4 +57,5 @@ def make_audio(polly, text: str, voice: str = "Camila", engine: str = "generativ
     return wav, {"duration_seconds": seconds, "duration_verified": True, "chunks": len(parts),
                  "submitted_characters": sum(map(len, parts)), "voice": voice, "engine": engine,
                  "text_type": "ssml" if use_ssml else "text", "english_terms": english_terms or [],
+                 "renderer": RENDERER_VERSION if use_ssml else "plain-text",
                  "status": "aguarda_escuta", "language": "pt-BR", "format": "wav", "sample_rate": 16000}
