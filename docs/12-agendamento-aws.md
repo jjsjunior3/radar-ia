@@ -70,3 +70,11 @@ O relatório mostra provedor, configuração de horário, estado do Scheduler, t
 O Secrets Manager custa aproximadamente **US$ 0,40 por segredo/mês**, além das requisições. O Scheduler oferece 14 milhões de invocações gratuitas por mês, compartilhadas conforme os termos da AWS; cerca de 22 disparos mensais são uma fração dessa faixa. Isso não torna o projeto inteiro gratuito: Lambda, S3, DynamoDB, SQS, logs, OpenRouter e Polly têm cobrança conforme consumo e condições da conta. Não há nova cobrança fixa de servidor dedicado.
 
 Referências oficiais: [limitações do cron GitHub](https://docs.github.com/en/actions/how-tos/troubleshoot-workflows), [horários e fusos do Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html), [preço do Scheduler](https://aws.amazon.com/eventbridge/pricing/), [preço do Secrets Manager](https://aws.amazon.com/secrets-manager/pricing/).
+## Validação em 29/10/2026
+
+- 221 testes Python passaram localmente; o workflow GitHub do commit de implementação passou, incluindo os testes JavaScript existentes.
+- CloudFormation instalou os sete recursos editoriais sem substituir recursos existentes; o Scheduler começou desativado. A ativação posterior modificou somente o estado do agendamento.
+- Uma invocação administrativa `diagnostic` verificou o pacote Linux e acessos de leitura da Lambda. Um agendamento pontual de teste, criado com o mesmo papel e destino da rotina diária, chegou à Lambda e produziu o marcador `editorial_diagnostic_ok` no CloudWatch. Ele foi configurado para exclusão automática após a execução. Nenhuma geração OpenRouter ou Polly foi solicitada.
+- O Scheduler diário foi consultado em estado `ENABLED`, com cron de segunda a sexta, fuso São Paulo e janela flexível `OFF`. O GitHub foi consultado com `RADAR_SCHEDULE_ENABLED=false`.
+- O diagnóstico AWS confirmou a edição de hoje em `completed` e o próximo disparo previsto para **30/10/2026 às 8h30 de São Paulo**. Como a instalação ocorreu à noite, nenhum disparo diário era esperado retroativamente para hoje.
+- **Ainda pendente:** validar uma edição nova completa preparada pela rotina diária. O teste pontual comprova entrega e acesso básico, não comprova a coleta de amanhã, qualidade do roteiro ou pontualidade futura.
