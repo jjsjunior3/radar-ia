@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2000" viewBox="0 0 1600 2000" role="img">
+<title>Radar IA — arquitetura e fluxo do MVP privado</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52DAC4"/></marker></defs>
+<rect width="1600" height="2000" fill="#091322"/>
+<g font-family="Segoe UI, Arial, sans-serif">
+<rect x="80" y="70" width="76" height="8" rx="4" fill="#52DAC4" stroke="none" stroke-width="2"/>
+<text x="80" y="132" fill="#52DAC4" font-size="24" font-weight="700" letter-spacing="3">RADAR IA  /  ARQUITETURA</text>
+<text x="80" y="238" fill="#F3F7FC" font-size="76" font-weight="700" letter-spacing="0">Da notícia ao seu celular.</text>
+<text x="80" y="302" fill="#B0C0D2" font-size="31" font-weight="400" letter-spacing="0">Python, LLM e AWS em uma experiência de áudio privada.</text>
+<rect x="80" y="342" width="300" height="44" rx="22" fill="#153430" stroke="none" stroke-width="2"/>
+<text x="98" y="372" fill="#52DAC4" font-size="22" font-weight="600" letter-spacing="0">ATÉ 10 MINUTOS</text>
+<rect x="400" y="342" width="476" height="44" rx="22" fill="#14243A" stroke="none" stroke-width="2"/>
+<text x="418" y="372" fill="#CBDCF3" font-size="22" font-weight="600" letter-spacing="0">PT-BR + INGLÊS TÉCNICO</text>
+<rect x="80" y="430" width="1440" height="560" rx="32" fill="#101F32" stroke="#24374D" stroke-width="2"/>
+<text x="112" y="478" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="0">01  PRODUÇÃO ACOMPANHADA</text>
+<text x="112" y="517" fill="#B0C0D2" font-size="25" font-weight="400" letter-spacing="0">GitHub Actions • seg–sex, 8h30 • America/Sao_Paulo</text>
+<rect x="112" y="552" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="136" y="598" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Fontes RSS</text>
+<text x="136" y="638" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">httpx + feedparser</text>
+<text x="136" y="670" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Publicação declarada no feed</text>
+<rect x="600" y="552" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="624" y="598" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Python: curadoria</text>
+<text x="624" y="638" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Datas, HTTPS e deduplicação</text>
+<text x="624" y="670" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Grade semanal + pauta variável</text>
+<rect x="1088" y="552" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="1112" y="598" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">OpenRouter + Gemini</text>
+<text x="1112" y="638" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Roteiro JSON + Pydantic</text>
+<text x="1112" y="670" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Português com inglês explicado</text>
+<rect x="1088" y="762" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="1112" y="808" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Revisão humana</text>
+<text x="1112" y="848" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Texto antes da voz</text>
+<text x="1112" y="880" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Escuta antes da publicação</text>
+<rect x="600" y="762" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="624" y="808" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Amazon Polly</text>
+<text x="624" y="848" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Camila • engine generative</text>
+<text x="624" y="880" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">SSML + duração medida</text>
+<rect x="112" y="762" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="136" y="808" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Amazon S3 privado</text>
+<text x="136" y="848" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Áudio, fontes e catálogo</text>
+<text x="136" y="880" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Checkpoints para retomada</text>
+<path d="M 523 625 H 584" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1011 625 H 1072" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1288 708 V 746" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1076 836 H 1016" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 588 836 H 528" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="112" y="960" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">IAM + OIDC: sessão temporária AWS para o workflow; catálogo com gravação condicional.</text>
+<rect x="80" y="1030" width="1440" height="652" rx="32" fill="#101F32" stroke="#24374D" stroke-width="2"/>
+<text x="112" y="1080" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="0">02  APLICATIVO E ACESSO</text>
+<rect x="112" y="1128" width="400" height="150" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="136" y="1174" fill="#F3F7FC" font-size="31" font-weight="650" letter-spacing="0">Celular / navegador</text>
+<text x="136" y="1214" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Player web instalável</text>
+<text x="136" y="1246" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Ouvidos, pendentes e retomada</text>
+<rect x="600" y="1128" width="400" height="150" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="624" y="1174" fill="#F3F7FC" font-size="31" font-weight="650" letter-spacing="0">Amazon CloudFront</text>
+<text x="624" y="1214" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Entrega HTTPS da interface</text>
+<text x="624" y="1246" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Origem S3 via OAC</text>
+<rect x="1088" y="1128" width="400" height="150" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="1112" y="1174" fill="#F3F7FC" font-size="30" font-weight="650" letter-spacing="0">S3 da interface</text>
+<text x="1112" y="1214" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">HTML + CSS + JavaScript</text>
+<text x="1112" y="1246" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Bucket privado; interface pública</text>
+<path d="M 523 1202 H 584" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1011 1202 H 1072" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 252 1290 V 1354" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="275" y="1326" fill="#B0C0D2" font-size="23" font-weight="400" letter-spacing="0">Login + PKCE</text>
+<path d="M 450 1290 V 1338 H 616 V 1354" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="650" y="1334" fill="#B0C0D2" font-size="22" font-weight="400" letter-spacing="0">Access token do app</text>
+<rect x="112" y="1370" width="272" height="160" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="136" y="1416" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Cognito</text>
+<text x="136" y="1456" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Login privado</text>
+<text x="136" y="1488" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Sem cadastro público</text>
+<rect x="480" y="1370" width="272" height="160" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="504" y="1416" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">API Gateway</text>
+<text x="504" y="1456" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Validação JWT</text>
+<text x="504" y="1488" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Escopo openid</text>
+<rect x="848" y="1370" width="272" height="160" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="872" y="1416" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Lambda</text>
+<text x="872" y="1456" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">API em Python</text>
+<text x="872" y="1488" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Links temporários</text>
+<rect x="1216" y="1370" width="272" height="160" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
+<text x="1240" y="1416" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">DynamoDB</text>
+<text x="1240" y="1456" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Posição de escuta</text>
+<text x="1240" y="1488" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Usuário + episódio</text>
+<path d="M 764 1450 H 832" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M 1132 1450 H 1200" fill="none" stroke="#52DAC4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="112" y="1582" fill="#F3F7FC" font-size="27" font-weight="400" letter-spacing="0">Acesso ao áudio: app → API → link assinado → S3 de áudio privado.</text>
+<text x="112" y="1631" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs da API.</text>
+<rect x="80" y="1722" width="1440" height="112" rx="24" fill="#153430" stroke="none" stroke-width="2"/>
+<text x="112" y="1765" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="1">OPEN SOURCE EM PREPARAÇÃO</text>
+<text x="112" y="1805" fill="#C7E6DF" font-size="26" font-weight="400" letter-spacing="0">Licença MIT. Código e dados privados têm ciclos de publicação separados.</text>
+<path d="M 80 1880 H 1520" fill="none" stroke="#B0C0D2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="80" y="1932" fill="#F3F7FC" font-size="28" font-weight="650" letter-spacing="0">Feito por jrsantosdev</text>
+<text x="80" y="1970" fill="#B0C0D2" font-size="23" font-weight="400" letter-spacing="0">MVP privado • código sob licença MIT • abertura pública planejada</text>
+<text x="1375" y="1932" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">01 / 03</text>
+</g></svg>

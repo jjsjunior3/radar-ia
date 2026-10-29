@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2000" viewBox="0 0 1600 2000" role="img">
+<title>Radar IA — arquitetura e fluxo do MVP privado</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#117E74"/></marker></defs>
+<rect width="1600" height="2000" fill="#F3F5F0"/>
+<g font-family="Segoe UI, Arial, sans-serif">
+<text x="80" y="115" fill="#117E74" font-size="24" font-weight="700" letter-spacing="3">RADAR IA  /  DO RSS AO PLAY</text>
+<text x="80" y="217" fill="#102B2B" font-size="78" font-weight="750" letter-spacing="0">Notícia boa merece</text>
+<text x="80" y="306" fill="#102B2B" font-size="78" font-weight="750" letter-spacing="0">uma escuta melhor.</text>
+<text x="80" y="367" fill="#526561" font-size="31" font-weight="400" letter-spacing="0">Um fluxo de IA que você acompanha, revisa e controla.</text>
+<path d="M 143 490 V 1638" fill="none" stroke="#AFC9C0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="101" y="485" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
+<text x="116" y="540" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">01</text>
+<rect x="224" y="440" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
+<text x="250" y="471" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">COLETA</text>
+<text x="250" y="515" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Encontrar e validar</text>
+<text x="250" y="559" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">RSS, datas de publicação e URLs HTTPS.</text>
+<text x="950" y="473" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">httpx • feedparser</text>
+<rect x="101" y="657" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
+<text x="116" y="712" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">02</text>
+<rect x="224" y="612" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
+<text x="250" y="643" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">CURADORIA</text>
+<text x="250" y="687" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Selecionar o que importa</text>
+<text x="250" y="731" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Grade semanal, deduplicação e quantidade variável.</text>
+<text x="950" y="645" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">Python • fila editorial</text>
+<rect x="101" y="829" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
+<text x="116" y="884" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">03</text>
+<rect x="224" y="784" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
+<text x="250" y="815" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">ROTEIRO COM LLM</text>
+<text x="250" y="859" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Explicar em português</text>
+<text x="250" y="903" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Inglês técnico contextualizado e saída validada.</text>
+<text x="950" y="817" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">OpenRouter • Gemini • Pydantic</text>
+<rect x="101" y="1001" width="84" height="84" rx="42" fill="#A65E2B" stroke="none" stroke-width="2"/>
+<text x="116" y="1056" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">04</text>
+<rect x="224" y="956" width="1296" height="155" rx="24" fill="#FBEEE3" stroke="#E3B78F" stroke-width="2"/>
+<text x="250" y="987" fill="#8D491D" font-size="19" font-weight="700" letter-spacing="1.5">REVISÃO HUMANA</text>
+<text x="250" y="1031" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Conferir o conteúdo</text>
+<text x="250" y="1075" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Revisar o roteiro antes de autorizar a voz.</text>
+<text x="950" y="989" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">Aprovação vinculada ao texto</text>
+<rect x="101" y="1173" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
+<text x="116" y="1228" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">05</text>
+<rect x="224" y="1128" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
+<text x="250" y="1159" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">VOZ SINTÉTICA</text>
+<text x="250" y="1203" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Transformar texto em áudio</text>
+<text x="250" y="1247" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Pausas e inglês via SSML; WAV de até 600 segundos.</text>
+<text x="950" y="1161" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">Amazon Polly • Camila generativa</text>
+<rect x="101" y="1345" width="84" height="84" rx="42" fill="#A65E2B" stroke="none" stroke-width="2"/>
+<text x="116" y="1400" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">06</text>
+<rect x="224" y="1300" width="1296" height="155" rx="24" fill="#FBEEE3" stroke="#E3B78F" stroke-width="2"/>
+<text x="250" y="1331" fill="#8D491D" font-size="19" font-weight="700" letter-spacing="1.5">ESCUTA HUMANA</text>
+<text x="250" y="1375" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Ouvir antes de publicar</text>
+<text x="250" y="1419" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Aprovar o áudio que será enviado ao catálogo.</text>
+<text x="950" y="1333" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">Aprovação vinculada ao áudio</text>
+<rect x="101" y="1517" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
+<text x="116" y="1572" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">07</text>
+<rect x="224" y="1472" width="1296" height="155" rx="24" fill="#FFFFFF" stroke="#D9E1D9" stroke-width="2"/>
+<text x="250" y="1503" fill="#117E74" font-size="19" font-weight="700" letter-spacing="1.5">PUBLICAÇÃO PRIVADA</text>
+<text x="250" y="1547" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Dar play, pausar e retomar</text>
+<text x="250" y="1591" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Catálogo S3 e aplicativo com login e progresso.</text>
+<text x="950" y="1505" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">AWS • web app no Android</text>
+<rect x="80" y="1680" width="1440" height="145" rx="24" fill="#DDEDE6" stroke="none" stroke-width="2"/>
+<text x="112" y="1725" fill="#117E74" font-size="26" font-weight="700" letter-spacing="0">AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO</text>
+<text x="112" y="1765" fill="#102B2B" font-size="28" font-weight="600" letter-spacing="0">Coleta e roteiro automáticos; voz e publicação após revisão.</text>
+<text x="112" y="1803" fill="#526561" font-size="24" font-weight="400" letter-spacing="0">Open source em preparação • licença MIT • sem preenchimento artificial.</text>
+<path d="M 80 1880 H 1520" fill="none" stroke="#526561" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="80" y="1932" fill="#102B2B" font-size="28" font-weight="650" letter-spacing="0">Feito por jrsantosdev</text>
+<text x="80" y="1970" fill="#526561" font-size="23" font-weight="400" letter-spacing="0">MVP privado • código sob licença MIT • abertura pública planejada</text>
+<text x="1375" y="1932" fill="#526561" font-size="24" font-weight="400" letter-spacing="0">02 / 03</text>
+</g></svg>

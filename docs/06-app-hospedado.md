@@ -14,7 +14,7 @@ A página de entrada e o código da interface são públicos. Biblioteca, catál
 
 ## Estado desta entrega
 
-Código e template preparados, testes locais passando. Infraestrutura ainda não foi implantada ou validada ao vivo nesta etapa. Não afirmar que o acesso Android está pronto antes da implantação e dos testes reais de login, reprodução e retomada.
+Infraestrutura implantada. O proprietário confirmou login, reprodução, progresso e uso no computador e Android, incluindo instalação do aplicativo no celular. As seções de recuperação abaixo registram o histórico de implantação. A execução manual de preparação pelo GitHub Actions também foi validada; a primeira produção agendada de uma edição nova ainda precisa ser acompanhada (ver guia 07).
 
 Template editável: infra/private-app.json. Pacote Lambda contém apenas __init__.py e hosted_api.py; usa boto3 fornecido pelo runtime Python3.12 da AWS. Não empacota .env, e-mail, chaves, SQLite ou episódios. Fixação/empacotamento do SDK é melhoria de reprodutibilidade para produção.
 
