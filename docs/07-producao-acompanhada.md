@@ -109,6 +109,22 @@ Isso não cancela uma execução já iniciada.
 
 ## Recuperação e limites
 
+### Nenhuma execução agendada e edição em new
+
+`status` é somente leitura. Uma edição em `new` sem snapshot remoto não tem pauta nem roteiro preparados. O programa informa essa ausência e não cria uma cópia de revisão vazia.
+
+Para conferir o arquivo efetivamente presente na branch padrão, o estado do workflow, a variável de ativação e os eventos recentes, execute no terminal autenticado:
+
+```bat
+.\.venv\Scripts\python.exe examples\diagnosticar_agendamento.py
+```
+
+O diagnóstico não altera configuração, não imprime segredos e salva o relatório em `local-output/diagnostico-agendamento.json`. Não assumir que o fuso é inválido nem mudar o cron antes de examinar esses dados. O suporte a `timezone` está documentado pelo GitHub; eventos também podem atrasar ou ser descartados sob carga.
+
+Se for preciso recuperar a edição do dia, `production prepare` prepara a pauta e `production draft --execute` solicita o roteiro. Voz e publicação continuam dependendo das aprovações humanas. Uma recuperação local não confirma o funcionamento do disparo agendado.
+
+Se uma correção das regras editoriais for necessária depois da coleta e antes da geração, `production replan` reaplica as regras à fila salva. Mantém o horário original da coleta, preserva o briefing anterior e rejeita coleta de mais de 24 horas ou edição cujo roteiro já começou. Replanejar não chama a LLM.
+
 ### Primeira execução: OIDC aceito e AccessDenied no S3
 
 A política inclui `s3:ListBucket` no bucket do projeto. Essa permissão permite distinguir arquivo ausente (404) de acesso negado (403) durante a primeira consulta ao estado. Ela não concede leitura do conteúdo de outros objetos, escrita em outros buckets ou acesso público. A política de objetos continua restrita aos caminhos do Radar IA.

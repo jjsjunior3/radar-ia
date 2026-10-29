@@ -111,3 +111,15 @@ def test_lost_polly_response_blocks_automatic_charge_retry(run):
     with pytest.raises(TimeoutError):run.synthesize(polly)
     with pytest.raises(ValueError,match='não repetir cobrança'):run.synthesize(polly)
     assert polly.calls==1
+
+
+def test_replan_does_not_discard_generated_script(run):
+    with pytest.raises(ValueError,match='antes de iniciar'):run.replan()
+    assert (run.folder/'roteiro.json').exists()
+
+
+def test_replan_does_not_refresh_expired_collection(tmp_path):
+    run=Production(tmp_path,datetime(2026,10,29,15,tzinfo=timezone.utc))
+    run.stage('prepared')
+    write_json(run.folder/'coleta.json',{'collected_at':'2026-10-27T15:00:00+00:00'})
+    with pytest.raises(ValueError,match='Coleta antiga'):run.replan()

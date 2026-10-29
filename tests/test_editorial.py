@@ -1,6 +1,16 @@
 from radar_ia.editorial import classify, choose
 
 
+def test_human_agents_do_not_count_as_ai_agents():
+    assert classify('Bluesky blocks links to leaked DHS employee data','Identifies ICE agents working for Homeland Security').category=='revisao'
+    assert classify('Software for travel agents','AI agents automate booking').category=='tecnico'
+
+
+def test_funding_titles_remain_market_even_with_agents():
+    assert classify('Wabi, the AI agent, now valued at $1.25B after latest round','').category=='mercado'
+    assert classify('Agent identity startup Mintive lands Cowboy Ventures','enterprise agents').category=='mercado'
+
+
 def test_promotion_not_promoted_by_ai_mention():
     assert classify("AWS named a Leader in Magic Quadrant", "AI agents").priority == "baixa"
 

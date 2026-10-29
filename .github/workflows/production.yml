@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: prepare
-        options: [prepare, draft, approve-script, audio, approve-audio, publish, status]
+        options: [prepare, replan, draft, approve-script, audio, approve-audio, publish, status]
       date:
         description: Data da edição (AAAA-MM-DD); vazio usa hoje em São Paulo
         type: string

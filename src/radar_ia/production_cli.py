@@ -19,7 +19,7 @@ from .production import Production, read_json
 from .production_store import ProductionStore
 from .script import generate_script
 
-STEPS = ('status', 'prepare', 'draft', 'approve-script', 'audio', 'approve-audio', 'publish')
+STEPS = ('status', 'prepare', 'replan', 'draft', 'approve-script', 'audio', 'approve-audio', 'publish')
 
 
 def parser():
@@ -58,6 +58,8 @@ def execute(args, output, now=None):
     if args.step == 'prepare':
         catalog, _ = read_catalog(s3, bucket, f'{prefix}/catalog.json')
         run.prepare(sources, catalog)
+    elif args.step == 'replan':
+        run.replan()
     elif args.step == 'draft':
         if run.state['stage'] in ('completed','no_content'):
             print('Edição já publicada ou sem conteúdo; nenhuma geração solicitada.')
@@ -92,9 +94,14 @@ def execute(args, output, now=None):
             store.save_editorial()
     print('Edição:', day, '| Etapa:', run.state['stage'])
     # Arquivos privados para revisão; jamais incluir .env nem credenciais.
-    print('Pasta de revisão:', run.folder.resolve())
+    if args.local:
+        print('Pasta de revisão:', run.folder.resolve())
     if store:
-        print('Estado salvo no S3 privado. Para baixar, use o comando status.')
+        if args.step == 'status':
+            print('Estado consultado no S3 privado; nenhuma alteração realizada.' if store.etag else
+                  'Nenhuma edição salva para esta data; pauta e roteiro ainda não foram preparados.')
+        else:
+            print('Estado salvo no S3 privado. Para baixar, use o comando status.')
     summary = os.getenv('GITHUB_STEP_SUMMARY')
     if summary:
         with open(summary, 'a', encoding='utf-8') as handle:
@@ -116,7 +123,7 @@ def main(argv=None):
                     import shutil
                     day = (args.date or datetime.now(ZoneInfo('America/Sao_Paulo')).date()).isoformat()
                     source = output/'production'/day
-                    if source.exists():
+                    if (source/'checkpoint.json').exists():
                         target = Path(os.getenv('OUTPUT_DIR','local-output'))/'revisoes-remotas'/day/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
                         shutil.copytree(source, target)
                         print('Cópia local para revisão:', target.resolve())

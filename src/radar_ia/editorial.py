@@ -23,8 +23,8 @@ class Editorial:
 TECH = ("agent", "agents", "agentic", "agente", "agentes", "llm", "llms", "rag", "retrieval", "prompt caching", "evaluation", "avaliacao", "tool calling", "llm security", "seguranca de llm", "prompt injection")
 APPLIED = ("developer", "developers", "sdk", "api", "security", "seguranca", "sagemaker", "infrastructure", "infraestrutura", "latency", "latencia", "fine-tuned", "fine-tuning", "machine learning", "computer vision", "cost", "custos")
 MARKET = ("layoffs", "layoff", "demissoes", "demite", "demitindo", "hiring", "contratacoes", "contratando", "vagas", "workforce", "expansion", "expansao", "data center", "data centers", "datacenter", "datacenters", "skills demand", "competencias mais exigidas", "job cuts", "job market", "jobs report", "recruiting", "recrutamento", "investimento", "investment", "investments")
-BUSINESS = ("ipo", "acquires", "acquisition", "aquisicao", "adquire", "compra empresa", "raises", "captacao", "funding round", "rodada de investimento")
-BUSINESS_PATTERNS = (r"\bbuys\s+.+\s+for\s+\$", r"\b(?:director|ceo|cto|executive)\b.+\b(?:leaves|joins|steps down)\b")
+BUSINESS = ("ipo", "acquires", "acquisition", "aquisicao", "adquire", "compra empresa", "raises", "captacao", "funding round", "rodada de investimento", "valued at", "valuation", "latest round")
+BUSINESS_PATTERNS = (r"\bbuys\s+.+\s+for\s+\$", r"\b(?:director|ceo|cto|executive)\b.+\b(?:leaves|joins|steps down)\b", r"\bstartup\b.+\blands\b")
 PROMO = ("magic quadrant", "named a leader", "award", "awards", "premio", "premiacao")
 
 
@@ -36,6 +36,8 @@ def classify(title: str, summary: str) -> Editorial:
     headline = normalize(title)
     if matches(headline, MARKET + BUSINESS) or any(re.search(pattern, headline) for pattern in BUSINESS_PATTERNS):
         return Editorial("mercado", "complementar", "Título sinaliza trabalho, expansão, investimento, aquisição ou liderança; verificar contexto, região e período. Evento isolado não comprova tendência.")
+    if matches(text, ("ice agents", "federal agents", "immigration agents", "agentes de imigracao", "real estate agents", "travel agents")) and not matches(text, ("ai agent", "ai agents", "artificial intelligence", "agentic", "llm", "machine learning")):
+        return Editorial("revisao", "indefinida", "Agentes humanos ou profissionais não comprovam relação com agentes de IA.")
     if matches(text, TECH):
         return Editorial("tecnico", "alta", "Menciona agentes, LLMs, recuperação, avaliação ou segurança específica de LLMs.")
     if matches(text, APPLIED):

@@ -126,6 +126,24 @@ class Production:
         self.stage('awaiting_script_review')
         return script.model_dump()
 
+    def replan(self):
+        """Reaplica regras à coleta salva antes de qualquer geração de roteiro."""
+        if self.state['stage'] not in ('prepared','no_content') or (self.folder/'roteiro.json').exists():
+            raise ValueError('Replanejar somente antes de iniciar o roteiro')
+        report=read_json(self.folder/'coleta.json')
+        collected=datetime.fromisoformat(report['collected_at'])
+        if collected.tzinfo is None or not 0 <= (self.now-collected).total_seconds() <= 86400:
+            raise ValueError('Coleta antiga; não replanejar para contornar o limite de 24 horas')
+        agenda=plan(read_json(self.folder/'fila-editorial.json'),self.now)
+        agenda['planned_for']=report['collected_at']
+        brief=build_brief(agenda)
+        brief['collection_cutoff']=report['collected_at']
+        write_json(self.folder/'briefing-antes-replanejamento.json',read_json(self.folder/'briefing.json'))
+        write_json(self.folder/'plano-editorial.json',agenda)
+        write_json(self.folder/'briefing.json',brief)
+        (self.folder/'pauta.md').write_text(render_report(agenda,self.now.isoformat()),encoding='utf-8')
+        self.stage('prepared' if brief['news'] else 'no_content')
+
     def script_bundle(self):
         brief=read_json(self.folder/'briefing.json')
         script=validate_script(read_json(self.folder/'roteiro.json'),brief)
