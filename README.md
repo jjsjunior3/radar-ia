@@ -13,7 +13,7 @@ Desenvolvido por **[jrsantosdev](https://github.com/jjsjunior3)** como projeto d
 
 [Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
 
-> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o disparo diário foi transferido para o EventBridge Scheduler e o disparo de 30/10/2026 iniciou às 8h30 com 3 segundos de atraso; o roteiro exigiu recuperação local após a LLM alterar a ordem dos IDs. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
+> **Estado do projeto:** MVP privado em uso, com código MIT preparado para abertura pública. Publicação automática opcional com agentes de coleta, relevância, roteiro, avaliação e produção: correções limitadas antes de voz Leo, verificação de duração, catálogo privado e aviso no Android. O modo acompanhado permanece disponível. Recebimento de notificações em Android real confirmado pelo proprietário. A primeira edição diária sem intervenção após ativar o modo automático ainda precisa ser observada; veja os [limites e a operação](docs/15-publicacao-automatica.md).
 
 ## O problema
 
@@ -25,28 +25,32 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 
 - **Coleta RSS:** fontes configuráveis, datas declaradas de publicação, URLs HTTPS e domínios permitidos.
 - **Curadoria editorial:** deduplicação por URL/título semelhante, grade semanal e seleção variável de uma a sete notícias.
-- **Roteiro em português:** geração estruturada via OpenRouter, validação com Pydantic, glossário e termos em inglês contextualizados.
+- **Agentes editoriais:** relevância, roteiro e avaliação em chamadas separadas via OpenRouter, revisão com feedback limitado a três versões e aprovação vinculada ao conteúdo. [Veja o fluxo](docs/16-agentes-editoriais.md).
+- **Roteiro em português:** geração estruturada, validação com Pydantic, glossário e termos em inglês contextualizados.
 - **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
 - **Biblioteca privada:** player web instalável no Android, filtros de ouvidos/pendentes e progresso por usuário.
 - **Revisão pelo app:** responsável acompanha a edição, lê roteiro/fontes e aprova a versão exibida, sem disparar voz ou publicação.
-- **Operação acompanhada:** checkpoints privados no S3, retomada de resultados salvos e aprovações vinculadas ao conteúdo revisado.
+- **Operação configurável:** modo automático ou acompanhado, checkpoints privados no S3 e autorizações vinculadas ao conteúdo; resultados pagos incertos exigem intervenção.
 - **Infraestrutura reproduzível:** template CloudFormation e acesso temporário do GitHub à AWS via OIDC.
 
 ## Arquitetura
 
 ```mermaid
 flowchart TB
-    subgraph PROD[Produção acompanhada]
+    subgraph PROD[Produção automática ou acompanhada]
         SCHED[EventBridge Scheduler / 8h30 São Paulo]
         EDIT[Lambda editorial Python]
         GH[GitHub Actions / testes e operação manual]
         RSS[Fontes RSS] --> COLETA[Coleta e curadoria em Python]
         SCHED --> EDIT --> COLETA
         GH -. operação manual .-> COLETA
-        COLETA --> LLM[OpenRouter / Gemini / JSON validado]
-        LLM --> R1[Revisão humana do roteiro]
-        R1 --> POLLY[Amazon Polly / Leo / SSML]
-        POLLY --> R2[Escuta e aprovação humana]
+        COLETA --> REL[Agente de relevância: notas e seleção]
+        REL --> LLM[Roteirista / OpenRouter / JSON validado]
+        LLM --> R1[Avaliador editorial + validação Python]
+        R1 -->|Reprovação e análise: até 2 revisões| LLM
+        R1 --> AQ[SQS / tarefa vinculada ao roteiro]
+        AQ --> POLLY[Worker / Amazon Polly / Leo / SSML]
+        POLLY --> R2[Integridade / duração até 10 min / autorização]
         R2 --> AUDIO[S3 privado: áudio e catálogo]
         EDIT <--> STATE[S3 privado: checkpoints]
         SECRET[Secrets Manager / OpenRouter] --> EDIT
@@ -74,7 +78,7 @@ flowchart TB
 
 O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega a interface por HTTPS a partir de uma origem privada. Catálogo, progresso e links de reprodução exigem autenticação; o áudio usa URLs temporárias emitidas pela API.
 
-**Componentes de IA:** a LLM gera o roteiro. Coleta, curadoria, validação, publicação e retomada são módulos Python; o Polly realiza síntese de voz. A versão atual usa orquestração explícita e revisão humana. Um sistema de agentes autônomos é uma possibilidade de evolução, não uma funcionalidade implementada.
+**Componentes de IA:** relevância, roteirista e avaliador têm prompts, saídas e chamadas LLM separados. O avaliador retorna correções ao roteirista em um ciclo limitado; somente a versão aprovada segue ao produtor. Coleta e produção usam módulos determinísticos. A coordenação é explícita em Python, com checkpoints privados; veja a [arquitetura dos agentes](docs/16-agentes-editoriais.md).
 
 <details>
 <summary>Ver o mapa completo da arquitetura</summary>
@@ -111,7 +115,7 @@ O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega
 6. O episódio entra no catálogo privado. Somente depois da confirmação, o histórico editorial avança.
 7. O aplicativo permite ouvir, marcar e retomar, com progresso sincronizado.
 
-**Agendamento:** EventBridge Scheduler, de segunda a sexta, às **8h30 em `America/Sao_Paulo`**, sem janela flexível. Uma Lambda prepara pauta e roteiro e aguarda revisão. Voz e publicação exigem confirmação no modo acompanhado. O fluxo automático com notificação está planejado para depois dos ajustes finos. O horário indica o disparo previsto, não a conclusão do episódio. O cron de produção no GitHub fica bloqueado por variável; execução manual e testes continuam disponíveis. Veja o [guia do agendamento AWS](docs/12-agendamento-aws.md).
+**Agendamento:** EventBridge Scheduler, de segunda a sexta, às **8h30 em `America/Sao_Paulo`**, sem janela flexível. Uma Lambda prepara pauta e roteiro; no modo automático, enfileira voz e publicação com validações antes do aviso. O modo acompanhado exige confirmação. Consulte o [guia da publicação automática](docs/15-publicacao-automatica.md). O horário indica o disparo previsto, não a conclusão do episódio. O cron de produção no GitHub fica bloqueado por variável; execução manual e testes continuam disponíveis. Veja o [guia do agendamento AWS](docs/12-agendamento-aws.md).
 
 ### Grade editorial
 
@@ -205,7 +209,7 @@ Os testes cobrem regras de coleta, curadoria, roteiro, áudio, catálogo, progre
 
 O [workflow de testes](.github/workflows/tests.yml) não exige chaves de provedores. Testes locais e simulados não substituem a validação de IAM, quotas, custos ou uma edição real no Actions.
 
-**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário. Em 30/10/2026, o Scheduler iniciou a edição às 8h30 com 3 segundos de atraso. A LLM alterou a ordem dos IDs; a resposta salva foi recuperada sem nova geração paga. Após revisão e publicação pelo app, o proprietário confirmou a notificação no Android. Ainda falta validar uma edição agendada sem recuperação manual; publicação continua acompanhada.
+**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário. Em 30/10/2026, o Scheduler iniciou a edição às 8h30 com 3 segundos de atraso. A LLM alterou a ordem dos IDs; a resposta salva foi recuperada sem nova geração paga. Após revisão e publicação pelo app, o proprietário confirmou a notificação no Android. Ainda falta validar uma edição agendada sem recuperação manual; essa edição usou publicação acompanhada. O modo automático posterior ainda precisa de observação de uma edição diária real.
 
 ## Estrutura do repositório
 
@@ -239,6 +243,8 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 | [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
+| [16 · Agentes editoriais](docs/16-agentes-editoriais.md) | Seleção, roteiro, avaliação e ciclo limitado de correções |
+| [15 · Publicação automática](docs/15-publicacao-automatica.md) | Ativar, pausar, verificar e recuperar o fluxo diário |
 | [13 · Avisos e painel](docs/13-notificacoes-painel.md) | Web Push no Android, teste por dispositivo e estado da produção |
 | [14 · Preparação para código aberto](docs/14-preparacao-open-source.md) | Auditoria, contribuição, privacidade e checklist de abertura |
 
@@ -259,7 +265,7 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Gerar voz em segundo plano, ouvir prévia, aprovar áudio e solicitar publicação pela interface.
 - [ ] Permitir edição/rejeição de rascunhos.
 - [x] Preparar avisos Web Push e painel de produção; validar recebimento no Android.
-- [ ] Após ajustes finos, ativar publicação totalmente automática com limites de custo.
+- [x] Implementar publicação automática configurável, com limites de conteúdo/duração e proteção contra repetição de cobranças incertas.
 - [x] Aplicar logo e cores do Radar IA ao login Cognito clássico.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [ ] Revisar o repositório e disponibilizar o código publicamente.

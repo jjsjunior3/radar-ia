@@ -109,7 +109,8 @@ def test_other_user_cannot_trigger_generation_or_publication():
         assert handle(event('POST /api/production/{date}/'+suffix,uid='other',data={}),backend)['statusCode']==403
     backend.start_job.assert_not_called()
 
-def test_mobile_flow_reuses_real_production_and_publishes_only_approved_audio(monkeypatch,store,tmp_path):
+@pytest.mark.parametrize('automatic', [False, True])
+def test_mobile_flow_reuses_real_production_and_publishes_only_approved_audio(monkeypatch,store,tmp_path,automatic):
     from tempfile import TemporaryDirectory
     monkeypatch.setattr(worker,"TemporaryDirectory",lambda **kw:TemporaryDirectory(dir=tmp_path,**kw))
     import hashlib,zipfile
@@ -130,16 +131,39 @@ def test_mobile_flow_reuses_real_production_and_publishes_only_approved_audio(mo
     date='2026-10-29';key=store.key(date);now=datetime.now(timezone.utc).isoformat()
     with zipfile.ZipFile(io.BytesIO(store.s3.objects[key])) as archive:files={name:archive.read(name) for name in archive.namelist()}
     brief=json.loads(files['briefing.json']);brief.update(planned_for=now,collection_cutoff=now)
-    files['briefing.json']=json.dumps(brief);store.s3.objects[key]=pack(files)
+    files['briefing.json']=json.dumps(brief)
+    if automatic:
+        from radar_ia.production import fingerprint
+        files['agents/approval.json']=json.dumps({'policy':'editorial-agents-v1','approved':True,
+            'script_digest':fingerprint({'brief':brief,'script':json.loads(files['roteiro.json'])})})
+    store.s3.objects[key]=pack(files)
     s3=CloudS3(store.s3.objects);reviews=ReviewStore(s3,'bucket','radar')
     summary=reviews.summary(date);reviews.approve_script(date,dict(digest=summary['digest'],confirmed=True),'owner')
     jobs,sqs,queue,_=setup();summary=reviews.summary(date)
-    audio=queue.start(summary,'audio',dict(digest=summary['digest'],confirmed=True),'owner')
+    audio=queue.start(summary,'audio',dict(digest=summary['digest'],confirmed=True),'owner',automatic=automatic)
+    if automatic:
+        monkeypatch.setenv('AUTOMATIC_PUBLICATION','true')
+        monkeypatch.setenv('NOTIFICATION_QUEUE_URL','notifications')
+        from radar_ia import push
+        def notify(client,url,episode_id):
+            assert json.loads(s3.objects['radar/catalog.json'])['episodes'][0]['id']==episode_id
+        notice=Mock(side_effect=notify)
+        monkeypatch.setattr(push,'episode_notice',notice)
+        monkeypatch.setattr(worker.boto3,'client',Mock())
     monkeypatch.setattr(worker,'verify_private',lambda *a:None);monkeypatch.setattr(catalog,'verify_private',lambda *a:None)
     monkeypatch.setattr(worker.Production,'revalidate',lambda *a:None)
     polly=Mock();polly.synthesize_speech.side_effect=lambda **kw:{'AudioStream':io.BytesIO(bytes(32000))}
     assert worker.process(audio['id'],jobs,s3,polly,'bucket','radar','owner',[])=='succeeded', jobs.get(audio['id']).get('error_code')
     summary=reviews.summary(date)
+    if automatic:
+        assert summary['stage']=='completed'
+        with zipfile.ZipFile(io.BytesIO(s3.objects[key])) as archive:
+            assert json.loads(archive.read('aprovacao-audio.json'))['mode']=='automatic'
+        assert len(json.loads(s3.objects['radar/catalog.json'])['episodes'])==1
+        assert worker.process(audio['id'],jobs,s3,polly,'bucket','radar','owner',[])=='duplicate'
+        assert polly.synthesize_speech.call_count==1
+        notice.assert_called_once()
+        return
     assert summary['can_approve_audio'] and not summary['can_publish']
     with pytest.raises(ReviewConflict):queue.start(summary,'publish',dict(digest=summary['audio_digest'],confirmed=True),'owner')
     summary=reviews.approve_audio(date,dict(digest=summary['audio_digest'],confirmed=True),'owner')
@@ -162,3 +186,13 @@ def test_worker_queue_has_timeout_margin_and_api_cannot_synthesize():
     assert resources['JobsTable']['Properties']['TimeToLiveSpecification']['Enabled']
     api=resources['ApiRole']['Properties']['Policies'][0]['PolicyDocument']['Statement']
     assert not any('polly:SynthesizeSpeech' in statement['Action'] for statement in api)
+
+
+def test_disabled_automatic_mode_blocks_paid_work(monkeypatch):
+    jobs,sqs,queue,summary=setup()
+    job=queue.start(summary,'audio',dict(digest=summary['digest'],confirmed=True),'owner',automatic=True)
+    monkeypatch.delenv('AUTOMATIC_PUBLICATION',raising=False)
+    polly=Mock()
+    assert worker.process(job['id'],jobs,Mock(),polly,'bucket','radar','owner',[])=='failed'
+    polly.synthesize_speech.assert_not_called()
+    assert jobs.get(job['id'])['can_retry'] is False

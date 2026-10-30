@@ -11,11 +11,12 @@ from botocore.config import Config
 from openai import OpenAI
 from .catalog import read_catalog,verify_private
 from .collection import collect_sources
-from .jobs import JobStore,editorial_job_id
+from .jobs import JobStore,JobQueue,editorial_job_id
 from .news import Fetcher
-from .production import Production,read_json
+from .production import Production,read_json,fingerprint
 from .production_store import ProductionStore
 from .script import generate_script
+from .agents import CollectionAgent,EditorialAgents,BudgetClient
 
 ZONE=ZoneInfo('America/Sao_Paulo')
 
@@ -31,7 +32,7 @@ def scheduled_edition(event,now):
     return local.date().isoformat()
 
 
-def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=None,generator=None):
+def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=None,generator=None,automatic_queue=None):
     now=now or datetime.now(timezone.utc);day=scheduled_edition(event,now)
     if not owner:raise ValueError('Responsavel nao configurado')
     identifier=editorial_job_id(day)
@@ -46,13 +47,13 @@ def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=Non
             store=ProductionStore(s3,bucket,prefix,output,day);store.load()
             run=Production(output,now,day=day,persist=store.save)
             catalog,_=read_catalog(s3,bucket,f'{prefix}/catalog.json')
-            deadline=time.monotonic()+660
+            deadline=time.monotonic()+480
             class BoundedFetcher(Fetcher):
                 def get(self,url):
                     remaining=deadline-time.monotonic()
                     if remaining<=0:raise TimeoutError('Limite da coleta editorial')
                     return super().get(url)
-            run.prepare(sources,catalog,collector=lambda configured,current,since:collect_sources(configured,current,since,fetcher_factory=BoundedFetcher))
+            run.prepare(sources,catalog,collector=lambda configured,current,since:CollectionAgent.collect(configured,current,since,fetcher_factory=BoundedFetcher))
             if run.state['stage'] in ('prepared','draft_in_progress','draft_failed'):
                 run.revalidate(sources,fetcher_factory=BoundedFetcher)
                 if generator is None:
@@ -63,8 +64,16 @@ def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=Non
                         key=secrets.get_secret_value(SecretId=secret_arn)['SecretString'].strip()
                         if not key:raise ValueError('Credencial ausente')
                         with OpenAI(api_key=key,base_url='https://openrouter.ai/api/v1',timeout=90,max_retries=0) as client:
-                            run.draft(lambda brief,save:generate_script(client,os.getenv('OPENROUTER_MODEL','google/gemini-2.5-flash'),brief,provider='openrouter',on_response=save))
+                            agents=EditorialAgents(run,BudgetClient(client),os.getenv('OPENROUTER_MODEL','google/gemini-2.5-flash'))
+                            if agents.select():run.draft(agents.generate)
                 else:run.draft(generator)
+            if automatic_queue is not None and run.state['stage']=='awaiting_script_review':
+                run.approve_script(mode='automatic')
+                brief,script,_=run.approved_bundle()
+                summary={'date':day,'digest':fingerprint({'brief':brief,'script':script.model_dump()}),
+                    'planned_for':brief['planned_for'],'audio_revision':run.state.get('audio_revision','initial'),
+                    'can_generate_audio':True}
+                automatic_queue.start(summary,'audio',{'digest':summary['digest'],'confirmed':True},owner,automatic=True)
             jobs.update(identifier,'succeeded',edition_stage=run.state['stage'])
             return {'status':'succeeded','date':day,'stage':run.state['stage']}
     except Exception as exc:
@@ -86,5 +95,6 @@ def handler(event,context):
         jobs.get(editorial_job_id(datetime.now(ZONE).date().isoformat()))
         print(json.dumps({'event':'editorial_diagnostic_ok','generation':False}))
         return {'status':'diagnostic_ok','generation':False}
+    automatic_queue=JobQueue(jobs,boto3.client('sqs',config=config),os.environ['AUDIO_QUEUE_URL']) if os.getenv('AUTOMATIC_PUBLICATION')=='true' else None
     return process(event,jobs,s3,boto3.client('secretsmanager',config=config),os.environ['S3_BUCKET'],
-        os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB'],os.environ['OPENROUTER_SECRET_ARN'],sources)
+        os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB'],os.environ['OPENROUTER_SECRET_ARN'],sources,automatic_queue=automatic_queue)

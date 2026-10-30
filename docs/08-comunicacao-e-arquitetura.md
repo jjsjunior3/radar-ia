@@ -9,7 +9,7 @@ Todas as imagens têm **1600 × 2000 pixels**, proporção 4:5. PNG para publica
 | Modelo | Público e mensagem | PNG | SVG editável |
 |---|---|---|---|
 | 01 · Arquitetura | Visão técnica: produção, aplicativo, serviços AWS e acesso | [Imagem](assets/linkedin/01-arquitetura.png) | [Editar](assets/linkedin/01-arquitetura.svg) |
-| 02 · Fluxo editorial | Visão de produto: da notícia ao play, com as duas revisões humanas | [Imagem](assets/linkedin/02-fluxo-editorial.png) | [Editar](assets/linkedin/02-fluxo-editorial.svg) |
+| 02 · Fluxo editorial | Visão de produto: da notícia ao play, com seleção e avaliação por agentes | [Imagem](assets/linkedin/02-fluxo-editorial.png) | [Editar](assets/linkedin/02-fluxo-editorial.svg) |
 | 03 · Módulos e IA | Responsabilidades de Python, LLM, TTS, publicação e player | [Imagem](assets/linkedin/03-modulos-e-ia.png) | [Editar](assets/linkedin/03-modulos-e-ia.svg) |
 
 **Sugestão editorial:** o modelo 02 apresenta o problema e a experiência com mais facilidade para um público amplo. O modelo 01 ajuda a explicar decisões de engenharia; o 03 detalha as responsabilidades dos componentes. Eles podem ser usados separadamente ou como sequência, ajustando a linguagem da publicação ao objetivo.
@@ -18,21 +18,21 @@ Todas as imagens têm **1600 × 2000 pixels**, proporção 4:5. PNG para publica
 
 ### Modelo 01 · Arquitetura
 
-- Produção: GitHub Actions, Python, RSS, OpenRouter/Gemini, revisão humana, Polly e S3.
+- Produção: EventBridge Scheduler, Python/RSS, agentes OpenRouter/Gemini, avaliador, Polly e S3; GitHub Actions para CI/operação manual.
 - Aplicativo: navegador/Android, CloudFront, S3 da interface, Cognito, API Gateway, Lambda e DynamoDB.
 - Infraestrutura: CloudFormation, IAM/OIDC, CloudWatch, origem S3 via OAC e links temporários de áudio.
 - As setas são uma visão lógica de responsabilidades e acesso. A autenticação real envolve redirecionamentos entre navegador e Cognito; o navegador apresenta o access token à API. Cognito não chama a API pelo usuário.
-- O cartão de revisão reúne as duas decisões humanas; o fluxo cronológico completo aparece no modelo 02.
+- O avaliador pode devolver análise ao roteirista; o ciclo tem até duas revisões e bloqueia o Polly se não houver aprovação.
 
 ### Modelo 02 · Fluxo editorial
 
-Mostra sete etapas: coleta, curadoria, roteiro, revisão do texto, síntese, escuta e publicação privada. As etapas humanas têm cor própria. A rotina agendada para na geração do roteiro; gerar áudio e publicar exigem revisão e ação explícita.
+Mostra sete etapas: coleta, relevância, roteiro, avaliação, síntese, validação do áudio e publicação privada com aviso. O modo automático exige aprovação do avaliador vinculada ao roteiro e verificação de duração antes da publicação.
 
 ### Modelo 03 · Módulos e IA
 
-Apresenta os papéis funcionais e os módulos que os implementam. Coletor, curadoria e publicador são código Python. Roteirista usa LLM via OpenRouter. Narrador usa o serviço TTS Amazon Polly. Player usa o aplicativo e os serviços AWS.
+Apresenta os papéis funcionais e os módulos: coleta determinística, relevância/roteiro/avaliação com chamadas LLM separadas, produção Polly/S3 e player privado.
 
-**Não há sistema multiagente autônomo implementado no MVP.** Os papéis visuais descrevem componentes orquestrados explicitamente. Uma futura arquitetura com agentes deve ser apresentada como evolução, com autonomia, ferramentas e limites efetivamente implementados.
+**Os agentes são coordenados explicitamente em Python.** Não são processos autônomos sem limites. A primeira versão permite até três roteiros e bloqueia resultados pagos incertos; veja [o guia dos agentes](16-agentes-editoriais.md).
 
 ## Como falar de open source
 
@@ -56,8 +56,8 @@ A identidade usa fontes sans-serif, contraste alto, margens constantes e a assin
 
 ## Conferência antes do post
 
-- Confirmar o resultado da primeira edição nova pelo GitHub Actions antes de descrevê-la como validada.
-- Manter a revisão humana explícita ao explicar o grau de automação.
+- Observar uma edição diária completa dos agentes na AWS antes de descrevê-la como validada sem intervenção.
+- Explicar que a revisão automática compara o roteiro aos resumos, sem checagem factual externa.
 - Atualizar a condição de open source quando o repositório estiver acessível ao público.
 - Usar dados de demonstração se for incluir capturas do aplicativo.
 

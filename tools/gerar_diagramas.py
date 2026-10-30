@@ -69,12 +69,12 @@ def architecture():
     a.pill(400,342,476,'PT-BR + INGLÊS TÉCNICO','#14243A','#CBDCF3')
 
     a.rect(80,430,1440,560,'#101F32','#24374D',32)
-    a.text(112,478,'01  PRODUÇÃO ACOMPANHADA',27,a.accent,700)
+    a.text(112,478,'01  PRODUÇÃO COM AGENTES',27,a.accent,700)
     a.text(112,517,'EventBridge Scheduler • seg–sex, 8h30 • America/Sao_Paulo',25,a.muted)
     cards=[(112,552,400,'Fontes RSS',['httpx + feedparser','Publicação declarada no feed']),
            (600,552,400,'Python: curadoria',['Datas, HTTPS e deduplicação','Grade semanal + pauta variável']),
-           (1088,552,400,'OpenRouter + Gemini',['Roteiro JSON + Pydantic','Português com inglês explicado']),
-           (1088,762,400,'Revisão humana',['Texto antes da voz','Escuta antes da publicação']),
+           (1088,552,400,'OpenRouter + Gemini',['Agentes: relevância + roteiro','JSON validado com Pydantic']),
+           (1088,762,400,'Avaliador editorial',['Aprova ou devolve análise','Até duas revisões de roteiro']),
            (600,762,400,'Amazon Polly',['Leo • engine generative','SSML + duração medida']),
            (112,762,400,'Amazon S3 privado',['Áudio, fontes e catálogo','Checkpoints para retomada'])]
     for x,y,w,title,body in cards:a.card(x,y,w,title,body,'#172A40','#30465E',h=148,title_size=29)
@@ -113,13 +113,13 @@ def journey():
     a.text(80,115,'RADAR IA  /  DO RSS AO PLAY',24,a.accent,700,3)
     a.text(80,217,'Notícia boa merece',78,weight=750)
     a.text(80,306,'uma escuta melhor.',78,weight=750)
-    a.text(80,367,'Um fluxo de IA que você acompanha, revisa e controla.',31,a.muted)
+    a.text(80,367,'Agentes especializados, revisão editorial e áudio privado.',31,a.muted)
     rows=[('01','COLETA','Encontrar e validar','RSS, datas de publicação e URLs HTTPS.','httpx • feedparser',False),
-          ('02','CURADORIA','Selecionar o que importa','Grade semanal, deduplicação e quantidade variável.','Python • fila editorial',False),
-          ('03','ROTEIRO COM LLM','Explicar em português','Inglês técnico contextualizado e saída validada.','OpenRouter • Gemini • Pydantic',False),
-          ('04','REVISÃO HUMANA','Conferir o conteúdo','Revisar o roteiro antes de autorizar a voz.','Aprovação vinculada ao texto',True),
+          ('02','AGENTE DE RELEVÂNCIA','Selecionar o que importa','Nota e justificativa sobre a pré-seleção por tema.','OpenRouter • JSON validado',True),
+          ('03','AGENTE ROTEIRISTA','Explicar em português','Inglês técnico contextualizado e saída validada.','OpenRouter • Gemini • Pydantic',False),
+          ('04','AGENTE AVALIADOR','Aprovar ou pedir correções','Devolve análise ao roteirista; até duas revisões.','Parecer + hash do roteiro',True),
           ('05','VOZ SINTÉTICA','Transformar texto em áudio','Pausas e inglês via SSML; WAV de até 600 segundos.','Amazon Polly • Leo generativa',False),
-          ('06','ESCUTA HUMANA','Ouvir antes de publicar','Aprovar o áudio que será enviado ao catálogo.','Aprovação vinculada ao áudio',True),
+          ('06','VERIFICAÇÃO DO ÁUDIO','Validar antes de publicar','Integridade, vínculo com roteiro e até 10 minutos.','Código Python • WAV',False),
           ('07','PUBLICAÇÃO PRIVADA','Dar play, pausar e retomar','Catálogo privado, progresso e aviso por dispositivo.','AWS • Android • Web Push',False)]
     a.path('M 143 490 V 1638',False,'#AFC9C0')
     for i,(number,label,title,body,tech,human) in enumerate(rows):
@@ -134,7 +134,7 @@ def journey():
         a.text(950,y+33,tech,21,a.muted,500)
     a.rect(80,1680,1440,145,'#DDEDE6')
     a.text(112,1725,'AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO',26,a.accent,700)
-    a.text(112,1765,'Coleta e roteiro na AWS; voz e publicação após revisão.',28,weight=600)
+    a.text(112,1765,'Coleta → agentes → Polly → catálogo privado → aviso.',28,weight=600)
     a.text(112,1803,'Open source em preparação • licença MIT • sem preenchimento artificial.',24,a.muted)
     a.footer('02 / 03');a.save('02-fluxo-editorial.svg')
 
@@ -143,17 +143,17 @@ def modules():
     a=Art('#161428','#F6F3FF','#BFB8D4','#BBA3FF')
     a.rect(80,72,76,8,a.accent,radius=4)
     a.text(80,137,'RADAR IA  /  MÓDULOS E RESPONSABILIDADES',23,a.accent,700,2)
-    a.text(80,245,'IA com controle humano.',79,weight=700)
+    a.text(80,245,'Agentes com limites claros.',79,weight=700)
     a.text(80,309,'Automação modular + geração com LLM + serviços AWS.',31,a.muted)
     a.rect(80,364,1440,118,'#26213E','#53446E')
     a.text(112,413,'ORQUESTRAÇÃO EM PYTHON',26,a.accent,700)
     a.text(112,454,'production.py + Lambda + EventBridge Scheduler • checkpoints S3 • IAM por função',27)
     cards=[
         (80,550,'01  Coletor RSS','CÓDIGO PYTHON',['collection.py • httpx • feedparser','Datas, URLs e domínios permitidos','Resumos e referências preservados']),
-        (840,550,'02  Curadoria','CÓDIGO PYTHON',['weekly.py + brief.py','Grade semanal e fila de candidatas','Deduplicação e seleção de 1 a 7 itens']),
+        (840,550,'02  Relevância','AGENTE LLM',['RelevanceAgent • OpenRouter','Nota de 0 a 5 + justificativa por ID','Seleciona candidatas com nota mínima 3']),
         (840,950,'03  Roteirista','GERAÇÃO COM LLM',['script.py • OpenRouter • Gemini','JSON estruturado + validação Pydantic','Português e glossário técnico em inglês']),
-        (80,950,'04  Narrador','SERVIÇO TTS + REVISÃO DO ROTEIRO',['Polly • Leo generativa • SSML','Pausas e pronúncia de termos em inglês','Duração medida: até 10 minutos']),
-        (80,1350,'05  Publicador','CÓDIGO PYTHON + APROVAÇÃO DO ÁUDIO',['catalog.py • Amazon S3 privado','Hash de conteúdo + gravação com ETag','Publicação idempotente do mesmo áudio']),
+        (80,950,'04  Avaliador','AGENTE LLM',['ScriptReviewerAgent • OpenRouter','Fidelidade às evidências e clareza','Aprovação vinculada ao hash do roteiro']),
+        (80,1350,'05  Produtor','POLLY + PUBLICAÇÃO DETERMINÍSTICA',['Leo • SSML • WAV de até 10 minutos','S3 privado + catálogo idempotente','Só publica após aprovação editorial']),
         (840,1350,'06  Player privado','APLICATIVO WEB',['CloudFront • Cognito • API Gateway','Lambda • S3 • DynamoDB • Web Push','Ouvidos, pendentes e posição de escuta'])]
     for x,y,title,tag,body in cards:
         a.card(x,y,680,title,body,'#26213E','#51446B',tag=tag,h=280,title_size=37)
@@ -162,8 +162,8 @@ def modules():
     a.path('M 824 1090 H 776')
     a.path('M 420 1246 V 1334')
     a.path('M 776 1490 H 824')
-    a.text(80,881,'Regras de software coletam e selecionam; a LLM produz o roteiro.',27,a.muted)
-    a.text(560,1280,'Revisão provisória • avisos via SQS + Web Push.',27,a.muted)
+    a.text(80,881,'Coleta determinística; relevância, roteiro e avaliação usam LLM.',27,a.muted)
+    a.text(560,1280,'Reprovação → roteirista • até duas revisões.',27,a.muted)
     a.rect(80,1690,1440,136,'#30264B')
     a.text(112,1736,'OPEN SOURCE EM PREPARAÇÃO • MIT',27,a.accent,700)
     a.text(112,1778,'Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.',26)

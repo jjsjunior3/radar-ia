@@ -16,9 +16,9 @@ O GitHub continua executando testes e permite etapas manuais. A variável `RADAR
 4. O código `Production` restaura o checkpoint do S3 e consulta o catálogo. Uma edição já existente é preservada.
 5. Coleta RSS, curadoria semanal e validação de URLs/datas usam os mesmos módulos do terminal.
 6. A Lambda lê a chave OpenRouter no Secrets Manager e gera o roteiro com `max_retries=0`. O checkpoint registra a tentativa antes da chamada paga e salva a resposta antes da validação.
-7. A edição fica em `awaiting_script_review` no aplicativo. Um dia sem conteúdo elegível termina em `no_content` e não chama a LLM.
+7. No modo acompanhado, a edição fica em `awaiting_script_review`. No automático, os agentes selecionam, escrevem e avaliam; com aprovação válida, a tarefa de áudio/publicação segue ao SQS. Sem candidatas elegíveis, a coleta termina sem LLM; o agente de relevância também pode rejeitar todas as candidatas, encerrando sem Polly.
 
-**Voz e publicação ainda exigem revisão.** As aprovações são provisórias durante os ajustes finos. Publicação totalmente automática e notificação no Android continuam no roteiro de evolução.
+**Modos configuráveis:** o acompanhado preserva revisão humana; o automático exige aprovação editorial do agente antes do Polly. Consulte [operação automática](15-publicacao-automatica.md) e [agentes editoriais](16-agentes-editoriais.md).
 
 ## Separação de permissões
 
@@ -78,3 +78,6 @@ Referências oficiais: [limitações do cron GitHub](https://docs.github.com/en/
 - O Scheduler diário foi consultado em estado `ENABLED`, com cron de segunda a sexta, fuso São Paulo e janela flexível `OFF`. O GitHub foi consultado com `RADAR_SCHEDULE_ENABLED=false`.
 - O diagnóstico AWS confirmou a edição de hoje em `completed` e o próximo disparo previsto para **30/10/2026 às 8h30 de São Paulo**. Como a instalação ocorreu à noite, nenhum disparo diário era esperado retroativamente para hoje.
 - **Ainda pendente:** validar uma edição nova completa preparada pela rotina diária. O teste pontual comprova entrega e acesso básico, não comprova a coleta de amanhã, qualidade do roteiro ou pontualidade futura.
+
+
+Atualização em 30/10/2026: o disparo diário iniciou às 8h30 com 3 segundos de atraso. A edição exigiu recuperação da ordem dos IDs, foi publicada pelo fluxo acompanhado e o proprietário confirmou o aviso no Android. A versão posterior com agentes e publicação automática ainda precisa de observação de uma edição diária real sem intervenção.

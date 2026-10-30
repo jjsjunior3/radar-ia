@@ -44,6 +44,14 @@
     "VapidPublicKey": {
       "Type": "String",
       "Default": ""
+    },
+    "AutomaticPublicationEnabled": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
     }
   },
   "Resources": {
@@ -579,6 +587,9 @@
             },
             "EDITORIAL_SCHEDULE_ENABLED": {
               "Ref": "EditorialScheduleEnabled"
+            },
+            "AUTOMATIC_PUBLICATION": {
+              "Ref": "AutomaticPublicationEnabled"
             }
           }
         }
@@ -1054,6 +1065,9 @@
                   "Ref": "AWS::NoValue"
                 }
               ]
+            },
+            "AUTOMATIC_PUBLICATION": {
+              "Ref": "AutomaticPublicationEnabled"
             }
           }
         }
@@ -1283,6 +1297,18 @@
                       "Arn"
                     ]
                   }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "AudioQueue",
+                      "Arn"
+                    ]
+                  }
                 }
               ]
             }
@@ -1346,7 +1372,13 @@
             "OPENROUTER_SECRET_ARN": {
               "Ref": "OpenRouterSecretArn"
             },
-            "OPENROUTER_MODEL": "google/gemini-2.5-flash"
+            "OPENROUTER_MODEL": "google/gemini-2.5-flash",
+            "AUTOMATIC_PUBLICATION": {
+              "Ref": "AutomaticPublicationEnabled"
+            },
+            "AUDIO_QUEUE_URL": {
+              "Ref": "AudioQueue"
+            }
           }
         }
       }

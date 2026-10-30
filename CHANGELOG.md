@@ -1,0 +1,18 @@
+# Histórico de mudanças
+
+## 0.1.0 · 30/10/2026
+
+Primeira versão do MVP Radar IA, com código preparado para distribuição sob licença MIT.
+
+- Coleta RSS, validação de datas/URLs, domínios permitidos, deduplicação e pauta semanal variável.
+- Agentes separados de relevância, roteiro e avaliação via OpenRouter; feedback ao roteirista e até duas revisões.
+- Aprovação editorial vinculada ao conteúdo; resultados pagos incertos bloqueiam repetição automática.
+- Produção com Amazon Polly/Leo, SSML bilíngue, integridade e duração WAV de até dez minutos.
+- Publicação automática configurável, catálogo e áudio privados no S3, Scheduler às 8h30 de São Paulo.
+- Aplicativo web instalável, Cognito/PKCE, sessão persistente, progresso de escuta e avisos Web Push.
+- CloudFormation, acesso OIDC para GitHub Actions, testes sem serviços pagos e documentação de operação/privacidade.
+- Três diagramas de arquitetura e fluxo em PNG e SVG editável.
+
+### Limites conhecidos
+
+O fluxo acompanhado e os avisos em Android real foram confirmados pelo proprietário. Os agentes e o ciclo automático possuem testes simulados; a primeira edição agendada sem intervenção nessa versão ainda precisa ser observada. A avaliação usa resumos RSS e não equivale a checagem factual independente. Falhas não disparam aviso push. O código público não implica acesso público ao aplicativo ou aos episódios.

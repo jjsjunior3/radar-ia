@@ -52,6 +52,7 @@ class Backend:
             previous=self.jobs.get(editorial_job_id((date.fromisoformat(edition)-timedelta(days=offset)).isoformat()))
         summary['last_editorial_job']=public_job(previous)
         summary['schedule_enabled']=os.getenv('EDITORIAL_SCHEDULE_ENABLED')=='true'
+        summary['automatic_publication']=os.getenv('AUTOMATIC_PUBLICATION')=='true'
         return summary
 
     def approve_script(self,edition,data,user_id):

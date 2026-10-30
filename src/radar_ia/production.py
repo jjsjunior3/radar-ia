@@ -149,13 +149,18 @@ class Production:
         script=validate_script(read_json(self.folder/'roteiro.json'),brief)
         return brief,script,spoken_text(script)
 
-    def approve_script(self):
+    def approve_script(self,*,mode="human"):
+        if mode not in ("human","automatic"):raise ValueError("Modo de aprovação inválido")
         if self.state['stage'] not in ('awaiting_script_review','script_approved'):
             raise ValueError('Gere e revise o roteiro antes da aprovação')
         brief,script,text=self.script_bundle()
         (self.folder/'narracao.txt').write_text(text,encoding='utf-8')
         digest=fingerprint({'brief':brief,'script':script.model_dump()})
-        write_json(self.folder/'aprovacao-roteiro.json',{'digest':digest,'approved_at':datetime.now(timezone.utc).isoformat()})
+        if mode=='automatic':
+            approval=read_json(self.folder/'agents'/'approval.json',{})
+            if approval.get('approved') is not True or approval.get('script_digest')!=digest or approval.get('policy')!='editorial-agents-v1':
+                raise ValueError('Roteiro sem aprovação editorial de agente para o conteúdo atual')
+        write_json(self.folder/'aprovacao-roteiro.json',{'digest':digest,'mode':mode,'approved_at':datetime.now(timezone.utc).isoformat()})
         self.stage('script_approved')
 
     def approved_bundle(self):
@@ -262,13 +267,14 @@ class Production:
                 raise ValueError('Formato ou duração inválidos')
         return metadata
 
-    def approve_audio(self):
+    def approve_audio(self,*,mode="human"):
+        if mode not in ("human","automatic"):raise ValueError("Modo de aprovação inválido")
         _,_,text=self.approved_bundle()
         self.validate_audio(text)
         if self.state['stage'] not in ('awaiting_audio_review','audio_approved'):
             raise ValueError('Gere e ouça o áudio antes de aprovar')
         data=(self.folder/'episode.wav').read_bytes()
-        write_json(self.folder/'aprovacao-audio.json',{'sha256':hashlib.sha256(data).hexdigest(),'approved_at':datetime.now(timezone.utc).isoformat()})
+        write_json(self.folder/'aprovacao-audio.json',{'sha256':hashlib.sha256(data).hexdigest(),'mode':mode,'approved_at':datetime.now(timezone.utc).isoformat()})
         self.stage('audio_approved')
 
     def publish(self,upload):

@@ -5,7 +5,7 @@
 <g font-family="Segoe UI, Arial, sans-serif">
 <rect x="80" y="72" width="76" height="8" rx="4" fill="#BBA3FF" stroke="none" stroke-width="2"/>
 <text x="80" y="137" fill="#BBA3FF" font-size="23" font-weight="700" letter-spacing="2">RADAR IA  /  MÓDULOS E RESPONSABILIDADES</text>
-<text x="80" y="245" fill="#F6F3FF" font-size="79" font-weight="700" letter-spacing="0">IA com controle humano.</text>
+<text x="80" y="245" fill="#F6F3FF" font-size="79" font-weight="700" letter-spacing="0">Agentes com limites claros.</text>
 <text x="80" y="309" fill="#BFB8D4" font-size="31" font-weight="400" letter-spacing="0">Automação modular + geração com LLM + serviços AWS.</text>
 <rect x="80" y="364" width="1440" height="118" rx="24" fill="#26213E" stroke="#53446E" stroke-width="2"/>
 <text x="112" y="413" fill="#BBA3FF" font-size="26" font-weight="700" letter-spacing="0">ORQUESTRAÇÃO EM PYTHON</text>
@@ -17,11 +17,11 @@
 <text x="104" y="699" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Datas, URLs e domínios permitidos</text>
 <text x="104" y="731" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Resumos e referências preservados</text>
 <rect x="840" y="550" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
-<text x="864" y="582" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">CÓDIGO PYTHON</text>
-<text x="864" y="627" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">02  Curadoria</text>
-<text x="864" y="667" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">weekly.py + brief.py</text>
-<text x="864" y="699" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Grade semanal e fila de candidatas</text>
-<text x="864" y="731" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Deduplicação e seleção de 1 a 7 itens</text>
+<text x="864" y="582" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">AGENTE LLM</text>
+<text x="864" y="627" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">02  Relevância</text>
+<text x="864" y="667" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">RelevanceAgent • OpenRouter</text>
+<text x="864" y="699" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Nota de 0 a 5 + justificativa por ID</text>
+<text x="864" y="731" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Seleciona candidatas com nota mínima 3</text>
 <rect x="840" y="950" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
 <text x="864" y="982" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">GERAÇÃO COM LLM</text>
 <text x="864" y="1027" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">03  Roteirista</text>
@@ -29,17 +29,17 @@
 <text x="864" y="1099" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">JSON estruturado + validação Pydantic</text>
 <text x="864" y="1131" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Português e glossário técnico em inglês</text>
 <rect x="80" y="950" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
-<text x="104" y="982" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">SERVIÇO TTS + REVISÃO DO ROTEIRO</text>
-<text x="104" y="1027" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">04  Narrador</text>
-<text x="104" y="1067" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Polly • Leo generativa • SSML</text>
-<text x="104" y="1099" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Pausas e pronúncia de termos em inglês</text>
-<text x="104" y="1131" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Duração medida: até 10 minutos</text>
+<text x="104" y="982" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">AGENTE LLM</text>
+<text x="104" y="1027" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">04  Avaliador</text>
+<text x="104" y="1067" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">ScriptReviewerAgent • OpenRouter</text>
+<text x="104" y="1099" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Fidelidade às evidências e clareza</text>
+<text x="104" y="1131" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Aprovação vinculada ao hash do roteiro</text>
 <rect x="80" y="1350" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
-<text x="104" y="1382" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">CÓDIGO PYTHON + APROVAÇÃO DO ÁUDIO</text>
-<text x="104" y="1427" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">05  Publicador</text>
-<text x="104" y="1467" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">catalog.py • Amazon S3 privado</text>
-<text x="104" y="1499" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Hash de conteúdo + gravação com ETag</text>
-<text x="104" y="1531" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Publicação idempotente do mesmo áudio</text>
+<text x="104" y="1382" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">POLLY + PUBLICAÇÃO DETERMINÍSTICA</text>
+<text x="104" y="1427" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">05  Produtor</text>
+<text x="104" y="1467" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Leo • SSML • WAV de até 10 minutos</text>
+<text x="104" y="1499" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">S3 privado + catálogo idempotente</text>
+<text x="104" y="1531" fill="#BFB8D4" font-size="24" font-weight="400" letter-spacing="0">Só publica após aprovação editorial</text>
 <rect x="840" y="1350" width="680" height="280" rx="24" fill="#26213E" stroke="#51446B" stroke-width="2"/>
 <text x="864" y="1382" fill="#BBA3FF" font-size="19" font-weight="700" letter-spacing="1">APLICATIVO WEB</text>
 <text x="864" y="1427" fill="#F6F3FF" font-size="37" font-weight="650" letter-spacing="0">06  Player privado</text>
@@ -51,8 +51,8 @@
 <path d="M 824 1090 H 776" fill="none" stroke="#BBA3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 420 1246 V 1334" fill="none" stroke="#BBA3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 776 1490 H 824" fill="none" stroke="#BBA3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<text x="80" y="881" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Regras de software coletam e selecionam; a LLM produz o roteiro.</text>
-<text x="560" y="1280" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Revisão provisória • avisos via SQS + Web Push.</text>
+<text x="80" y="881" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Coleta determinística; relevância, roteiro e avaliação usam LLM.</text>
+<text x="560" y="1280" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Reprovação → roteirista • até duas revisões.</text>
 <rect x="80" y="1690" width="1440" height="136" rx="24" fill="#30264B" stroke="none" stroke-width="2"/>
 <text x="112" y="1736" fill="#BBA3FF" font-size="27" font-weight="700" letter-spacing="0">OPEN SOURCE EM PREPARAÇÃO • MIT</text>
 <text x="112" y="1778" fill="#F6F3FF" font-size="26" font-weight="400" letter-spacing="0">Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.</text>

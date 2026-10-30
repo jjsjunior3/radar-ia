@@ -24,6 +24,8 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
     try:
         if job['user_id']!=owner or job['action'] not in ('audio','publish') or job['voice']!=DEFAULT_VOICE or job['renderer']!=RENDERER_VERSION:
             raise ValueError('Tarefa não autorizada ou configuração mudou')
+        if job.get('automatic') and os.getenv('AUTOMATIC_PUBLICATION')!='true':
+            raise ValueError('Publicação automática desativada; revisar tarefa')
         verify_private(s3,bucket)
         output=temporary.name
         store=ProductionStore(s3,bucket,prefix,output,job['date']);store.load()
@@ -31,12 +33,28 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
         brief,script,text=run.approved_bundle()
         if fingerprint({'brief':brief,'script':script.model_dump()})!=job['script_digest']:
             raise ValueError('Roteiro mudou depois da solicitação')
+        if job.get('automatic'):
+            approval=read_json(run.folder/'agents'/'approval.json',{})
+            if approval.get('approved') is not True or approval.get('script_digest')!=job['script_digest'] or approval.get('policy')!='editorial-agents-v1':
+                raise ValueError('Avaliador editorial não aprovou esta versão do roteiro')
         total=len(speech_chunks(text))
         def persist():
             store.save()
             completed=sum(read_json(path,{}).get('status')=='complete' for path in (run.folder/'audio-chunks').glob('*.json'))
             jobs.update(identifier,'running',completed_chunks=completed,total_chunks=total)
         run.persist=persist
+        def publish_episode():
+            metadata=run.validate_audio(text)
+            if job['action']=='publish' and metadata['audio_sha256']!=job['audio_digest']:
+                raise ValueError('Áudio mudou depois da solicitação')
+            if run.state['stage'] not in ('publish_in_progress','completed'):run.revalidate(sources)
+            def upload(audio,payload,narration,brief,edition):
+                return upload_episode(s3,bucket,prefix,audio=audio,script=payload,narration=narration,brief=brief,
+                    date=edition,title=f"Radar IA — {brief['theme']}")[0]
+            episode=run.publish(upload);store.save_editorial()
+            if os.getenv("NOTIFICATION_QUEUE_URL"):
+                from .push import episode_notice
+                episode_notice(boto3.client("sqs"),os.environ["NOTIFICATION_QUEUE_URL"],episode["id"])
         if job['action']=='audio':
             run.revalidate(sources)
             metadata=run.synthesize(polly,voice=DEFAULT_VOICE,engine='generative')
@@ -46,18 +64,13 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
                     ServerSideEncryption='AES256',IfNoneMatch='*')
             except ClientError as exc:
                 if exc.response['Error']['Code'] not in ('PreconditionFailed','412'):raise
+            if job.get('automatic'):
+                # Valida integridade e duração antes da autorização automática; não representa escuta humana.
+                if run.state['stage']=='awaiting_audio_review':run.approve_audio(mode='automatic')
+                publish_episode()
             jobs.update(identifier,'succeeded',completed_chunks=total,total_chunks=total)
         else:
-            metadata=run.validate_audio(text)
-            if metadata['audio_sha256']!=job['audio_digest']:raise ValueError('Áudio mudou depois da solicitação')
-            if run.state['stage'] not in ('publish_in_progress','completed'):run.revalidate(sources)
-            def upload(audio,payload,narration,brief,edition):
-                return upload_episode(s3,bucket,prefix,audio=audio,script=payload,narration=narration,brief=brief,
-                    date=edition,title=f"Radar IA — {brief['theme']}")[0]
-            episode=run.publish(upload);store.save_editorial()
-            if os.getenv("NOTIFICATION_QUEUE_URL"):
-                from .push import episode_notice
-                episode_notice(boto3.client("sqs"),os.environ["NOTIFICATION_QUEUE_URL"],episode["id"])
+            publish_episode()
             jobs.update(identifier,'succeeded')
         return 'succeeded'
     except Exception as exc:

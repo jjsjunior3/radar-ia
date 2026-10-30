@@ -79,7 +79,7 @@ def public_job(item,now=None):
 
 class JobQueue:
     def __init__(self,store,sqs,url):self.store,self.sqs,self.url=store,sqs,url
-    def start(self,summary,action,data,user_id):
+    def start(self,summary,action,data,user_id,*,automatic=False):
         if action not in ('audio','publish') or not isinstance(data,dict) or set(data)!={'digest','confirmed'} or data['confirmed'] is not True:
             raise ValueError('Confirmação inválida')
         expected=summary.get('digest') if action=='audio' else summary.get('audio_digest')
@@ -100,7 +100,7 @@ class JobQueue:
                 if planned.tzinfo is None or not 0<=(now-planned).total_seconds()<=86400:raise ReviewConflict()
             item=self.store.create({'job_id':identifier,'date':summary['date'],'action':action,'user_id':user_id,
                 'script_digest':summary['digest'],'audio_digest':summary.get('audio_digest',''),
-                'voice':DEFAULT_VOICE,'renderer':RENDERER_VERSION,'status':'queued','created_at':now.isoformat(),
+                'voice':DEFAULT_VOICE,'renderer':RENDERER_VERSION,'automatic':bool(automatic),'status':'queued','created_at':now.isoformat(),
                 'updated_at':now.isoformat(),'expires_at':int((now+timedelta(days=30)).timestamp())})
         if item['status']=='queued':
             # Reenviar a mesma mensagem é seguro: a reivindicação condicional é única.

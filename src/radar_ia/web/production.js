@@ -40,7 +40,7 @@ window.radarProduction=(()=>{
       script_approved:'Texto aprovado. A geração e a revisão do áudio são as próximas etapas.',
       awaiting_audio_review:'O áudio está pronto para a próxima etapa de escuta e aprovação pelo fluxo acompanhado.',
       completed:'O episódio já está disponível na sua biblioteca.'};
-    find('note').textContent=notes[data.stage]||'Você pode atualizar este painel para acompanhar o andamento.';
+    find('note').textContent=data.automatic_publication&&!['completed','no_content'].includes(data.stage)?'Modo automático: verificações de roteiro, áudio e duração antes da publicação. Você receberá um aviso quando o episódio estiver disponível.':notes[data.stage]||'Você pode atualizar este painel para acompanhar o andamento.';
     find('details').hidden=!data.narration;
     find('narration').textContent=data.narration||'';
     const sources=find('sources');sources.replaceChildren();

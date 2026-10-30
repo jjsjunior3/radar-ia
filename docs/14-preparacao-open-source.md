@@ -23,11 +23,14 @@ Imagens de arquitetura foram revisadas visualmente. A ferramenta não inspeciona
 - [x] Auditoria inicial de arquivos e histórico, sem candidatos encontrados.
 - [x] Código e recursos editáveis registrados no Git.
 - [x] Confirmar o teste de aviso em um Android real.
-- [ ] Validar a primeira edição diária completa do Scheduler.
-- [ ] Revisar novamente o diff e o histórico imediatamente antes de abrir.
+- [ ] Observar a primeira edição diária automática sem intervenção (limite conhecido, não bloqueia abertura do código).
+- [x] Revisar novamente o diff e o histórico antes da abertura; repetir se houver novas alterações.
 - [ ] O proprietário decidir quando alterar a visibilidade para público.
 
 A validação de uma edição agendada sem recuperação manual deve aparecer como limite conhecido no README, mesmo que o proprietário decida abrir antes de concluí-los. Não apresente uma funcionalidade como validada em Android apenas porque um teste de navegador simulado passou.
 
 
 Validação em 30/10/2026: o proprietário confirmou no Android o recebimento do aviso após publicar a edição. O teste de aviso também foi confirmado.
+
+
+Entrega com agentes: `CHANGELOG.md`, guia operacional e diagramas atualizados. O modo automático foi habilitado na AWS após testes simulados do ciclo e diagnóstico remoto sem geração. A confirmação de uma edição diária real permanece como limite conhecido da versão 0.1.0.

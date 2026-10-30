@@ -39,7 +39,7 @@ def prepare(monkeypatch,store,tmp_path):
     monkeypatch.setattr(module.Production,'revalidate',lambda *a,**kw:None)
     raw=store.s3.objects[store.key('2026-10-29')]
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:files={name:archive.read(name) for name in archive.namelist()}
-    brief=json.loads(files['briefing.json']);script=validate_script(json.loads(files['roteiro.json']),brief)
+    brief=json.loads(files['briefing.json']);brief['planned_for']=NOW.isoformat();files['briefing.json']=json.dumps(brief).encode();script=validate_script(json.loads(files['roteiro.json']),brief)
     files={key:value for key,value in files.items() if key not in ('roteiro.json','narracao.txt')}
     files['checkpoint.json']=json.dumps({'date':'2026-10-29','stage':'prepared'}).encode()
     snapshots=[]
@@ -102,3 +102,22 @@ def test_infrastructure_timezone_permissions_retry_and_initial_disabled_state():
     assert len(writes)==1 and writes[0]['Resource']['Fn::Sub'].endswith('/production/editions/*')
     secrets=[entry for entry in statements if 'secretsmanager:GetSecretValue' in entry['Action']]
     assert secrets[0]['Resource']=={'Ref':'OpenRouterSecretArn'}
+
+
+def test_automatic_editorial_marks_policy_and_queues_audio_without_polly(monkeypatch,store,tmp_path):
+    script,snapshots=prepare(monkeypatch,store,tmp_path)
+    queue=Mock();jobs=JobStore(Table())
+    def generate(brief,save):
+        from radar_ia.production import fingerprint
+        for folder in tmp_path.glob('radar-editorial-*/production/*'):
+            (folder/'agents').mkdir(exist_ok=True)
+            (folder/'agents/approval.json').write_text(json.dumps({'policy':'editorial-agents-v1','approved':True,'script_digest':fingerprint({'brief':brief,'script':script.model_dump()})}))
+        return script,{}
+    result=module.process(EVENT,jobs,Mock(),Mock(),'bucket','radar','owner','secret',[],now=NOW,generator=generate,automatic_queue=queue)
+    assert result['stage']=='script_approved'
+    queue.start.assert_called_once()
+    args,kwargs=queue.start.call_args
+    assert args[1]=='audio' and args[3]=='owner' and kwargs=={'automatic':True}
+    assert 'script_approved' in snapshots
+    assert module.process(EVENT,jobs,Mock(),Mock(),'bucket','radar','owner','secret',[],now=NOW,generator=generate,automatic_queue=queue)['status']=='duplicate'
+    queue.start.assert_called_once()

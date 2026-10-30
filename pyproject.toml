@@ -5,8 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "radar-ia"
 version = "0.1.0"
+description = "Podcast privado de IA com agentes editoriais, Python e AWS"
+readme = "README.md"
+authors = [{name = "jrsantosdev"}]
+keywords = ["podcast", "rss", "aws", "polly", "ai-agents"]
 requires-python = ">=3.11"
 dependencies = ["boto3[crt]>=1.42,<2", "feedparser>=6.0.11,<7", "httpx>=0.28,<1", "openai>=2,<3", "python-dotenv>=1,<2", "tzdata>=2025.1", "pydantic>=2.10,<3"]
+
+[project.urls]
+Repository = "https://github.com/jjsjunior3/radar-ia"
+Documentation = "https://github.com/jjsjunior3/radar-ia/blob/main/README.md"
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]

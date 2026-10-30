@@ -102,7 +102,7 @@ def main():
         current=cf.describe_stacks(StackName=stack)['Stacks'][0]
         old={item['OutputKey']:item['OutputValue'] for item in current['Outputs']}
         for parameter in current.get('Parameters',[]):
-            if parameter['ParameterKey'] in ('EditorialCodeKey','OpenRouterSecretArn','EditorialScheduleEnabled','VapidSecretArn','VapidPublicKey'):
+            if parameter['ParameterKey'] in ('EditorialCodeKey','OpenRouterSecretArn','EditorialScheduleEnabled','VapidSecretArn','VapidPublicKey','AutomaticPublicationEnabled'):
                 parameters.append({'ParameterKey':parameter['ParameterKey'],'UsePreviousValue':True})
         email=os.getenv('APP_LOGIN_EMAIL','').strip()
         if email:
