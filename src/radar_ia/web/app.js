@@ -47,7 +47,7 @@ document.querySelector('#back').onclick=()=>audio.currentTime=Math.max(0,audio.c
 const weekday=new Date().getDay();document.querySelectorAll('.schedule span').forEach((el,index)=>el.classList.toggle('today',index===weekday-1));
 window.radarAuth.initialize().then(ready=>{if(!ready)return null;return api('/api/episodes');}).then(data=>{if(!data||!window.radarAuth.ready){document.querySelector('#count').textContent='Entre para acessar';return;}episodes=data.episodes;if(data.mode==='demo')message.textContent='DEMONSTRAÇÃO · dados fictícios, sem áudio real, AWS ou chamadas pagas.';document.querySelector('#app-nav').hidden=false;setView(location.hash==='#review'?'review':location.hash==='#library'?'library':'pending');document.querySelector('#mode').textContent=data.mode==='demo'?'Demonstração local · sem conexão AWS':data.mode==='cloud'?'Acesso privado · progresso na sua conta':'Prévia local · catálogo privado S3';render();window.radarProduction.load();window.radarNotifications.initialize();}).catch(err=>{message.textContent=err.message;document.querySelector('#count').textContent='Indisponível';});
 
-window.addEventListener("radar-episode-published",async()=>{try{await saveChain.catch(()=>{});const data=await api("/api/episodes");episodes=data.episodes;render();}catch(error){message.textContent=error.message;}});
+window.addEventListener("radar-episode-published",async event=>{try{await saveChain.catch(()=>{});const data=await api("/api/episodes");episodes=data.episodes;if(event.detail?.navigate)setView('pending');else render();}catch(error){message.textContent=error.message;}});
 
 window.addEventListener("radar-review-opened",()=>{setView("review");window.radarProduction.load();document.querySelector("#app-nav").scrollIntoView({block:"start"});});
 
