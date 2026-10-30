@@ -22,7 +22,7 @@ window.radarNotifications=(()=>{
   async function initialize(){
     if(!window.radarAuth.ready||!window.radarAuth.config)return;
     el('panel').hidden=false;
-    navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='radar-notice-opened'&&window.radarAuth.ready)window.dispatchEvent(new Event('radar-episode-published'));});
+    navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='radar-notice-opened'&&window.radarAuth.ready){if(event.data.view==='review')window.dispatchEvent(new Event('radar-review-opened'));else window.dispatchEvent(new Event('radar-episode-published'));}});
     if(!supported()){el('status').textContent='Este navegador não oferece avisos Web Push. Use o Chrome atualizado no Android.';el('enable').hidden=true;return;}
     try{
       config=await request('/api/push/config');

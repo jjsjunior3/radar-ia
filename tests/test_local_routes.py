@@ -49,3 +49,11 @@ def test_unknown_episode_cannot_save_state(tmp_path):
 def test_path_traversal_not_served(tmp_path):
     (status,_),_=request(tmp_path,'/../../.env')
     assert status==404
+
+
+def test_demo_review_has_versions_and_no_paid_service_dependency(tmp_path):
+    (status,payload),_=request(tmp_path,'/api/production/2026-10-30')
+    assert status==200 and payload['demo'] and len(payload['refinement']['versions'])==2
+    (status,payload),lib=request(tmp_path,'/api/production/2026-10-30/approve-script','POST',
+        headers={'Origin':'http://127.0.0.1:8765','X-Radar-Client':'web'},data={'digest':'a'*64,'confirmed':True,'feedback':'Exemplo fictício'})
+    assert status==200 and payload['demo'] and payload['stage']=='completed'

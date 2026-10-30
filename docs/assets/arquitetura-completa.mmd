@@ -1,0 +1,79 @@
+flowchart TB
+    subgraph CONTROLE[Infraestrutura e operação]
+        GH[GitHub Actions: testes e operação manual] --> OIDC[IAM / OIDC: credenciais temporárias]
+        CFN[CloudFormation: template e helpers] --> AWS[Recursos AWS do projeto]
+        SM[Secrets Manager: OpenRouter e VAPID]
+        CW[CloudWatch: logs de execução]
+    end
+    subgraph EDITORIAL[Lambda editorial: Python]
+        SCH[EventBridge Scheduler: seg–sex, 8h30 / São Paulo] --> CLAIM[DynamoDB Jobs: uma execução por data]
+        CLAIM --> RESTORE[S3 privado: restaurar checkpoint / consultar catálogo]
+        RESTORE --> COL[1. Coletor: RSS / httpx / feedparser]
+        RSS[Fontes RSS configuradas] --> COL
+        COL --> RULES[Datas / HTTPS / domínios / deduplicação / grade semanal]
+        RULES --> REL[2. Agente de relevância: nota 0–5 e motivo por ID]
+        REL -->|Notas >= 3| WR[3. Roteirista: PT-BR / inglês explicado / JSON]
+        REL -->|Nenhuma elegível| EMPTY[Sem conteúdo: encerrar sem Polly]
+        WR --> VALID[Pydantic / IDs / glossário / limite de texto]
+        VALID -->|Válido| REV[4. Avaliador: comparar roteiro às evidências]
+        VALID -->|Resposta inválida conhecida: uma correção| WR
+        VALID -->|Resultado incerto ou erro persistente| BLOCK[Interromper e preservar tentativa]
+        REV -->|Primeira reprovação + análise| WR
+        REV -->|Segunda reprovação| HOLD[Aguardando decisão humana]
+        REV -->|Aprovado / nota >= 4 / sem bloqueantes| BIND[Aprovação vinculada ao hash do roteiro]
+        SM --> REL
+        SM --> WR
+        SM --> REV
+        REL <--> OPEN[OpenRouter / modelo configurado]
+        WR <--> OPEN
+        REV <--> OPEN
+    end
+    subgraph APRENDIZADO[Memória editorial privada]
+        HOLD --> REVIEWNOTICE[SQS avisos: solicitação de revisão]
+        HUMAN[Responsável: texto + pareceres + versões + diferenças] -->|Aprovar / registrar preferência| HAPP[API: aprovação humana / hash / autor / horário]
+        HAPP --> MEMORY[S3: observação e trecho do roteiro aceito]
+        MEMORY --> LIMIT[Até 5 aprovações humanas dos 14 dias anteriores]
+        LIMIT -. contexto, sem alterar instruções de sistema .-> REL
+        LIMIT -. contexto, sem alterar instruções de sistema .-> WR
+        LIMIT -. contexto, sem alterar instruções de sistema .-> REV
+        HAPP --> BIND
+    end
+    subgraph PRODUCAO[Produção e publicação]
+        BIND --> MODE[Modo automático habilitado]
+        MODE --> AQ[SQS áudio: tarefa por hash / voz / versão]
+        AQ --> WORK[5. Lambda worker: validar aprovação e fontes]
+        WORK --> POLLY[Amazon Polly: Leo generativa / SSML]
+        POLLY --> WAV[Integridade / roteiro correspondente / WAV até 600 s]
+        WAV -->|Inválido| BLOCK
+        WAV -->|Válido| CAT[S3 privado: áudio + catálogo / escrita condicional]
+        CAT --> STATE[S3: cobertura e estado editorial após catálogo]
+        STATE --> NQ[SQS avisos: episódio publicado]
+        REVIEWNOTICE --> NOTIFIER[Lambda worker: conferir se revisão ainda está pendente]
+        NQ --> NOTIFIER
+        NOTIFIER --> LEDGER[DynamoDB Jobs: deduplicar por aviso e dispositivo]
+        LEDGER --> PUSH[Web Push / VAPID: payload genérico]
+        SM --> PUSH
+    end
+    subgraph APP[Aplicativo e consumo privado]
+        PHONE[Android / navegador / PWA] --> CF[CloudFront / HTTPS / origem privada OAC]
+        CF --> WEB[S3 da interface: HTML / CSS / JS]
+        PHONE <--> COG[Cognito: Authorization Code / PKCE / sessão persistente]
+        PHONE -->|Access token| GW[API Gateway: validação JWT]
+        GW --> API[Lambda API: biblioteca / aprovação / refinamento / links temporários]
+        API --> PROG[DynamoDB Progress: posição / ouvido por usuário]
+        API --> SUBS[DynamoDB Push: assinaturas privadas]
+        SUBS --> NOTIFIER
+        API -->|Leitura do catálogo e link assinado| CAT
+        PHONE -->|Reprodução por link temporário| CAT
+        API --> HUMAN
+        PUSH -->|Pronto: Para ouvir / revisão: Análise e aprovação| PHONE
+    end
+    COL -. checkpoints .-> SNAP[S3: respostas / roteiros / pareceres / recibos]
+    REV -. checkpoints .-> SNAP
+    WORK -. checkpoints .-> SNAP
+    BLOCK --> JOBFAIL[DynamoDB: failed / needs_review]
+    CLAIM -. falhas não tratadas .-> DLQE[SQS: fila de falhas editorial]
+    AQ -. entrega/processamento não tratado .-> DLQA[SQS: dead letter do worker]
+    WORK -. logs .-> CW
+    REV -. logs .-> CW
+    API -. logs .-> CW

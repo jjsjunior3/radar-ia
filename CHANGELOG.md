@@ -15,9 +15,13 @@ Primeira versão do MVP Radar IA, com código preparado para distribuição sob 
 
 ### Limites conhecidos
 
-O fluxo acompanhado e os avisos em Android real foram confirmados pelo proprietário. Os agentes e o ciclo automático possuem testes simulados; a primeira edição agendada sem intervenção nessa versão ainda precisa ser observada. A avaliação usa resumos RSS e não equivale a checagem factual independente. Falhas não disparam aviso push. O código público não implica acesso público ao aplicativo ou aos episódios.
+O fluxo acompanhado e os avisos em Android real foram confirmados pelo proprietário. Os agentes e o ciclo automático possuem testes simulados; a primeira edição agendada sem intervenção nessa versão ainda precisa ser observada. A avaliação usa resumos RSS e não equivale a checagem factual independente. Falhas técnicas não disparam aviso push genérico; revisão humana possui aviso próprio. O código público não implica acesso público ao aplicativo ou aos episódios.
 
 - Revisão humana após duas reprovações, com os pareceres no app; retomada automática após decisão vinculada ao roteiro.
 - Memória editorial privada de aprovações humanas e observações, consumida como contexto limitado nas próximas edições.
 
 - Interface organizada em Para ouvir, Biblioteca e Análise e aprovação; detalhes recolhidos, indicador de pendência e player compartilhado.
+
+- Aviso de revisão humana vinculado ao roteiro pendente, com abertura da área de análise e descarte de avisos antigos.
+- Painel de refinamento com referências humanas consultadas, versões e comparação textual.
+- Demonstração local sem credenciais/cobranças, capturas fictícias e organograma completo em PNG, SVG e Mermaid.

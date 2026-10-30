@@ -74,3 +74,18 @@ def test_other_user_cannot_subscribe_or_request_test():
     for route in ['GET /api/push/config','POST /api/push/subscribe','POST /api/push/test','POST /api/push/unsubscribe']:
         assert handle(event(route,uid='other',data={}),backend)['statusCode']==403
     backend.push.assert_not_called()
+
+
+def test_review_notification_is_bound_to_pending_digest_and_deduplicated(monkeypatch):
+    from types import SimpleNamespace
+    from radar_ia import review_api
+    devices=PushStore(DeviceTable());devices.subscribe('owner',subscription());jobs=JobStore(Table());send=Mock(return_value=201)
+    summary={'stage':'awaiting_human_review','digest':'a'*64}
+    monkeypatch.setattr(review_api,'ReviewStore',lambda *a:SimpleNamespace(summary=lambda day:summary))
+    message={'kind':'human_review','date':'2026-10-30','digest':'a'*64}
+    deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)
+    deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)
+    send.assert_called_once();assert send.call_args.args[1]['view']=='review'
+    summary['stage']='script_approved'
+    assert deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)['processed']==0
+    send.assert_called_once()

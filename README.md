@@ -11,9 +11,9 @@ Radar IA transforma notícias de inteligência artificial e do mercado de tecnol
 
 Desenvolvido por **[jrsantosdev](https://github.com/jjsjunior3)** como projeto de portfólio e aprendizado aplicado em Python, IA generativa e AWS.
 
-[Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
+[Demonstração sem AWS](docs/19-demonstracao-e-divulgacao.md) · [Organograma completo](docs/18-arquitetura-completa.md) · [Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
 
-> **Estado do projeto:** MVP privado em uso, com código MIT preparado para abertura pública. Publicação automática opcional com agentes de coleta, relevância, roteiro, avaliação e produção: correções limitadas antes de voz Leo, verificação de duração, catálogo privado e aviso no Android. O modo acompanhado permanece disponível. Recebimento de notificações em Android real confirmado pelo proprietário. A primeira edição diária sem intervenção após ativar o modo automático ainda precisa ser observada; veja os [limites e a operação](docs/15-publicacao-automatica.md).
+> **Estado do projeto:** MVP privado em uso, com código aberto sob licença MIT. Publicação automática opcional com agentes de coleta, relevância, roteiro, avaliação e produção: correções limitadas antes de voz Leo, verificação de duração, catálogo privado e aviso no Android. O modo acompanhado permanece disponível. Recebimento de notificações em Android real confirmado pelo proprietário. A primeira edição diária sem intervenção após ativar o modo automático ainda precisa ser observada; veja os [limites e a operação](docs/15-publicacao-automatica.md).
 
 ## O problema
 
@@ -29,6 +29,7 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 - **Roteiro em português:** geração estruturada, validação com Pydantic, glossário e termos em inglês contextualizados.
 - **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
 - **Aplicativo organizado:** Para ouvir (pendentes e retomada), Biblioteca (histórico/filtros) e Análise e aprovação (pareceres e decisões), com player compartilhado e progresso por usuário.
+- **Refinamento visível:** referências humanas usadas, versões preservadas e comparação de texto; aviso específico quando a decisão humana é necessária.
 - **Revisão pelo app:** responsável acompanha a edição, lê roteiro/fontes e aprova a versão exibida, sem disparar voz ou publicação.
 - **Operação configurável:** modo automático ou acompanhado, checkpoints privados no S3 e autorizações vinculadas ao conteúdo; resultados pagos incertos exigem intervenção.
 - **Infraestrutura reproduzível:** template CloudFormation e acesso temporário do GitHub à AWS via OIDC.
@@ -245,6 +246,9 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 | [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
+| [18 · Arquitetura completa](docs/18-arquitetura-completa.md) | Todos os agentes, serviços e o ciclo de aprendizado |
+| [19 · Demonstração e divulgação](docs/19-demonstracao-e-divulgacao.md) | Dados fictícios, capturas e rascunho para LinkedIn |
+| [20 · Próximos diferenciais](docs/20-proximos-diferenciais.md) | Avaliação mensurável e observabilidade propostas |
 | [17 · Interface por áreas](docs/17-interface.md) | Pendentes, histórico, análise e player compartilhado |
 | [16 · Agentes editoriais](docs/16-agentes-editoriais.md) | Seleção, roteiro, avaliação e ciclo limitado de correções |
 | [15 · Publicação automática](docs/15-publicacao-automatica.md) | Ativar, pausar, verificar e recuperar o fluxo diário |
@@ -271,14 +275,14 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Implementar publicação automática configurável, com limites de conteúdo/duração e proteção contra repetição de cobranças incertas.
 - [x] Aplicar logo e cores do Radar IA ao login Cognito clássico.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
-- [ ] Revisar o repositório e disponibilizar o código publicamente.
+- [x] Revisar o repositório e disponibilizar o código publicamente.
 - [ ] Criar um feed RSS público como canal opcional de distribuição.
 
 O feed público exigirá uma decisão própria de distribuição e acesso aos arquivos; URLs S3 temporárias do app não funcionam como endereço permanente de podcast.
 
 ## Licença e participação
 
-O código é distribuído sob a [licença MIT](LICENSE). O repositório está privado durante esta fase de revisão e preparação para abertura pública. A licença do código não transfere direitos sobre notícias de terceiros, dados pessoais ou credenciais.
+O código é distribuído sob a [licença MIT](LICENSE). O repositório é público; o aplicativo e os episódios da instância do autor continuam privados. A licença do código não transfere direitos sobre notícias de terceiros, dados pessoais ou credenciais.
 
 Ao abrir o repositório, contribuições poderão focar melhorias reproduzíveis, correções de bugs e documentação. Issues e pull requests devem usar dados fictícios e preservar informações de conta. Alterações de privacidade, custos e publicação precisam explicar seu impacto.
 
@@ -287,4 +291,4 @@ Ao abrir o repositório, contribuições poderão focar melhorias reproduzíveis
 
 ## Contribuição e abertura do código
 
-Veja [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md) e [PRIVACY](PRIVACY.md). A demonstração e os testes podem rodar sem AWS ou chave LLM. A auditoria de preparação não alterou a visibilidade: o repositório continua privado, aguardando decisão do proprietário. Os relatórios de segurança e dados de produção ficam fora do Git.
+Veja [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md) e [PRIVACY](PRIVACY.md). A demonstração e os testes podem rodar sem AWS ou chave LLM. O código foi aberto após revisão dos arquivos, histórico e testes. Os relatórios de segurança e dados de produção ficam fora do Git.

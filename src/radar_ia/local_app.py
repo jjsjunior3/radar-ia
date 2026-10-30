@@ -18,6 +18,8 @@ class Library:
     def __init__(self, output, demo=False):
         self.output=Path(output)
         self.demo=demo
+        self.demo_approved=False
+        self.demo_feedback=""
         self.progress=ProgressStore(self.output/'app'/'progress.sqlite3')
         self.cached=None
         self.cached_at=0
@@ -29,7 +31,8 @@ class Library:
 
     def episodes(self):
         if self.demo:
-            return [dict(id='demo-1',date='2026-10-28',title='Caixa de ferramentas',theme='Guias, agentes e infraestrutura',duration_seconds=217.6,visibility='local-demo',description='Demonstração da biblioteca. O player será conectado ao episódio privado no modo S3.')]
+            from .demo import episodes
+            return episodes()
         if self.cached is None or time.monotonic()-self.cached_at>30:
             catalog,_=read_catalog(self.s3,self.bucket,f'{self.prefix}/catalog.json')
             self.cached=catalog['episodes']
@@ -41,7 +44,12 @@ class Library:
 
     def listing(self):
         progress=self.progress.all()
-        return {'mode':'demo' if self.demo else 's3','episodes':[dict(e,progress=progress.get(e['id'],dict(position=0,heard=False))) for e in self.episodes()]}
+        return {'mode':'demo' if self.demo else 's3','episodes':[dict(e,progress=progress.get(e['id'],e.get('demo_progress',dict(position=0,heard=False)))) for e in self.episodes()]}
+
+    def demo_edition(self,edition):
+        if not self.demo:raise ValueError('Demonstração não habilitada')
+        from .demo import edition as build
+        return build(edition,self.demo_approved,self.demo_feedback)
 
     def audio_url(self,episode):
         if self.demo: raise ValueError('Player de demonstração: execute em modo S3 para ouvir o episódio privado.')
@@ -78,6 +86,8 @@ def handler_for(library,port):
             try:
                 if path=='/api/episodes':
                     return self.reply(200,library.listing())
+                if library.demo and path.startswith('/api/production/'):
+                    return self.reply(200,library.demo_edition(path.rsplit('/',1)[1]))
                 if path.startswith('/api/audio/'):
                     episode=library.episode(unquote(path[len('/api/audio/'):]))
                     if not episode: return self.reply(404,{'error':'Episódio não encontrado'})
@@ -94,7 +104,18 @@ def handler_for(library,port):
             if not self.authorized_host(): return
             if self.headers.get('X-Radar-Client')!='web' or self.headers.get('Origin') not in {f'http://{host}' for host in allowed_hosts}:
                 return self.reply(403,{'error':'Origem não autorizada'})
-            if urlparse(self.path).path!='/api/progress': return self.reply(404,{'error':'Rota não encontrada'})
+            path=urlparse(self.path).path
+            if library.demo and path.startswith('/api/production/') and path.endswith('/approve-script'):
+                try:
+                    size=int(self.headers.get('Content-Length','0'))
+                    if not 0<size<=4096:raise ValueError('Requisição inválida')
+                    data=json.loads(self.rfile.read(size))
+                    if data.get('confirmed') is not True or data.get('digest')!='a'*64 or not isinstance(data.get('feedback',''),str) or len(data.get('feedback',''))>2000:raise ValueError('Confirmação inválida')
+                    library.demo_edition(path.split('/')[-2])
+                    library.demo_approved=True;library.demo_feedback=data.get('feedback','')
+                    return self.reply(200,library.demo_edition(path.split('/')[-2]))
+                except (ValueError,TypeError):return self.reply(400,{'error':'Simulação inválida'})
+            if path!='/api/progress': return self.reply(404,{'error':'Rota não encontrada'})
             try:
                 size=int(self.headers.get('Content-Length','0'))
                 if not 0<size<=4096: raise ValueError('Requisição inválida')

@@ -1312,6 +1312,18 @@
                       "Arn"
                     ]
                   }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "NotificationQueue",
+                      "Arn"
+                    ]
+                  }
                 }
               ]
             }
@@ -1381,6 +1393,17 @@
             },
             "AUDIO_QUEUE_URL": {
               "Ref": "AudioQueue"
+            },
+            "NOTIFICATION_QUEUE_URL": {
+              "Fn::If": [
+                "PushConfigured",
+                {
+                  "Ref": "NotificationQueue"
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
             }
           }
         }

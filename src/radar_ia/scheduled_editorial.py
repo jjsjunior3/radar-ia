@@ -33,7 +33,7 @@ def scheduled_edition(event,now):
     return local.date().isoformat()
 
 
-def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=None,generator=None,automatic_queue=None):
+def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=None,generator=None,automatic_queue=None,notice_queue=None):
     now=now or datetime.now(timezone.utc);day=scheduled_edition(event,now)
     if not owner:raise ValueError('Responsavel nao configurado')
     identifier=editorial_job_id(day)
@@ -78,6 +78,10 @@ def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=Non
                     'planned_for':brief['planned_for'],'audio_revision':run.state.get('audio_revision','initial'),
                     'can_generate_audio':True}
                 automatic_queue.start(summary,'audio',{'digest':summary['digest'],'confirmed':True},owner,automatic=True)
+            if run.state['stage']=='awaiting_human_review' and notice_queue is not None:
+                from .push import review_notice
+                brief,script,_=run.script_bundle()
+                review_notice(notice_queue[0],notice_queue[1],day,fingerprint({'brief':brief,'script':script.model_dump()}))
             jobs.update(identifier,'succeeded',edition_stage=run.state['stage'])
             return {'status':'succeeded','date':day,'stage':run.state['stage']}
     except Exception as exc:
@@ -100,5 +104,6 @@ def handler(event,context):
         print(json.dumps({'event':'editorial_diagnostic_ok','generation':False}))
         return {'status':'diagnostic_ok','generation':False}
     automatic_queue=JobQueue(jobs,boto3.client('sqs',config=config),os.environ['AUDIO_QUEUE_URL']) if os.getenv('AUTOMATIC_PUBLICATION')=='true' else None
+    notice_queue=(boto3.client('sqs',config=config),os.environ['NOTIFICATION_QUEUE_URL']) if os.getenv('NOTIFICATION_QUEUE_URL') else None
     return process(event,jobs,s3,boto3.client('secretsmanager',config=config),os.environ['S3_BUCKET'],
-        os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB'],os.environ['OPENROUTER_SECRET_ARN'],sources,automatic_queue=automatic_queue)
+        os.getenv('S3_PREFIX','radar-ia').strip('/'),os.environ['REVIEWER_SUB'],os.environ['OPENROUTER_SECRET_ARN'],sources,automatic_queue=automatic_queue,notice_queue=notice_queue)

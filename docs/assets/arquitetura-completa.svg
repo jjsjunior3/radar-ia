@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="2800" viewBox="0 0 2200 2800" role="img"><title>Radar IA: agentes, serviços e aprendizado</title><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#57dbc0"/></marker></defs><rect width="2200" height="2800" fill="#091322"/><g font-family="Segoe UI,Arial,sans-serif">
+<text x="80" y="100" fill="#57dbc0" font-size="29" font-weight="700">RADAR IA / ARQUITETURA COMPLETA</text>
+<text x="80" y="195" fill="#F3F7FC" font-size="76" font-weight="700">Agentes, serviços e aprendizado.</text>
+<text x="80" y="248" fill="#B8C9DB" font-size="30" font-weight="400">Da notícia ao áudio privado, com decisões rastreáveis e refinamento editorial.</text>
+<rect x="80" y="300" width="480" height="185" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="348" fill="#F3F7FC" font-size="27" font-weight="700">GitHub Actions + IAM/OIDC</text>
+<text x="106" y="394" fill="#B8C9DB" font-size="25" font-weight="400">Testes e operação manual</text>
+<text x="106" y="428" fill="#B8C9DB" font-size="25" font-weight="400">Sessões AWS temporárias</text>
+<rect x="600" y="300" width="480" height="185" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="626" y="348" fill="#F3F7FC" font-size="27" font-weight="700">CloudFormation + S3</text>
+<text x="626" y="394" fill="#B8C9DB" font-size="25" font-weight="400">Infraestrutura em arquivo</text>
+<text x="626" y="428" fill="#B8C9DB" font-size="25" font-weight="400">Artefatos privados de deploy</text>
+<rect x="1120" y="300" width="480" height="185" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1146" y="348" fill="#F3F7FC" font-size="27" font-weight="700">Secrets Manager</text>
+<text x="1146" y="394" fill="#B8C9DB" font-size="25" font-weight="400">Credenciais OpenRouter</text>
+<text x="1146" y="428" fill="#B8C9DB" font-size="25" font-weight="400">Chave privada VAPID</text>
+<rect x="1640" y="300" width="480" height="185" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1666" y="348" fill="#F3F7FC" font-size="27" font-weight="700">CloudWatch</text>
+<text x="1666" y="394" fill="#B8C9DB" font-size="25" font-weight="400">Logs por Lambda</text>
+<text x="1666" y="428" fill="#B8C9DB" font-size="25" font-weight="400">Sem chaves nos registros</text>
+<text x="80" y="550" fill="#57dbc0" font-size="30" font-weight="700">PRODUÇÃO / EVENTBRIDGE SCHEDULER → LAMBDA EDITORIAL</text>
+<text x="80" y="594" fill="#B8C9DB" font-size="26" font-weight="400">Seg–sex, 8h30 São Paulo • DynamoDB Jobs evita execução duplicada por data.</text>
+<rect x="80" y="650" width="600" height="230" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="698" fill="#F3F7FC" font-size="31" font-weight="700">01 / Coletor determinístico</text>
+<text x="106" y="744" fill="#B8C9DB" font-size="25" font-weight="400">RSS • httpx • feedparser</text>
+<text x="106" y="778" fill="#B8C9DB" font-size="25" font-weight="400">Datas, HTTPS, domínios e deduplicação</text>
+<text x="106" y="812" fill="#B8C9DB" font-size="25" font-weight="400">Grade semanal e até 7 candidatas</text>
+<rect x="800" y="650" width="600" height="230" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="826" y="698" fill="#F3F7FC" font-size="31" font-weight="700">02 / Agente de relevância</text>
+<text x="826" y="744" fill="#B8C9DB" font-size="25" font-weight="400">OpenRouter • modelo configurado</text>
+<text x="826" y="778" fill="#B8C9DB" font-size="25" font-weight="400">Nota de 0 a 5 + motivo por notícia</text>
+<text x="826" y="812" fill="#B8C9DB" font-size="25" font-weight="400">Seleciona notas a partir de 3</text>
+<rect x="1520" y="650" width="600" height="230" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1546" y="698" fill="#F3F7FC" font-size="31" font-weight="700">03 / Agente roteirista</text>
+<text x="1546" y="744" fill="#B8C9DB" font-size="25" font-weight="400">OpenRouter • JSON + Pydantic</text>
+<text x="1546" y="778" fill="#B8C9DB" font-size="25" font-weight="400">PT-BR e inglês contextualizado</text>
+<text x="1546" y="812" fill="#B8C9DB" font-size="25" font-weight="400">Recebe análise para uma correção</text>
+<path d="M 690 765 H 786" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 1410 765 H 1506" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 1820 890 V 1006" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="1350" y="956" fill="#57dbc0" font-size="25" font-weight="400">Roteiro + evidências originais</text>
+<rect x="1520" y="1020" width="600" height="250" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1546" y="1068" fill="#F3F7FC" font-size="31" font-weight="700">04 / Agente avaliador</text>
+<text x="1546" y="1114" fill="#B8C9DB" font-size="25" font-weight="400">Fidelidade, atribuições e clareza</text>
+<text x="1546" y="1148" fill="#B8C9DB" font-size="25" font-weight="400">Aprova com nota ≥ 4, sem bloqueantes</text>
+<text x="1546" y="1182" fill="#B8C9DB" font-size="25" font-weight="400">1ª reprovação: análise ao roteirista</text>
+<text x="1546" y="1216" fill="#B8C9DB" font-size="25" font-weight="400">2ª reprovação: decisão humana</text>
+<rect x="800" y="1020" width="600" height="250" rx="24" fill="#30264B" stroke="#38516A" stroke-width="2"/>
+<text x="826" y="1068" fill="#F3F7FC" font-size="31" font-weight="700">05 / Decisão humana</text>
+<text x="826" y="1114" fill="#B8C9DB" font-size="25" font-weight="400">Roteiro + dois pareceres + diferenças</text>
+<text x="826" y="1148" fill="#B8C9DB" font-size="25" font-weight="400">Aprovação ligada ao hash e ao autor</text>
+<text x="826" y="1182" fill="#B8C9DB" font-size="25" font-weight="400">Preferências não alteram o texto atual</text>
+<text x="826" y="1216" fill="#B8C9DB" font-size="25" font-weight="400">Após aprovar: retoma automaticamente</text>
+<rect x="80" y="1020" width="600" height="250" rx="24" fill="#30264B" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="1068" fill="#F3F7FC" font-size="31" font-weight="700">06 / Memória editorial privada</text>
+<text x="106" y="1114" fill="#B8C9DB" font-size="25" font-weight="400">S3: observação + trecho aceito</text>
+<text x="106" y="1148" fill="#B8C9DB" font-size="25" font-weight="400">Até 5 aprovações humanas em 14 dias</text>
+<text x="106" y="1182" fill="#B8C9DB" font-size="25" font-weight="400">Contexto para relevância/roteiro/avaliação</text>
+<text x="106" y="1216" fill="#B8C9DB" font-size="25" font-weight="400">Não treina o modelo nem muda código</text>
+<path d="M 1510 1140 H 1414" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 790 1140 H 694" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 1820 1278 V 1390 H 380 V 1486" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 1100 1278 V 1425 H 380 V 1486" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="80" y="1340" fill="#57dbc0" font-size="28" font-weight="600">Aprovação do avaliador OU decisão humana</text>
+<text x="650" y="1458" fill="#C9B7F8" font-size="25" font-weight="400">MEMÓRIA → próxima edição; fontes e validações continuam obrigatórias.</text>
+<rect x="80" y="1500" width="600" height="260" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="1548" fill="#F3F7FC" font-size="31" font-weight="700">07 / SQS + DynamoDB Jobs</text>
+<text x="106" y="1594" fill="#B8C9DB" font-size="25" font-weight="400">Fila de áudio e tarefa por hash</text>
+<text x="106" y="1628" fill="#B8C9DB" font-size="25" font-weight="400">Voz/versão vinculadas ao conteúdo</text>
+<text x="106" y="1662" fill="#B8C9DB" font-size="25" font-weight="400">Estados e cobranças incertas preservados</text>
+<text x="106" y="1696" fill="#B8C9DB" font-size="25" font-weight="400">Checkpoint: S3 privado</text>
+<rect x="800" y="1500" width="600" height="260" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="826" y="1548" fill="#F3F7FC" font-size="31" font-weight="700">08 / Lambda worker + Polly</text>
+<text x="826" y="1594" fill="#B8C9DB" font-size="25" font-weight="400">Valida aprovação e revalida fontes</text>
+<text x="826" y="1628" fill="#B8C9DB" font-size="25" font-weight="400">Leo generativa • SSML bilíngue</text>
+<text x="826" y="1662" fill="#B8C9DB" font-size="25" font-weight="400">WAV íntegro e duração de até 600 s</text>
+<text x="826" y="1696" fill="#B8C9DB" font-size="25" font-weight="400">Sem aprovação: não chama Polly</text>
+<rect x="1520" y="1500" width="600" height="260" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1546" y="1548" fill="#F3F7FC" font-size="31" font-weight="700">09 / S3 + avisos Web Push</text>
+<text x="1546" y="1594" fill="#B8C9DB" font-size="25" font-weight="400">Catálogo confirma antes do aviso</text>
+<text x="1546" y="1628" fill="#B8C9DB" font-size="25" font-weight="400">SQS avisos → worker → VAPID</text>
+<text x="1546" y="1662" fill="#B8C9DB" font-size="25" font-weight="400">DynamoDB deduplica por dispositivo</text>
+<text x="1546" y="1696" fill="#B8C9DB" font-size="25" font-weight="400">Revisão pendente também gera aviso</text>
+<path d="M 690 1630 H 786" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M 1410 1630 H 1506" fill="none" stroke="#57dbc0" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="80" y="1845" fill="#57dbc0" font-size="30" font-weight="700">APLICATIVO / ANDROID, NAVEGADOR E DADOS PRIVADOS</text>
+<rect x="80" y="1890" width="480" height="215" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="1938" fill="#F3F7FC" font-size="27" font-weight="700">Android / navegador</text>
+<text x="106" y="1984" fill="#B8C9DB" font-size="25" font-weight="400">PWA: Para ouvir / Biblioteca</text>
+<text x="106" y="2018" fill="#B8C9DB" font-size="25" font-weight="400">Análise e aprovação</text>
+<rect x="600" y="1890" width="480" height="215" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="626" y="1938" fill="#F3F7FC" font-size="27" font-weight="700">CloudFront + S3 web</text>
+<text x="626" y="1984" fill="#B8C9DB" font-size="25" font-weight="400">Interface HTTPS</text>
+<text x="626" y="2018" fill="#B8C9DB" font-size="25" font-weight="400">Origem privada por OAC</text>
+<rect x="1120" y="1890" width="480" height="215" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1146" y="1938" fill="#F3F7FC" font-size="27" font-weight="700">Cognito / PKCE</text>
+<text x="1146" y="1984" fill="#B8C9DB" font-size="25" font-weight="400">Login por convite</text>
+<text x="1146" y="2018" fill="#B8C9DB" font-size="25" font-weight="400">Sessão persistente</text>
+<rect x="1640" y="1890" width="480" height="215" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1666" y="1938" fill="#F3F7FC" font-size="27" font-weight="700">API Gateway + Lambda</text>
+<text x="1666" y="1984" fill="#B8C9DB" font-size="25" font-weight="400">JWT / autorização do responsável</text>
+<text x="1666" y="2018" fill="#B8C9DB" font-size="25" font-weight="400">Progresso, revisão e links</text>
+<rect x="80" y="2170" width="600" height="240" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="106" y="2218" fill="#F3F7FC" font-size="31" font-weight="700">DynamoDB / dados do app</text>
+<text x="106" y="2264" fill="#B8C9DB" font-size="25" font-weight="400">Progress: posição e ouvido por usuário</text>
+<text x="106" y="2298" fill="#B8C9DB" font-size="25" font-weight="400">Push: assinaturas por dispositivo</text>
+<text x="106" y="2332" fill="#B8C9DB" font-size="25" font-weight="400">Jobs: tarefas e ledger de avisos</text>
+<rect x="800" y="2170" width="600" height="240" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="826" y="2218" fill="#F3F7FC" font-size="31" font-weight="700">S3 / acesso ao episódio</text>
+<text x="826" y="2264" fill="#B8C9DB" font-size="25" font-weight="400">Áudios e catálogo privados</text>
+<text x="826" y="2298" fill="#B8C9DB" font-size="25" font-weight="400">API emite URL temporária</text>
+<text x="826" y="2332" fill="#B8C9DB" font-size="25" font-weight="400">Originais, versões e pareceres privados</text>
+<rect x="1520" y="2170" width="600" height="240" rx="24" fill="#172A40" stroke="#38516A" stroke-width="2"/>
+<text x="1546" y="2218" fill="#F3F7FC" font-size="31" font-weight="700">Falhas e intervenção</text>
+<text x="1546" y="2264" fill="#B8C9DB" font-size="25" font-weight="400">Jobs: failed ou needs_review</text>
+<text x="1546" y="2298" fill="#B8C9DB" font-size="25" font-weight="400">SQS: filas de falha / dead letter</text>
+<text x="1546" y="2332" fill="#B8C9DB" font-size="25" font-weight="400">Resultados pagos incertos não repetem</text>
+<text x="80" y="2490" fill="#C9B7F8" font-size="29" font-weight="600">COMO APRENDE: aprovação humana → memória S3 → contexto dos três agentes LLM.</text>
+<text x="80" y="2540" fill="#B8C9DB" font-size="26" font-weight="400">O painel mostra referências usadas e mudanças entre versões. Comparação de texto não comprova melhoria.</text>
+<text x="80" y="2590" fill="#B8C9DB" font-size="25" font-weight="400">Avaliação usa resumos RSS; não equivale a checagem factual externa. Uma edição automática real ainda será observada.</text>
+<path d="M80 2650H2120" stroke="#38516A" stroke-width="2"/>
+<text x="80" y="2710" fill="#F3F7FC" font-size="32" font-weight="700">Feito por jrsantosdev</text>
+<text x="80" y="2758" fill="#B8C9DB" font-size="25" font-weight="400">Código sob licença MIT • aplicativo, episódios e memória continuam privados.</text>
+</g></svg>

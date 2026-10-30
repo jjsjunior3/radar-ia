@@ -22,3 +22,10 @@ test('existing app window is focused and told to refresh its library',async()=>{
  listeners.notificationclick({notification:{close(){}},waitUntil:p=>pending=p});await pending;
  assert.equal(focused,true);assert.equal(message.type,'radar-notice-opened');
 });
+
+test('human review notification opens only the allowed review section',async()=>{
+ const {sandbox,listeners}=environment();let opened,pending;
+ sandbox.self.clients.matchAll=async()=>[];sandbox.self.clients.openWindow=async url=>opened=url;
+ listeners.notificationclick({notification:{data:{view:'review',url:'https://evil.example'},close(){}},waitUntil:p=>pending=p});await pending;
+ assert.equal(opened,'https://radar.example/#review');
+});

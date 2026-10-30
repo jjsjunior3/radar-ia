@@ -36,9 +36,9 @@ Apresenta os papéis funcionais e os módulos: coleta determinística, relevânc
 
 ## Como falar de open source
 
-O código está sob licença MIT, mas o repositório continua privado durante a revisão. As imagens usam **“Open source em preparação”** e **“abertura pública planejada”**. Isso preserva a intenção do projeto e descreve corretamente o acesso atual.
+O código está aberto sob licença MIT. As imagens usam “Código aberto • licença MIT”; o aplicativo, os episódios, os checkpoints e a memória do autor continuam privados. O endereço do repositório é https://github.com/jjsjunior3/radar-ia.
 
-Depois da abertura pública, atualizar essas frases no gerador/SVG, acrescentar o endereço acessível do repositório e exportar novamente as imagens. A publicação do código é independente da privacidade dos episódios e do aplicativo. Não incluir dados de conta ou conteúdo pessoal no material público.
+A publicação do código é independente da distribuição de episódios. O feed RSS público é uma evolução separada. Use as capturas com dados fictícios disponíveis no [guia da demonstração](19-demonstracao-e-divulgacao.md).
 
 ## Como editar e regenerar
 
@@ -58,7 +58,7 @@ A identidade usa fontes sans-serif, contraste alto, margens constantes e a assin
 
 - Observar uma edição diária completa dos agentes na AWS antes de descrevê-la como validada sem intervenção.
 - Explicar que a revisão automática compara o roteiro aos resumos, sem checagem factual externa.
-- Atualizar a condição de open source quando o repositório estiver acessível ao público.
+- Confirmar que os links do código e das imagens continuam públicos e corretos.
 - Usar dados de demonstração se for incluir capturas do aplicativo.
 
 A postagem no LinkedIn é uma ação separada; estes arquivos são material preparado para sua revisão e publicação.

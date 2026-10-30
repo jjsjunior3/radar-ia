@@ -74,3 +74,17 @@ def test_feedback_length_is_limited_before_any_mutation(store):
     before=store.summary('2026-10-29')
     with pytest.raises(ValueError):store.approve_script('2026-10-29',{'digest':before['digest'],'confirmed':True,'feedback':'x'*2001},'owner')
     assert store.summary('2026-10-29')['stage']=='awaiting_script_review'
+
+
+def test_refinement_summary_exposes_versions_changes_and_only_editorial_memory(store):
+    key=store.key('2026-10-29')
+    with zipfile.ZipFile(io.BytesIO(store.s3.objects[key])) as z:files={name:z.read(name) for name in z.namelist()}
+    brief=json.loads(files['briefing.json']);brief['editorial_memory']=[{'date':'2026-10-28','feedback':'Prefiro frases curtas.','accepted_excerpt':'Exemplo.','approved_by':'private-owner'}]
+    files['briefing.json']=json.dumps(brief)
+    script=json.loads(files['roteiro.json']);first=dict(script,intro_pt='Primeira versão longa.')
+    for i,draft in [(1,first),(2,script)]:files[f'agents/writer-{i}/response.json']=json.dumps({'choices':[{'message':{'content':json.dumps(draft)}}]})
+    store.s3.objects[key]=pack(files)
+    refinement=store.summary('2026-10-29')['refinement']
+    assert len(refinement['versions'])==2 and '-Primeira versão longa.' in refinement['changes']
+    assert refinement['examples'][0]['feedback']=='Prefiro frases curtas.'
+    assert 'approved_by' not in refinement['examples'][0]

@@ -1,5 +1,6 @@
 """Revisão de roteiro sobre checkpoint privado; somente stdlib e cliente S3."""
 import hashlib
+import difflib
 import io
 import json
 import re
@@ -76,6 +77,25 @@ class ReviewStore:
                 if not narration.strip() or len(narration)>20000:raise ValueError('Narração inválida')
                 result.update(narration=narration,digest=digest_script(brief,script),
                     can_approve_script=checkpoint['stage'] in ('awaiting_script_review','awaiting_human_review'))
+            versions=[]
+            for number in (1,2):
+                name=f'agents/writer-{number}/response.json'
+                if name not in archive.namelist():continue
+                try:
+                    raw_version=json.loads(archive.read(name))
+                    draft=json.loads(raw_version['choices'][0]['message']['content'])
+                    parts=[draft['intro_pt'],*(story['narration_pt'] for story in draft['stories']),draft['outro_pt']]
+                    if not all(isinstance(part,str) for part in parts):raise ValueError('Texto inválido')
+                    versions.append({'version':number,'narration':'\n\n'.join(parts)[:12000]})
+                except (ValueError,KeyError,TypeError,IndexError):
+                    versions.append({'version':number,'narration':'Resposta não estruturada; consulte o parecer de validação.'})
+            changes=''
+            if len(versions)==2:
+                changes='\n'.join(difflib.unified_diff(versions[0]['narration'].splitlines(),versions[1]['narration'].splitlines(),fromfile='Versão 1',tofile='Versão 2',lineterm=''))[:16000]
+            memory=brief.get('editorial_memory',[]) if 'briefing.json' in archive.namelist() else []
+            result['refinement']={'versions':versions,'changes':changes,'examples':[
+                {key:str(item.get(key,''))[:2000] for key in ('date','theme','feedback','accepted_excerpt')}
+                for item in memory[:5] if isinstance(item,dict)]}
             result['human_escalated']='agents/escalation.json' in archive.namelist()
             result['editorial_reviews']=[json.loads(archive.read(name)) for name in sorted(archive.namelist()) if re.fullmatch(r'agents/review-[12]\.json',name)]
             if 'aprovacao-roteiro.json' in archive.namelist():

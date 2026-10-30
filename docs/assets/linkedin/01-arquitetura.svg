@@ -86,10 +86,10 @@
 <text x="112" y="1625" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">CloudFormation provisiona a infraestrutura • CloudWatch recebe os logs.</text>
 <text x="112" y="1660" fill="#B0C0D2" font-size="22" font-weight="400" letter-spacing="0">Após publicar: SQS + Lambda → Web Push; assinaturas privadas no DynamoDB.</text>
 <rect x="80" y="1722" width="1440" height="112" rx="24" fill="#153430" stroke="none" stroke-width="2"/>
-<text x="112" y="1765" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="1">OPEN SOURCE EM PREPARAÇÃO</text>
+<text x="112" y="1765" fill="#52DAC4" font-size="27" font-weight="700" letter-spacing="1">CÓDIGO ABERTO • LICENÇA MIT</text>
 <text x="112" y="1805" fill="#C7E6DF" font-size="26" font-weight="400" letter-spacing="0">Licença MIT. Código e dados privados têm ciclos de publicação separados.</text>
 <path d="M 80 1880 H 1520" fill="none" stroke="#B0C0D2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="80" y="1932" fill="#F3F7FC" font-size="28" font-weight="650" letter-spacing="0">Feito por jrsantosdev</text>
-<text x="80" y="1970" fill="#B0C0D2" font-size="23" font-weight="400" letter-spacing="0">MVP privado • código sob licença MIT • abertura pública planejada</text>
+<text x="80" y="1970" fill="#B0C0D2" font-size="23" font-weight="400" letter-spacing="0">Aplicativo privado • código aberto sob licença MIT</text>
 <text x="1375" y="1932" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">01 / 03</text>
 </g></svg>

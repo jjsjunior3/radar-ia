@@ -121,3 +121,12 @@ def test_automatic_editorial_marks_policy_and_queues_audio_without_polly(monkeyp
     assert 'script_approved' in snapshots
     assert module.process(EVENT,jobs,Mock(),Mock(),'bucket','radar','owner','secret',[],now=NOW,generator=generate,automatic_queue=queue)['status']=='duplicate'
     queue.start.assert_called_once()
+
+
+def test_human_escalation_notifies_instead_of_queuing_polly(monkeypatch,store,tmp_path):
+    script,_=prepare(monkeypatch,store,tmp_path);jobs=JobStore(Table());sqs=Mock();queue=Mock()
+    result=module.process(EVENT,jobs,Mock(),Mock(),'bucket','radar','owner','secret',[],now=NOW,
+        generator=lambda brief,save:(script,{'human_review_required':True}),automatic_queue=queue,notice_queue=(sqs,'notifications'))
+    assert result['stage']=='awaiting_human_review';queue.start.assert_not_called()
+    message=json.loads(sqs.send_message.call_args.kwargs['MessageBody'])
+    assert message['kind']=='human_review' and len(message['digest'])==64

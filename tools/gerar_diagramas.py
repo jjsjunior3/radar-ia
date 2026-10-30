@@ -51,7 +51,7 @@ class Art:
     def footer(self, variant):
         self.path('M 80 1880 H 1520',False,self.muted)
         self.text(80,1932,'Feito por jrsantosdev',28,weight=650)
-        self.text(80,1970,'MVP privado • código sob licença MIT • abertura pública planejada',23,self.muted)
+        self.text(80,1970,'Aplicativo privado • código aberto sob licença MIT',23,self.muted)
         self.text(1375,1932,variant,24,self.muted)
 
     def save(self, filename):
@@ -103,7 +103,7 @@ def architecture():
     a.text(112,1660,'Após publicar: SQS + Lambda → Web Push; assinaturas privadas no DynamoDB.',22,a.muted)
 
     a.rect(80,1722,1440,112,'#153430')
-    a.text(112,1765,'OPEN SOURCE EM PREPARAÇÃO',27,a.accent,700,1)
+    a.text(112,1765,'CÓDIGO ABERTO • LICENÇA MIT',27,a.accent,700,1)
     a.text(112,1805,'Licença MIT. Código e dados privados têm ciclos de publicação separados.',26,'#C7E6DF')
     a.footer('01 / 03');a.save('01-arquitetura.svg')
 
@@ -135,7 +135,7 @@ def journey():
     a.rect(80,1680,1440,145,'#DDEDE6')
     a.text(112,1725,'AGENDADO: SEG–SEX, 8H30 • AMERICA/SAO_PAULO',26,a.accent,700)
     a.text(112,1765,'Coleta → agentes → Polly → catálogo privado → aviso.',28,weight=600)
-    a.text(112,1803,'Open source em preparação • licença MIT • sem preenchimento artificial.',24,a.muted)
+    a.text(112,1803,'Código aberto • licença MIT • sem preenchimento artificial.',24,a.muted)
     a.footer('02 / 03');a.save('02-fluxo-editorial.svg')
 
 
@@ -165,8 +165,8 @@ def modules():
     a.text(80,881,'Coleta determinística; relevância, roteiro e avaliação usam LLM.',27,a.muted)
     a.text(560,1280,'Reprovação → roteirista • na 2ª, revisão humana.',27,a.muted)
     a.rect(80,1690,1440,136,'#30264B')
-    a.text(112,1736,'OPEN SOURCE EM PREPARAÇÃO • MIT',27,a.accent,700)
-    a.text(112,1778,'Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.',26)
+    a.text(112,1736,'CÓDIGO ABERTO • LICENÇA MIT',27,a.accent,700)
+    a.text(112,1778,'Código aberto, aplicativo privado. Evolução: feed RSS público opcional.',26)
     a.footer('03 / 03');a.save('03-modulos-e-ia.svg')
 
 

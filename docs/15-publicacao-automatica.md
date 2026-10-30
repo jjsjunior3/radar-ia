@@ -33,7 +33,7 @@ Para voltar ao fluxo acompanhado, prepare e execute um plano com `--plan --disab
 
 O modo automático não faz repetição ilimitada nem possui um teto financeiro em dólares. As barreiras são uma tarefa editorial por data, hashes de conteúdo, ausência de repetição paga quando o resultado é incerto, até sete notícias, até mil palavras e áudio de até dez minutos. Custos continuam dependendo de caracteres/tokens, armazenamento e utilização. Configure alertas de orçamento na sua conta.
 
-Falhas param o fluxo e aparecem no painel. O aviso ao usuário é de episódio publicado; não há aviso push de falha implementado. Consulte o diagnóstico diário e a fila de falhas quando não houver edição:
+Falhas param o fluxo e aparecem no painel. Há aviso de episódio publicado e de revisão humana após duas reprovações. Não há aviso push genérico de falha implementado. Consulte o diagnóstico diário e a fila de falhas quando não houver edição:
 
 ```bat
 .\.venv\Scripts\python.exe examples\diagnosticar_agendamento_aws.py

@@ -63,3 +63,9 @@ def test_notice(sqs,queue,user_id,identifier,now=None):
 def episode_notice(sqs,queue,episode_id):
     if not re.fullmatch(r'\d{4}-\d{2}-\d{2}-[a-f0-9]{16}',episode_id):raise ValueError('Episodio invalido')
     sqs.send_message(QueueUrl=queue,MessageBody=json.dumps({'kind':'episode','episode_id':episode_id}))
+
+
+def review_notice(sqs,queue,edition,digest):
+    from datetime import date
+    if date.fromisoformat(edition).isoformat()!=edition or not re.fullmatch('[a-f0-9]{64}',digest):raise ValueError('Revisão inválida')
+    sqs.send_message(QueueUrl=queue,MessageBody=json.dumps({'kind':'human_review','date':edition,'digest':digest}))

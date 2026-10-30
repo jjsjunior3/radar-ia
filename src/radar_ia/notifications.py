@@ -17,6 +17,14 @@ def deliver(message,store,jobs,s3,bucket,prefix,owner,send):
         if not any(item['id']==message['episode_id'] for item in catalog['episodes']):raise ValueError('Episodio nao publicado')
         reference=message['episode_id'];selected=devices
         payload={'title':'Radar IA','body':'Um novo episódio está pronto na sua biblioteca privada.','tag':'radar-'+reference}
+    elif kind=='human_review' and set(message)=={'kind','date','digest'}:
+        from .review_api import ReviewStore
+        summary=ReviewStore(s3,bucket,prefix).summary(message['date'])
+        if summary['stage']!='awaiting_human_review' or summary.get('digest')!=message['digest']:
+            return {'processed':0,'skipped':'no_longer_pending'}
+        reference=message['date']+':'+message['digest'];selected=devices
+        payload={'title':'Radar IA','body':'Uma edição precisa da sua revisão no Radar IA.',
+                 'tag':'radar-review-'+message['date']+'-'+message['digest'][:12],'view':'review'}
     elif kind=='test' and set(message)=={'kind','user_id','subscription_id','request_id'} and message['user_id']==owner:
         reference=message['request_id'];selected={key:value for key,value in devices.items() if key==message['subscription_id']}
         payload={'title':'Radar IA','body':'Tudo certo! Os avisos estão ativados neste dispositivo.','tag':'radar-test'}

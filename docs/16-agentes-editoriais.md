@@ -78,4 +78,4 @@ Cada aprovação humana pelo app registra uma observação opcional e um trecho 
 
 Isso é memória contextual, não treinamento ou fine-tuning do modelo. Não garante melhoria em toda edição e não reescreve código, prompts de sistema ou regras de segurança sozinho. As observações explícitas tornam o refinamento mais útil que uma aprovação sem comentário. A memória ativa é limitada à janela de leitura; os registros S3 não são apagados automaticamente após 14 dias. Para retirar uma preferência, o administrador pode remover o objeto correspondente no prefixo privado de feedback.
 
-O aviso Web Push continua sendo de episódio publicado. A solicitação de decisão humana aparece no painel do app; um aviso push específico de revisão ainda não foi implementado.
+A solicitação de decisão humana também gera Web Push e abre Análise e aprovação. Antes de entregar, o worker confirma que o mesmo roteiro ainda aguarda decisão; avisos antigos são descartados. O recebimento desse novo tipo em Android real ainda precisa ser confirmado. O aviso de episódio publicado continua separado.

@@ -4,7 +4,7 @@
 
 O repositório tem licença MIT, README com arquitetura, `.env.example` sem valores secretos, modo de demonstração sem AWS, testes, guias operacionais, instruções de contribuição, política de relato de segurança, descrição de dados/privacidade e modelos de issue/PR. Os diagramas e o logo incluem fontes SVG editáveis.
 
-O código pode ser aberto enquanto a instância e os episódios continuam privados. Esta preparação **não alterou a visibilidade do repositório**, não publicou episódios e não enviou post ao LinkedIn.
+O código pode ser aberto enquanto a instância e os episódios continuam privados. A abertura do código foi autorizada pelo proprietário na sequência de conclusão do MVP. A instância privada não foi aberta, nenhum episódio foi tornado público e nenhum post ao LinkedIn foi enviado.
 
 ## Auditoria realizada
 
@@ -25,7 +25,7 @@ Imagens de arquitetura foram revisadas visualmente. A ferramenta não inspeciona
 - [x] Confirmar o teste de aviso em um Android real.
 - [ ] Observar a primeira edição diária automática sem intervenção (limite conhecido, não bloqueia abertura do código).
 - [x] Revisar novamente o diff e o histórico antes da abertura; repetir se houver novas alterações.
-- [ ] O proprietário decidir quando alterar a visibilidade para público.
+- [x] O proprietário autorizou abrir o repositório ao aprovar a sequência de entregas.
 
 A validação de uma edição agendada sem recuperação manual deve aparecer como limite conhecido no README, mesmo que o proprietário decida abrir antes de concluí-los. Não apresente uma funcionalidade como validada em Android apenas porque um teste de navegador simulado passou.
 
@@ -34,3 +34,6 @@ Validação em 30/10/2026: o proprietário confirmou no Android o recebimento do
 
 
 Entrega com agentes: `CHANGELOG.md`, guia operacional e diagramas atualizados. O modo automático foi habilitado na AWS após testes simulados do ciclo e diagnóstico remoto sem geração. A confirmação de uma edição diária real permanece como limite conhecido da versão 0.1.0.
+
+
+A revisão adicional de 22 execuções do GitHub Actions não encontrou candidatos a segredos nem artefatos de execução. Três logs de produção contêm referências ao ID da conta AWS, metadado de infraestrutura que não é credencial. Esses logs não foram apagados. A ferramenta de padrões não é uma garantia de ausência de vulnerabilidades; as imagens públicas também foram conferidas visualmente.

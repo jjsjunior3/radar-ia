@@ -15,7 +15,7 @@ window.radarProduction=(()=>{
     return `${value('year')}-${value('month')}-${value('day')}`;
   }
   async function request(path,options={}){
-    const response=await fetch(window.radarAuth.url(path),{...options,cache:'no-store',headers:await window.radarAuth.headers(options.headers||{})});
+    const response=await fetch(window.radarAuth.url(path),{...options,cache:'no-store',headers:await window.radarAuth.headers({'X-Radar-Client':'web',...(options.headers||{})})});
     const data=await response.json();
     if(!response.ok){const error=Error(data.error||'Não foi possível consultar a edição.');error.status=response.status;throw error;}
     return data;
@@ -44,6 +44,7 @@ window.radarProduction=(()=>{
       awaiting_audio_review:'O áudio está pronto para a próxima etapa de escuta e aprovação pelo fluxo acompanhado.',
       completed:'O episódio já está disponível na sua biblioteca.'};
     find('note').textContent=data.automatic_publication&&!['completed','no_content','awaiting_human_review'].includes(data.stage)?'Modo automático: verificações de roteiro, áudio e duração antes da publicação. Você receberá um aviso quando o episódio estiver disponível.':notes[data.stage]||'Você pode atualizar este painel para acompanhar o andamento.';
+    if(data.demo)find('note').textContent='Demonstração com dados fictícios. Aprovar simula a conclusão, sem gerar áudio ou chamar AWS/LLM.';
     find('details').hidden=!data.narration;
     find('narration').textContent=data.narration||'';
     const sources=find('sources');sources.replaceChildren();
@@ -60,7 +61,15 @@ window.radarProduction=(()=>{
       const heading=document.createElement('p');heading.textContent=`Versão ${index+1}: ${review.approved?'aprovada':'reprovada'} · qualidade ${review.quality}/5`;findings.append(heading);
       for(const item of review.findings||[]){const line=document.createElement('p');line.textContent=`${item.news_id?'Notícia '+item.news_id+': ':''}${item.issue} Correção sugerida: ${item.correction}`;findings.append(line);}
     }
-    find('approve').textContent=data.human_escalated&&data.automatic_publication?'Aprovar e continuar automaticamente':'Aprovar roteiro';
+    find('approve').textContent=data.demo?'Simular aprovação':data.human_escalated&&data.automatic_publication?'Aprovar e continuar automaticamente':'Aprovar roteiro';
+    const refinement=data.refinement||{versions:[],examples:[],changes:''};
+    find('refinement').hidden=!data.narration;
+    find('learning-summary').textContent=`${refinement.examples.length} referência(s) de aprovação humana consultada(s) nesta edição. ${refinement.versions.length} versão(ões) de roteiro preservada(s).`;
+    const examples=find('learning-examples');examples.replaceChildren();
+    for(const item of refinement.examples){const line=document.createElement('p');line.className='small';line.textContent=`${item.date} · ${item.feedback||'Texto aprovado sem observação adicional.'}`;examples.append(line);}
+    const versions=find('script-versions');versions.replaceChildren();
+    for(const item of refinement.versions){const details=document.createElement('details'),summary=document.createElement('summary'),text=document.createElement('p');summary.textContent=`Ler versão ${item.version}`;text.className='production-narration';text.textContent=item.narration;details.append(summary,text);versions.append(details);}
+    find('diff-section').hidden=!refinement.changes;find('script-diff').textContent=refinement.changes||'';
     find('confirmation').hidden=!data.can_approve_script;
     find('confirm').checked=false;find('approve').disabled=true;
     activeJob=[...(data.jobs||[]),...(['queued','running'].includes(data.editorial_job?.status)?[data.editorial_job]:[])].filter(Boolean).find(job=>job.status!=='succeeded')||null;
@@ -134,7 +143,7 @@ window.radarProduction=(()=>{
     try{
       const result=await request('/api/production/'+current.date+'/approve-script',{method:'POST',
         headers:{'Content-Type':'application/json'},body:JSON.stringify({digest:current.digest,confirmed:true,feedback:find('editorial-feedback').value.trim()})});
-      render(result);find('editorial-feedback').value='';find('feedback').textContent=result.human_escalated&&result.automatic_publication?'Decisão registrada. O fluxo automático foi retomado; suas observações orientarão as próximas edições.':'Roteiro aprovado e preferência editorial registrada. Nenhuma geração de voz ou publicação foi iniciada.';
+      render(result);find('editorial-feedback').value='';find('feedback').textContent=result.demo?'Aprovação simulada. Nenhum episódio ou chamada paga foi gerado.':result.human_escalated&&result.automatic_publication?'Decisão registrada. O fluxo automático foi retomado; suas observações orientarão as próximas edições.':'Roteiro aprovado e preferência editorial registrada. Nenhuma geração de voz ou publicação foi iniciada.';
     }catch(error){
       if(error.status===409)await load();
       find('feedback').textContent=error.message;

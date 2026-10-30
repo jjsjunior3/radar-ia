@@ -1,6 +1,6 @@
 # Contribuir com o Radar IA
 
-O Radar IA é um projeto de portfólio em Python, com aplicativo privado e código sob licença MIT. O repositório está em preparação para abertura pública. O acesso à instância do autor não faz parte da contribuição; use seu próprio ambiente para integrações AWS.
+O Radar IA é um projeto de portfólio em Python, com aplicativo privado e código sob licença MIT. O repositório é público e aceita contribuições reproduzíveis. O acesso à instância do autor não faz parte da contribuição; use seu próprio ambiente para integrações AWS.
 
 ## Começar sem credenciais ou serviços pagos
 
