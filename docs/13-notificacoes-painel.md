@@ -51,7 +51,7 @@ A Lambda aceita uma invocação administrativa `{"push_diagnostic":true}` que va
 
 A chave VAPID usa um segundo segredo no Secrets Manager, aproximadamente US$ 0,40/mês além das chamadas. Somados OpenRouter e VAPID, são dois segredos, aproximadamente US$ 0,80/mês. SQS, DynamoDB, Lambda e logs continuam sujeitos ao consumo e às condições da conta. Os valores são estimativas com base na [página oficial de preços](https://aws.amazon.com/secrets-manager/pricing/).
 
-Nesta entrega passaram os testes Python de acesso, validação de endpoint, catálogo publicado, deduplicação e expiração, além dos testes JavaScript do service worker e da sessão. Um Chrome isolado verificou ativar/testar/desativar, permissão somente após clique, painel normal/falha e largura de 390 px, com serviços simulados. Na AWS, o diagnóstico criptográfico da Lambda foi executado sem envio real e as rotas do responsável foram consultadas; outro usuário recebeu 403. O recebimento num Android real depende da confirmação do proprietário.
+Nesta entrega passaram os testes Python de acesso, validação de endpoint, catálogo publicado, deduplicação e expiração, além dos testes JavaScript do service worker e da sessão. Um Chrome isolado verificou ativar/testar/desativar, permissão somente após clique, painel normal/falha e largura de 390 px, com serviços simulados. Na AWS, o diagnóstico criptográfico da Lambda foi executado sem envio real e as rotas do responsável foram consultadas; outro usuário recebeu 403. O proprietário confirmou o recebimento do teste e do aviso após publicação em Android real.
 
 Referências técnicas: [PushManager.subscribe](https://developer.mozilla.org/en-US/docs/Web/API/PushManager/subscribe), [pywebpush](https://github.com/web-push-libs/pywebpush).
 
@@ -60,4 +60,7 @@ Referências técnicas: [PushManager.subscribe](https://developer.mozilla.org/en
 
 Em 29/10/2026, passaram 237 testes Python (incluindo o teste que executa os três cenários JavaScript do service worker) e os dez testes JavaScript de sessão. A stack concluiu a atualização sem substituir recursos existentes. A Lambda validou VAPID e criptografia com transporte em memória, retornando `sent:false`; a API retornou somente chave pública e recusou outro usuário com 403. As rotas sem login responderam 401. Os arquivos servidos pelo CloudFront foram comparados aos arquivos locais. O painel da API implantada mostrou a edição de hoje em `completed`, com agendamento habilitado e os campos operacionais presentes.
 
-Ainda dependem de confirmação externa: recebimento do aviso no Android do proprietário e a primeira edição nova preparada pelo disparo diário. Os dados de navegador usados nas capturas de UI foram simulados; não comprovam esses dois cenários reais.
+O disparo de 30/10 ocorreu às 8h30 com 3 segundos de atraso, mas a ordem dos IDs no roteiro exigiu recuperação sem nova chamada LLM. Após publicação acompanhada, o proprietário confirmou o aviso no Android. Ainda falta validar uma edição agendada sem recuperação manual. As capturas com serviços simulados não comprovam esses cenários reais.
+
+
+Validação em 30/10/2026: o proprietário confirmou no Android o recebimento do aviso após publicar a edição. O teste de aviso também foi confirmado.

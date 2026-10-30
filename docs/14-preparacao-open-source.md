@@ -22,9 +22,12 @@ Imagens de arquitetura foram revisadas visualmente. A ferramenta não inspeciona
 - [x] CONTRIBUTING, SECURITY, PRIVACY e modelos de issue/PR.
 - [x] Auditoria inicial de arquivos e histórico, sem candidatos encontrados.
 - [x] Código e recursos editáveis registrados no Git.
-- [ ] Confirmar o teste de aviso em um Android real.
+- [x] Confirmar o teste de aviso em um Android real.
 - [ ] Validar a primeira edição diária completa do Scheduler.
 - [ ] Revisar novamente o diff e o histórico imediatamente antes de abrir.
 - [ ] O proprietário decidir quando alterar a visibilidade para público.
 
-Os dois testes operacionais pendentes devem aparecer como limites conhecidos no README, mesmo que o proprietário decida abrir antes de concluí-los. Não apresente uma funcionalidade como validada em Android apenas porque um teste de navegador simulado passou.
+A validação de uma edição agendada sem recuperação manual deve aparecer como limite conhecido no README, mesmo que o proprietário decida abrir antes de concluí-los. Não apresente uma funcionalidade como validada em Android apenas porque um teste de navegador simulado passou.
+
+
+Validação em 30/10/2026: o proprietário confirmou no Android o recebimento do aviso após publicar a edição. O teste de aviso também foi confirmado.

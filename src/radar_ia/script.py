@@ -90,9 +90,14 @@ def assemble_script(payload: dict, brief: dict) -> tuple[Script, list[str]]:
     """
     script = Script.model_validate(payload)
     ids = validate_brief(brief)
-    if [s.news_id for s in script.stories] != ids:
-        raise ValueError("IDs do roteiro devem corresponder ao briefing, na mesma ordem")
+    received = [story.news_id for story in script.stories]
+    if len(received) != len(ids) or set(received) != set(ids):
+        raise ValueError("IDs do roteiro devem corresponder ao briefing sem ausências ou duplicações")
     changes = []
+    if received != ids:
+        by_id = {story.news_id: story for story in script.stories}
+        script.stories = [by_id[news_id] for news_id in ids]
+        changes.append("Restaurada a ordem das notícias conforme o briefing; IDs e textos preservados")
     for term in script.glossary:
         if not term.term_en.strip() or not term.explanation_pt.strip():
             raise ValueError("Glossário contém campo vazio")

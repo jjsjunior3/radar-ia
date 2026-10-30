@@ -13,7 +13,7 @@ Desenvolvido por **[jrsantosdev](https://github.com/jjsjunior3)** como projeto d
 
 [Visão do produto](docs/01-produto.md) · [Arquitetura](#arquitetura) · [Executar localmente](#executar-localmente) · [Produção e agendamento](docs/07-producao-acompanhada.md) · [Artes para divulgação](docs/08-comunicacao-e-arquitetura.md)
 
-> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o disparo diário foi transferido para o EventBridge Scheduler e a primeira edição nova desse agendamento ainda aguarda validação. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
+> **Estado do projeto:** MVP privado em uso. Código sob licença MIT, com abertura pública do repositório planejada. Aplicativo e áudio validados pelo proprietário no computador e Android. O acesso AWS pelo GitHub Actions foi validado; o disparo diário foi transferido para o EventBridge Scheduler e o disparo de 30/10/2026 iniciou às 8h30 com 3 segundos de atraso; o roteiro exigiu recuperação local após a LLM alterar a ordem dos IDs. Roteiro e áudio passam por revisão humana **temporária**, durante os ajustes finos. O objetivo final é produzir e publicar automaticamente e notificar quando o episódio estiver pronto.
 
 ## O problema
 
@@ -180,7 +180,7 @@ As etapas seguintes são explícitas e devem ser usadas após a revisão corresp
 ## Confiabilidade, privacidade e limites
 
 - Buckets privados, bloqueio de acesso público, ACLs desativadas e criptografia S3 configurada.
-- Avisos Web Push opcionais por dispositivo após publicação pelo app; recebimento em Android real ainda aguarda confirmação.
+- Avisos Web Push opcionais por dispositivo após publicação pelo app; recebimento do teste e do aviso após publicação confirmado pelo proprietário em Android real.
 - Cadastro público do app desativado; tokens de acesso em memória, renovação de sessão por até 30 dias neste navegador e autorização na API.
 - Progresso separado pelo identificador autenticado do usuário, com atualização condicional.
 - Gravações condicionais com ETag evitam sobrescrever catálogo/estado lidos em versão antiga.
@@ -205,7 +205,7 @@ Os testes cobrem regras de coleta, curadoria, roteiro, áudio, catálogo, progre
 
 O [workflow de testes](.github/workflows/tests.yml) não exige chaves de provedores. Testes locais e simulados não substituem a validação de IAM, quotas, custos ou uma edição real no Actions.
 
-**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário; episódio de 29/10/2026 produzido pelo fluxo acompanhado e publicado com Leo após aprovação do roteiro e áudio. O evento agendado desse dia foi registrado às 14h29 de São Paulo, em vez das 8h30 previstas, e reaproveitou o roteiro já existente. Uma edição nova preparada pelo agendamento desde o início ainda precisa ser validada; sucesso do workflow não comprova pontualidade nem publicação automática.
+**Validação operacional registrada:** login, reprodução e progresso no computador/Android confirmados pelo proprietário. Em 30/10/2026, o Scheduler iniciou a edição às 8h30 com 3 segundos de atraso. A LLM alterou a ordem dos IDs; a resposta salva foi recuperada sem nova geração paga. Após revisão e publicação pelo app, o proprietário confirmou a notificação no Android. Ainda falta validar uma edição agendada sem recuperação manual; publicação continua acompanhada.
 
 ## Estrutura do repositório
 

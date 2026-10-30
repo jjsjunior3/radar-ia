@@ -28,8 +28,9 @@ window.radarProduction=(()=>{
     find('schedule').textContent=data.schedule_enabled?'Seg–sex, 8h30 · São Paulo':'Disparo diário desativado';
     find('last-run').textContent=operation?.started_at||operation?.updated_at?new Date(operation.started_at||operation.updated_at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'}):'Aguardando primeira execução';
     const operations={queued:'Na fila',running:'Preparando pauta e roteiro',succeeded:'Execução concluída',failed:'Execução interrompida',needs_review:'Resultado incerto'};
-    find('operation-result').textContent=operation?operations[operation.status]||'Consultar edição':'Ainda sem execução registrada';
-    const warning=operation&&['failed','needs_review'].includes(operation.status)&&data.stage!=='completed';
+    const recovered=operation?.date===data.date&&['failed','needs_review'].includes(operation.status)&&['awaiting_script_review','script_approved','audio_in_progress','awaiting_audio_review','audio_approved','publish_in_progress','completed'].includes(data.stage);
+    find('operation-result').textContent=recovered?'Edição recuperada após interrupção':operation?operations[operation.status]||'Consultar edição':'Ainda sem execução registrada';
+    const warning=operation&&['failed','needs_review'].includes(operation.status)&&!recovered&&data.stage!=='completed';
     find('operation-alert').hidden=!warning;
     find('operation-alert').textContent=warning?'A produção encontrou um problema. A tentativa foi preservada e não haverá repetição automática de uma chamada paga.':'';
     find('state').textContent=states[data.stage]||'Em preparação';

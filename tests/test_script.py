@@ -96,3 +96,24 @@ def test_response_saved_before_validation_failure(brief):
     with pytest.raises(ValueError):
         generate_script(client, "test/model", brief, provider="openrouter", on_response=saved.append)
     assert saved == [{"original": "response"}]
+
+
+def test_assembly_restores_order_without_changing_story_content(brief, payload):
+    from radar_ia.script import assemble_script
+    brief["news"].append(dict(brief["news"][0], id=2))
+    second = dict(payload["stories"][0], news_id=2, title_pt="Segunda notícia")
+    first = copy.deepcopy(payload["stories"][0])
+    payload["stories"] = [second, first]
+    script, changes = assemble_script(payload, brief)
+    assert [story.model_dump() for story in script.stories] == [first, second]
+    assert len(changes) == 1
+    assert assemble_script(script.model_dump(), brief)[1] == []
+
+
+@pytest.mark.parametrize("received", [[1, 1], [1], [1, 3]])
+def test_assembly_rejects_missing_duplicate_or_unknown_story_ids(brief, payload, received):
+    from radar_ia.script import assemble_script
+    brief["news"].append(dict(brief["news"][0], id=2))
+    payload["stories"] = [dict(payload["stories"][0], news_id=i) for i in received]
+    with pytest.raises(ValueError):
+        assemble_script(payload, brief)
