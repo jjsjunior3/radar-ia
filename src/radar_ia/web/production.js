@@ -22,6 +22,8 @@ window.radarProduction=(()=>{
   }
   function render(data){
     const oldDigest=current?.audio_digest;current=data;panel.hidden=false;
+    window.dispatchEvent(new CustomEvent('radar-production-state',{detail:{stage:data.stage}}));
+    find('editorial-reviews').open=data.stage==='awaiting_human_review';
     if(oldDigest!==data.audio_digest){find('player').pause();find('player').removeAttribute('src');find('player').hidden=true;}
     find('date').textContent=new Date(data.date+'T12:00:00-03:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',timeZone:'America/Sao_Paulo'});
     const operation=data.last_editorial_job;

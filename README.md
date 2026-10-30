@@ -28,7 +28,7 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 - **Agentes editoriais:** relevância, roteiro e avaliação em chamadas separadas via OpenRouter, revisão com feedback limitado a duas versões e aprovação vinculada ao conteúdo. [Veja o fluxo](docs/16-agentes-editoriais.md).
 - **Roteiro em português:** geração estruturada, validação com Pydantic, glossário e termos em inglês contextualizados.
 - **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
-- **Biblioteca privada:** player web instalável no Android, filtros de ouvidos/pendentes e progresso por usuário.
+- **Aplicativo organizado:** Para ouvir (pendentes e retomada), Biblioteca (histórico/filtros) e Análise e aprovação (pareceres e decisões), com player compartilhado e progresso por usuário.
 - **Revisão pelo app:** responsável acompanha a edição, lê roteiro/fontes e aprova a versão exibida, sem disparar voz ou publicação.
 - **Operação configurável:** modo automático ou acompanhado, checkpoints privados no S3 e autorizações vinculadas ao conteúdo; resultados pagos incertos exigem intervenção.
 - **Infraestrutura reproduzível:** template CloudFormation e acesso temporário do GitHub à AWS via OIDC.
@@ -245,6 +245,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 | [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
+| [17 · Interface por áreas](docs/17-interface.md) | Pendentes, histórico, análise e player compartilhado |
 | [16 · Agentes editoriais](docs/16-agentes-editoriais.md) | Seleção, roteiro, avaliação e ciclo limitado de correções |
 | [15 · Publicação automática](docs/15-publicacao-automatica.md) | Ativar, pausar, verificar e recuperar o fluxo diário |
 | [13 · Avisos e painel](docs/13-notificacoes-painel.md) | Web Push no Android, teste por dispositivo e estado da produção |

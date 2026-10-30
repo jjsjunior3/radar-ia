@@ -48,6 +48,7 @@ window.radarAuth={ready:false,config:null,token:null,expiresAt:0,refreshing:null
     document.querySelector('#library-section').hidden=true;
     document.querySelector('#player-panel').hidden=true;
     document.querySelector('#sign-out').hidden=true;
+    for(const id of ['app-nav','review-section']){const el=document.querySelector('#'+id);if(el)el.hidden=true;}
   },
   async login(){
     const encode=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');

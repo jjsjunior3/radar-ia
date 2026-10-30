@@ -19,3 +19,5 @@ O fluxo acompanhado e os avisos em Android real foram confirmados pelo propriet�
 
 - Revisão humana após duas reprovações, com os pareceres no app; retomada automática após decisão vinculada ao roteiro.
 - Memória editorial privada de aprovações humanas e observações, consumida como contexto limitado nas próximas edições.
+
+- Interface organizada em Para ouvir, Biblioteca e Análise e aprovação; detalhes recolhidos, indicador de pendência e player compartilhado.
