@@ -12,6 +12,7 @@ from botocore.config import Config
 from .review_api import ReviewStore, ReviewConflict
 from .jobs import JobStore, JobQueue, job_id, public_job, editorial_job_id
 from .push import PushStore,test_notice
+from .editorial_learning import record_feedback
 
 
 class Conflict(Exception): pass
@@ -56,7 +57,12 @@ class Backend:
         return summary
 
     def approve_script(self,edition,data,user_id):
-        return ReviewStore(self.s3,self.bucket,self.prefix).approve_script(edition,data,user_id)
+        summary=ReviewStore(self.s3,self.bucket,self.prefix).approve_script(edition,data,user_id)
+        record_feedback(self.s3,self.bucket,self.prefix,summary,user_id)
+        if os.getenv('AUTOMATIC_PUBLICATION')=='true' and summary.get('human_escalated') and summary.get('can_generate_audio'):
+            self.queue.start(summary,'audio',{'digest':summary['digest'],'confirmed':True},user_id,automatic=True)
+            return self.production(edition)
+        return summary
 
     def approve_audio(self,edition,data,user_id):
         return ReviewStore(self.s3,self.bucket,self.prefix).approve_audio(edition,data,user_id)

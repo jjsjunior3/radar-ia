@@ -457,6 +457,9 @@
                   "Resource": [
                     {
                       "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/editions/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${AudioBucket}/${AudioPrefix}/production/feedback/*"
                     }
                   ]
                 },

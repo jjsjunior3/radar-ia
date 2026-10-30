@@ -35,7 +35,9 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
             raise ValueError('Roteiro mudou depois da solicitação')
         if job.get('automatic'):
             approval=read_json(run.folder/'agents'/'approval.json',{})
-            if approval.get('approved') is not True or approval.get('script_digest')!=job['script_digest'] or approval.get('policy')!='editorial-agents-v1':
+            human=read_json(run.folder/'aprovacao-roteiro.json',{})
+            human_override=human.get('mode')=='human' and human.get('editorial_override') is True and human.get('digest')==job['script_digest'] and human.get('approved_by')==owner
+            if not human_override and (approval.get('approved') is not True or approval.get('script_digest')!=job['script_digest'] or approval.get('policy')!='editorial-agents-v1'):
                 raise ValueError('Avaliador editorial não aprovou esta versão do roteiro')
         total=len(speech_chunks(text))
         def persist():

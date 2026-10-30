@@ -22,7 +22,7 @@ Todas as imagens têm **1600 × 2000 pixels**, proporção 4:5. PNG para publica
 - Aplicativo: navegador/Android, CloudFront, S3 da interface, Cognito, API Gateway, Lambda e DynamoDB.
 - Infraestrutura: CloudFormation, IAM/OIDC, CloudWatch, origem S3 via OAC e links temporários de áudio.
 - As setas são uma visão lógica de responsabilidades e acesso. A autenticação real envolve redirecionamentos entre navegador e Cognito; o navegador apresenta o access token à API. Cognito não chama a API pelo usuário.
-- O avaliador pode devolver análise ao roteirista; o ciclo tem até duas revisões e bloqueia o Polly se não houver aprovação.
+- O avaliador pode devolver análise ao roteirista; o ciclo tem uma correção e encaminha a decisão ao responsável após duas reprovações.
 
 ### Modelo 02 · Fluxo editorial
 
@@ -32,7 +32,7 @@ Mostra sete etapas: coleta, relevância, roteiro, avaliação, síntese, valida�
 
 Apresenta os papéis funcionais e os módulos: coleta determinística, relevância/roteiro/avaliação com chamadas LLM separadas, produção Polly/S3 e player privado.
 
-**Os agentes são coordenados explicitamente em Python.** Não são processos autônomos sem limites. A primeira versão permite até três roteiros e bloqueia resultados pagos incertos; veja [o guia dos agentes](16-agentes-editoriais.md).
+**Os agentes são coordenados explicitamente em Python.** Não são processos autônomos sem limites. A primeira versão permite até dois roteiros e bloqueia resultados pagos incertos; veja [o guia dos agentes](16-agentes-editoriais.md).
 
 ## Como falar de open source
 

@@ -34,7 +34,7 @@
 <rect x="224" y="956" width="1296" height="155" rx="24" fill="#FBEEE3" stroke="#E3B78F" stroke-width="2"/>
 <text x="250" y="987" fill="#8D491D" font-size="19" font-weight="700" letter-spacing="1.5">AGENTE AVALIADOR</text>
 <text x="250" y="1031" fill="#102B2B" font-size="35" font-weight="700" letter-spacing="0">Aprovar ou pedir correções</text>
-<text x="250" y="1075" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Devolve análise ao roteirista; até duas revisões.</text>
+<text x="250" y="1075" fill="#526561" font-size="25" font-weight="400" letter-spacing="0">Devolve análise; na 2ª reprovação, pede sua decisão.</text>
 <text x="950" y="989" fill="#526561" font-size="21" font-weight="500" letter-spacing="0">Parecer + hash do roteiro</text>
 <rect x="101" y="1173" width="84" height="84" rx="42" fill="#117E74" stroke="none" stroke-width="2"/>
 <text x="116" y="1228" fill="#FFFFFF" font-size="39" font-weight="700" letter-spacing="0">05</text>

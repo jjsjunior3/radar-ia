@@ -123,7 +123,7 @@ class Production:
         write_json(self.folder/'metadados-llm.json',metadata)
         (self.folder/'narracao.txt').write_text(spoken_text(script),encoding='utf-8')
         (self.folder/'revisao.md').write_text(render_script(script,brief),encoding='utf-8')
-        self.stage('awaiting_script_review')
+        self.stage('awaiting_human_review' if metadata.get('human_review_required') else 'awaiting_script_review')
         return script.model_dump()
 
     def replan(self):
@@ -151,7 +151,7 @@ class Production:
 
     def approve_script(self,*,mode="human"):
         if mode not in ("human","automatic"):raise ValueError("Modo de aprovação inválido")
-        if self.state['stage'] not in ('awaiting_script_review','script_approved'):
+        if self.state['stage'] not in ('awaiting_script_review','awaiting_human_review','script_approved'):
             raise ValueError('Gere e revise o roteiro antes da aprovação')
         brief,script,text=self.script_bundle()
         (self.folder/'narracao.txt').write_text(text,encoding='utf-8')

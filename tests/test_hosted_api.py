@@ -81,6 +81,6 @@ def test_runtime_role_cannot_publish_audio_or_generate_voice():
     actions=[action for s in statements for action in s['Action']]
     writes=[s for s in statements if 's3:PutObject' in s['Action']]
     assert len(writes)==1
-    assert all(item['Fn::Sub'].endswith('/production/editions/*') for item in writes[0]['Resource'])
+    assert {item['Fn::Sub'].rsplit('/production/',1)[1] for item in writes[0]['Resource']}=={'editions/*','feedback/*'}
     assert 'polly:SynthesizeSpeech' not in actions
     assert 'dynamodb:PutItem' in actions

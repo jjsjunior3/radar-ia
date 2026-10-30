@@ -29,7 +29,7 @@
 <rect x="1088" y="762" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
 <text x="1112" y="808" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Avaliador editorial</text>
 <text x="1112" y="848" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Aprova ou devolve análise</text>
-<text x="1112" y="880" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Até duas revisões de roteiro</text>
+<text x="1112" y="880" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">2 reprovações: revisão humana</text>
 <rect x="600" y="762" width="400" height="148" rx="24" fill="#172A40" stroke="#30465E" stroke-width="2"/>
 <text x="624" y="808" fill="#F3F7FC" font-size="29" font-weight="650" letter-spacing="0">Amazon Polly</text>
 <text x="624" y="848" fill="#B0C0D2" font-size="24" font-weight="400" letter-spacing="0">Leo • engine generative</text>

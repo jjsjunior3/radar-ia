@@ -74,7 +74,7 @@ def architecture():
     cards=[(112,552,400,'Fontes RSS',['httpx + feedparser','Publicação declarada no feed']),
            (600,552,400,'Python: curadoria',['Datas, HTTPS e deduplicação','Grade semanal + pauta variável']),
            (1088,552,400,'OpenRouter + Gemini',['Agentes: relevância + roteiro','JSON validado com Pydantic']),
-           (1088,762,400,'Avaliador editorial',['Aprova ou devolve análise','Até duas revisões de roteiro']),
+           (1088,762,400,'Avaliador editorial',['Aprova ou devolve análise','2 reprovações: revisão humana']),
            (600,762,400,'Amazon Polly',['Leo • engine generative','SSML + duração medida']),
            (112,762,400,'Amazon S3 privado',['Áudio, fontes e catálogo','Checkpoints para retomada'])]
     for x,y,w,title,body in cards:a.card(x,y,w,title,body,'#172A40','#30465E',h=148,title_size=29)
@@ -117,7 +117,7 @@ def journey():
     rows=[('01','COLETA','Encontrar e validar','RSS, datas de publicação e URLs HTTPS.','httpx • feedparser',False),
           ('02','AGENTE DE RELEVÂNCIA','Selecionar o que importa','Nota e justificativa sobre a pré-seleção por tema.','OpenRouter • JSON validado',True),
           ('03','AGENTE ROTEIRISTA','Explicar em português','Inglês técnico contextualizado e saída validada.','OpenRouter • Gemini • Pydantic',False),
-          ('04','AGENTE AVALIADOR','Aprovar ou pedir correções','Devolve análise ao roteirista; até duas revisões.','Parecer + hash do roteiro',True),
+          ('04','AGENTE AVALIADOR','Aprovar ou pedir correções','Devolve análise; na 2ª reprovação, pede sua decisão.','Parecer + hash do roteiro',True),
           ('05','VOZ SINTÉTICA','Transformar texto em áudio','Pausas e inglês via SSML; WAV de até 600 segundos.','Amazon Polly • Leo generativa',False),
           ('06','VERIFICAÇÃO DO ÁUDIO','Validar antes de publicar','Integridade, vínculo com roteiro e até 10 minutos.','Código Python • WAV',False),
           ('07','PUBLICAÇÃO PRIVADA','Dar play, pausar e retomar','Catálogo privado, progresso e aviso por dispositivo.','AWS • Android • Web Push',False)]
@@ -163,7 +163,7 @@ def modules():
     a.path('M 420 1246 V 1334')
     a.path('M 776 1490 H 824')
     a.text(80,881,'Coleta determinística; relevância, roteiro e avaliação usam LLM.',27,a.muted)
-    a.text(560,1280,'Reprovação → roteirista • até duas revisões.',27,a.muted)
+    a.text(560,1280,'Reprovação → roteirista • na 2ª, revisão humana.',27,a.muted)
     a.rect(80,1690,1440,136,'#30264B')
     a.text(112,1736,'OPEN SOURCE EM PREPARAÇÃO • MIT',27,a.accent,700)
     a.text(112,1778,'Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.',26)

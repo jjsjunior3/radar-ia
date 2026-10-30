@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-MODULES=('audio','brief','catalog','collection','editorial','jobs','news','production','production_store','review','review_api','script','speech_markup','weekly','windows','worker','push','notifications','agents')
+MODULES=('audio','brief','catalog','collection','editorial','jobs','news','production','production_store','review','review_api','script','speech_markup','weekly','windows','worker','push','notifications','agents','editorial_learning')
 
 
 def package_runtime(name='worker',requirements_file='worker-requirements.txt',extra_modules=()):

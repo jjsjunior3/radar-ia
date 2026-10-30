@@ -109,7 +109,7 @@ def test_other_user_cannot_trigger_generation_or_publication():
         assert handle(event('POST /api/production/{date}/'+suffix,uid='other',data={}),backend)['statusCode']==403
     backend.start_job.assert_not_called()
 
-@pytest.mark.parametrize('automatic', [False, True])
+@pytest.mark.parametrize('automatic', [False, True, 'human_override'])
 def test_mobile_flow_reuses_real_production_and_publishes_only_approved_audio(monkeypatch,store,tmp_path,automatic):
     from tempfile import TemporaryDirectory
     monkeypatch.setattr(worker,"TemporaryDirectory",lambda **kw:TemporaryDirectory(dir=tmp_path,**kw))
@@ -132,7 +132,9 @@ def test_mobile_flow_reuses_real_production_and_publishes_only_approved_audio(mo
     with zipfile.ZipFile(io.BytesIO(store.s3.objects[key])) as archive:files={name:archive.read(name) for name in archive.namelist()}
     brief=json.loads(files['briefing.json']);brief.update(planned_for=now,collection_cutoff=now)
     files['briefing.json']=json.dumps(brief)
-    if automatic:
+    if automatic=='human_override':
+        files['agents/escalation.json']='{"reason":"two_rejections"}'
+    elif automatic:
         from radar_ia.production import fingerprint
         files['agents/approval.json']=json.dumps({'policy':'editorial-agents-v1','approved':True,
             'script_digest':fingerprint({'brief':brief,'script':json.loads(files['roteiro.json'])})})

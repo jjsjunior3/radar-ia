@@ -52,7 +52,7 @@
 <path d="M 420 1246 V 1334" fill="none" stroke="#BBA3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <path d="M 776 1490 H 824" fill="none" stroke="#BBA3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="80" y="881" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Coleta determinística; relevância, roteiro e avaliação usam LLM.</text>
-<text x="560" y="1280" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Reprovação → roteirista • até duas revisões.</text>
+<text x="560" y="1280" fill="#BFB8D4" font-size="27" font-weight="400" letter-spacing="0">Reprovação → roteirista • na 2ª, revisão humana.</text>
 <rect x="80" y="1690" width="1440" height="136" rx="24" fill="#30264B" stroke="none" stroke-width="2"/>
 <text x="112" y="1736" fill="#BBA3FF" font-size="27" font-weight="700" letter-spacing="0">OPEN SOURCE EM PREPARAÇÃO • MIT</text>
 <text x="112" y="1778" fill="#F6F3FF" font-size="26" font-weight="400" letter-spacing="0">Hoje: aplicativo privado. Evolução: feed RSS público e abertura do código.</text>

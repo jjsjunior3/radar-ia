@@ -25,7 +25,7 @@ O Radar IA reúne coleta, curadoria por regras, roteiro com LLM e síntese de vo
 
 - **Coleta RSS:** fontes configuráveis, datas declaradas de publicação, URLs HTTPS e domínios permitidos.
 - **Curadoria editorial:** deduplicação por URL/título semelhante, grade semanal e seleção variável de uma a sete notícias.
-- **Agentes editoriais:** relevância, roteiro e avaliação em chamadas separadas via OpenRouter, revisão com feedback limitado a três versões e aprovação vinculada ao conteúdo. [Veja o fluxo](docs/16-agentes-editoriais.md).
+- **Agentes editoriais:** relevância, roteiro e avaliação em chamadas separadas via OpenRouter, revisão com feedback limitado a duas versões e aprovação vinculada ao conteúdo. [Veja o fluxo](docs/16-agentes-editoriais.md).
 - **Roteiro em português:** geração estruturada, validação com Pydantic, glossário e termos em inglês contextualizados.
 - **Áudio:** Amazon Polly, voz Leo generativa, marcação SSML para pausas/idioma e duração WAV medida antes da publicação.
 - **Biblioteca privada:** player web instalável no Android, filtros de ouvidos/pendentes e progresso por usuário.
@@ -47,8 +47,10 @@ flowchart TB
         COLETA --> REL[Agente de relevância: notas e seleção]
         REL --> LLM[Roteirista / OpenRouter / JSON validado]
         LLM --> R1[Avaliador editorial + validação Python]
-        R1 -->|Reprovação e análise: até 2 revisões| LLM
-        R1 --> AQ[SQS / tarefa vinculada ao roteiro]
+        R1 -->|Primeira reprovação: corrigir| LLM
+        R1 -->|Aprovado| AQ[SQS / tarefa vinculada ao roteiro]
+        R1 -->|Segunda reprovação| HUMAN[Decisão humana + memória editorial]
+        HUMAN -->|Aprovado| AQ
         AQ --> POLLY[Worker / Amazon Polly / Leo / SSML]
         POLLY --> R2[Integridade / duração até 10 min / autorização]
         R2 --> AUDIO[S3 privado: áudio e catálogo]
@@ -78,7 +80,7 @@ flowchart TB
 
 O S3 da interface e o S3 de áudio têm funções diferentes. CloudFront entrega a interface por HTTPS a partir de uma origem privada. Catálogo, progresso e links de reprodução exigem autenticação; o áudio usa URLs temporárias emitidas pela API.
 
-**Componentes de IA:** relevância, roteirista e avaliador têm prompts, saídas e chamadas LLM separados. O avaliador retorna correções ao roteirista em um ciclo limitado; somente a versão aprovada segue ao produtor. Coleta e produção usam módulos determinísticos. A coordenação é explícita em Python, com checkpoints privados; veja a [arquitetura dos agentes](docs/16-agentes-editoriais.md).
+**Componentes de IA:** relevância, roteirista e avaliador têm prompts, saídas e chamadas LLM separados. O avaliador retorna correções ao roteirista em um ciclo limitado; somente a versão aprovada segue ao produtor. Duas reprovações encaminham a decisão ao responsável; suas aprovações e observações orientam próximas edições. Coleta e produção usam módulos determinísticos. A coordenação é explícita em Python, com checkpoints privados; veja a [arquitetura dos agentes](docs/16-agentes-editoriais.md).
 
 <details>
 <summary>Ver o mapa completo da arquitetura</summary>

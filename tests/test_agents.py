@@ -44,15 +44,17 @@ def test_rejected_script_receives_analysis_then_only_approved_version_can_advanc
     assert create.call_count==5
 
 
-def test_three_rejections_block_publication_and_do_not_save_final_script(tmp_path,brief,payload):
-    outputs=[selected()]+[p for _ in range(3) for p in (payload,review(False))]
+def test_two_rejections_escalate_valid_script_with_both_reviews(tmp_path,brief,payload):
+    outputs=[selected()]+[p for _ in range(2) for p in (payload,review(False))]
     run,agents,create=setup(tmp_path,brief,outputs);assert agents.select()
-    with pytest.raises(ValueError,match='três versões'):run.draft(agents.generate)
-    assert run.state['stage']=='draft_failed'
-    assert not (run.folder/'roteiro.json').exists()
-    assert not (run.folder/'resposta-original.json').exists()
+    run.draft(agents.generate)
+    assert run.state['stage']=='awaiting_human_review'
+    assert (run.folder/'roteiro.json').exists()
+    assert (run.folder/'agents/review-1.json').exists()
+    assert (run.folder/'agents/review-2.json').exists()
     assert not (run.folder/'agents/approval.json').exists()
-    assert create.call_count==7
+    with pytest.raises(ValueError,match='aprovação editorial'):run.approve_script(mode='automatic')
+    assert create.call_count==5
 
 
 def test_no_relevant_news_stops_before_writer_and_polly(tmp_path,brief):
@@ -111,3 +113,13 @@ def test_automatic_approval_requires_evaluator_receipt(tmp_path,brief,payload):
     run.draft(lambda b,save:(validate_script(payload,b),{}))
     with pytest.raises(ValueError,match='aprovação editorial'):run.approve_script(mode='automatic')
     assert not (run.folder/'aprovacao-roteiro.json').exists()
+
+
+def test_human_memory_reaches_all_three_llm_roles_as_data(tmp_path,brief,payload):
+    brief['editorial_memory']=[{'feedback':'Prefiro explicações curtas.','accepted_excerpt':'Exemplo.'}]
+    run,agents,create=setup(tmp_path,brief,[selected(),payload,review(True)])
+    agents.select();run.draft(agents.generate)
+    for call in create.call_args_list:
+        data=json.loads(call.kwargs['messages'][1]['content'])
+        assert data['editorial_memory'][0]['feedback']=='Prefiro explicações curtas.'
+        assert 'Prefiro explicações curtas.' not in call.kwargs['messages'][0]['content']

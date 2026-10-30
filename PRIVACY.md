@@ -11,3 +11,6 @@ Os avisos usam mensagem genérica e payload criptografado pelo protocolo Web Pus
 O MVP não carrega analytics ou scripts de publicidade. Logs técnicos são retidos por 14 dias; tarefas editoriais e de áudio têm TTL de 30 dias, e registros de deduplicação de avisos têm TTL de 90 dias. A remoção por TTL é eventual. Arquivos e catálogo S3 não possuem exclusão automática nesta versão. O administrador da instância pode remover manualmente dados e assinaturas pelos serviços AWS.
 
 A licença MIT cobre o código do projeto. Ela não concede acesso à biblioteca privada nem direitos sobre textos, áudios, marcas ou notícias de terceiros.
+
+
+Aprovações humanas guardam observações opcionais e um trecho do roteiro aceito no S3 privado para orientar futuras edições. Os agentes consultam até cinco aprovações dos últimos 14 dias. Essa janela não apaga os objetos; o administrador pode excluí-los no prefixo privado de feedback. Os dados são enviados ao provedor LLM como contexto editorial, sem incluir identificador do usuário nesse contexto. Não há treinamento do modelo implementado.

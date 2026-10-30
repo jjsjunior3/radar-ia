@@ -17,6 +17,7 @@ from .production import Production,read_json,fingerprint
 from .production_store import ProductionStore
 from .script import generate_script
 from .agents import CollectionAgent,EditorialAgents,BudgetClient
+from .editorial_learning import load_feedback
 
 ZONE=ZoneInfo('America/Sao_Paulo')
 
@@ -61,6 +62,9 @@ def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=Non
                     if (run.folder/'resposta-original.json').exists() or (run.folder/'roteiro.json').exists():
                         run.draft(lambda *args:(_ for _ in ()).throw(ValueError('Resposta deveria estar salva')))
                     else:
+                        brief=read_json(run.folder/'briefing.json')
+                        brief['editorial_memory']=load_feedback(s3,bucket,prefix,day,owner)
+                        run.save_json(run.folder/'briefing.json',brief)
                         key=secrets.get_secret_value(SecretId=secret_arn)['SecretString'].strip()
                         if not key:raise ValueError('Credencial ausente')
                         with OpenAI(api_key=key,base_url='https://openrouter.ai/api/v1',timeout=90,max_retries=0) as client:

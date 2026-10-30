@@ -75,7 +75,14 @@ class ReviewStore:
                 narration=archive.read('narracao.txt').decode('utf-8-sig').replace('\r\n','\n')
                 if not narration.strip() or len(narration)>20000:raise ValueError('Narração inválida')
                 result.update(narration=narration,digest=digest_script(brief,script),
-                    can_approve_script=checkpoint['stage']=='awaiting_script_review')
+                    can_approve_script=checkpoint['stage'] in ('awaiting_script_review','awaiting_human_review'))
+            result['human_escalated']='agents/escalation.json' in archive.namelist()
+            result['editorial_reviews']=[json.loads(archive.read(name)) for name in sorted(archive.namelist()) if re.fullmatch(r'agents/review-[12]\.json',name)]
+            if 'aprovacao-roteiro.json' in archive.namelist():
+                human=json.loads(archive.read('aprovacao-roteiro.json'))
+                result['human_feedback']=human.get('feedback','')
+                result['human_approved_by']=human.get('approved_by','')
+                result['human_approved_at']=human.get('approved_at','')
             names=archive.namelist()
             approved='aprovacao-roteiro.json' in names and json.loads(archive.read('aprovacao-roteiro.json')).get('digest')==result.get('digest')
             result['can_generate_audio']=bool(approved and checkpoint['stage']=='script_approved')
@@ -92,14 +99,15 @@ class ReviewStore:
             return result
 
     def approve_script(self, edition, data, user_id):
-        if not isinstance(data,dict) or set(data)!={'digest','confirmed'} or data['confirmed'] is not True or not isinstance(data['digest'],str) or not re.fullmatch('[a-f0-9]{64}',data['digest']):
+        if not isinstance(data,dict) or not {'digest','confirmed'}<=set(data) or set(data)-{'digest','confirmed','feedback'} or data['confirmed'] is not True or not isinstance(data['digest'],str) or not re.fullmatch('[a-f0-9]{64}',data['digest']):
             raise ValueError('Aprovação inválida')
+        if not isinstance(data.get('feedback',''),str) or len(data.get('feedback',''))>2000:raise ValueError('Observação editorial inválida')
         raw,etag=self.load(edition)
         if raw is None:raise ReviewConflict()
         summary=self.summary(edition,raw)
         if data['digest']!=summary.get('digest'):raise ReviewConflict()
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            if summary['stage']!='awaiting_script_review':
+            if summary['stage'] not in ('awaiting_script_review','awaiting_human_review'):
                 if 'aprovacao-roteiro.json' in archive.namelist() and json.loads(archive.read('aprovacao-roteiro.json')).get('digest')==data['digest']:
                     return summary
                 raise ReviewConflict()
@@ -109,7 +117,8 @@ class ReviewStore:
             checkpoint=json.loads(archive.read('checkpoint.json'))
             checkpoint.update(stage='script_approved',updated_at=now)
             replacements={'checkpoint.json':checkpoint,'aprovacao-roteiro.json':{
-                'digest':data['digest'],'approved_at':now,'approved_by':user_id,'channel':'web'}}
+                'digest':data['digest'],'approved_at':now,'approved_by':user_id,'channel':'web','mode':'human',
+                'editorial_override':summary.get('human_escalated',False),'feedback':data.get('feedback','').strip()}}
             output=io.BytesIO()
             with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as target:
                 for name in archive.namelist():

@@ -22,7 +22,7 @@ def package():
         # Lista permitida: nunca empacotar .env, credenciais ou dados locais.
         z.writestr('radar_ia/__init__.py','')
         z.write(ROOT/'src/radar_ia/hosted_api.py','radar_ia/hosted_api.py')
-        for module in ('review_api','jobs','audio','speech_markup','push'):
+        for module in ('review_api','jobs','audio','speech_markup','push','editorial_learning'):
             z.write(ROOT/f'src/radar_ia/{module}.py',f'radar_ia/{module}.py')
     return archive
 

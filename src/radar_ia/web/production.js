@@ -5,7 +5,7 @@ window.radarProduction=(()=>{
   let current=null, activeJob=null, timer=null;
   const states={new:'Ainda não preparado',prepared:'Pauta preparada',no_content:'Sem conteúdo para esta edição',
     draft_in_progress:'Preparando o roteiro',draft_failed:'Geração do roteiro interrompida',
-    awaiting_script_review:'Aguardando sua revisão',script_approved:'Roteiro aprovado',
+    awaiting_human_review:'Duas reprovações: aguardando sua decisão',awaiting_script_review:'Aguardando sua revisão',script_approved:'Roteiro aprovado',
     audio_in_progress:'Preparando o áudio',audio_failed:'Geração do áudio interrompida',
     awaiting_audio_review:'Áudio aguardando escuta',audio_approved:'Áudio aprovado',
     publish_in_progress:'Publicação em andamento',completed:'Publicado'};
@@ -36,11 +36,12 @@ window.radarProduction=(()=>{
     find('state').textContent=states[data.stage]||'Em preparação';
     find('theme').textContent=data.theme||'Seu próximo episódio';
     const notes={new:'A edição de hoje ainda não foi preparada.',no_content:'Nenhum conteúdo elegível foi selecionado para hoje.',
+      awaiting_human_review:'O avaliador reprovou duas versões. Confira os pareceres e o roteiro; sua aprovação retoma automaticamente Polly e publicação, com custos AWS. As observações orientarão futuras edições.',
       awaiting_script_review:'Leia o texto e confira as fontes antes de aprovar. A aprovação não gera áudio nem publica o episódio.',
       script_approved:'Texto aprovado. A geração e a revisão do áudio são as próximas etapas.',
       awaiting_audio_review:'O áudio está pronto para a próxima etapa de escuta e aprovação pelo fluxo acompanhado.',
       completed:'O episódio já está disponível na sua biblioteca.'};
-    find('note').textContent=data.automatic_publication&&!['completed','no_content'].includes(data.stage)?'Modo automático: verificações de roteiro, áudio e duração antes da publicação. Você receberá um aviso quando o episódio estiver disponível.':notes[data.stage]||'Você pode atualizar este painel para acompanhar o andamento.';
+    find('note').textContent=data.automatic_publication&&!['completed','no_content','awaiting_human_review'].includes(data.stage)?'Modo automático: verificações de roteiro, áudio e duração antes da publicação. Você receberá um aviso quando o episódio estiver disponível.':notes[data.stage]||'Você pode atualizar este painel para acompanhar o andamento.';
     find('details').hidden=!data.narration;
     find('narration').textContent=data.narration||'';
     const sources=find('sources');sources.replaceChildren();
@@ -51,6 +52,13 @@ window.radarProduction=(()=>{
       link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
       link.textContent=`${source.source} — ${source.title}`;item.append(link);sources.append(item);
     }
+    find('editorial-reviews').hidden=!(data.editorial_reviews||[]).length;
+    const findings=find('review-findings');findings.replaceChildren();
+    for(const [index,review] of (data.editorial_reviews||[]).entries()){
+      const heading=document.createElement('p');heading.textContent=`Versão ${index+1}: ${review.approved?'aprovada':'reprovada'} · qualidade ${review.quality}/5`;findings.append(heading);
+      for(const item of review.findings||[]){const line=document.createElement('p');line.textContent=`${item.news_id?'Notícia '+item.news_id+': ':''}${item.issue} Correção sugerida: ${item.correction}`;findings.append(line);}
+    }
+    find('approve').textContent=data.human_escalated&&data.automatic_publication?'Aprovar e continuar automaticamente':'Aprovar roteiro';
     find('confirmation').hidden=!data.can_approve_script;
     find('confirm').checked=false;find('approve').disabled=true;
     activeJob=[...(data.jobs||[]),...(['queued','running'].includes(data.editorial_job?.status)?[data.editorial_job]:[])].filter(Boolean).find(job=>job.status!=='succeeded')||null;
@@ -123,8 +131,8 @@ window.radarProduction=(()=>{
     find('approve').disabled=true;find('feedback').textContent='Registrando sua aprovação…';
     try{
       const result=await request('/api/production/'+current.date+'/approve-script',{method:'POST',
-        headers:{'Content-Type':'application/json'},body:JSON.stringify({digest:current.digest,confirmed:true})});
-      render(result);find('feedback').textContent='Roteiro aprovado. Nenhuma geração de voz ou publicação foi iniciada.';
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({digest:current.digest,confirmed:true,feedback:find('editorial-feedback').value.trim()})});
+      render(result);find('editorial-feedback').value='';find('feedback').textContent=result.human_escalated&&result.automatic_publication?'Decisão registrada. O fluxo automático foi retomado; suas observações orientarão as próximas edições.':'Roteiro aprovado e preferência editorial registrada. Nenhuma geração de voz ou publicação foi iniciada.';
     }catch(error){
       if(error.status===409)await load();
       find('feedback').textContent=error.message;
