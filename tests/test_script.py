@@ -117,3 +117,15 @@ def test_assembly_rejects_missing_duplicate_or_unknown_story_ids(brief, payload,
     payload["stories"] = [dict(payload["stories"][0], news_id=i) for i in received]
     with pytest.raises(ValueError):
         assemble_script(payload, brief)
+
+
+@pytest.mark.parametrize("intro", ["Olá, eu sou sua apresentadora.", "Sou a narradora do Radar IA.", "Aqui é sua apresentadora."])
+def test_female_self_introduction_is_rejected_for_leo(brief,payload,intro):
+    payload['intro_pt']=intro
+    with pytest.raises(ValueError,match='Autoapresentação'):validate_script(payload,brief)
+
+
+def test_neutral_intro_and_female_news_subject_are_preserved(brief,payload):
+    payload['intro_pt']='Este é o Radar IA.'
+    payload['stories'][0]['narration_pt']+=' A apresentadora Ana explicou o anúncio.'
+    assert 'A apresentadora Ana' in validate_script(payload,brief).stories[0].narration_pt

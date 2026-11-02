@@ -77,6 +77,10 @@ def validate_script(payload: dict, brief: dict) -> Script:
     narration = spoken_text(script)
     if re.search(r"https?://|www\.", narration, re.I):
         raise ValueError("A narração não deve ler URLs")
+    # Detectar autoapresentação; não proibir palavras femininas em notícias ou citações.
+    identity = r"\b(?:eu\s+sou|sou|aqui\s+(?:é|quem\s+fala\s+é))\s+(?:(?:a|sua|uma)\s+){0,2}(?:apresentadora|narradora)\b"
+    if re.search(identity, script.intro_pt, re.I) or re.search(identity, script.outro_pt, re.I):
+        raise ValueError("Autoapresentação incompatível com a voz masculina Leo; use apresentação neutra ou masculina")
     # Limite controlado pelo aplicativo, não pelo arquivo de entrada.
     if len(narration.split()) > 1000 or len(narration) > 12000:
         raise ValueError("Narração excede orçamento inicial; encurtar antes de sintetizar")
