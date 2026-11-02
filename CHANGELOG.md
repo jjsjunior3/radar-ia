@@ -1,5 +1,11 @@
 # Histórico de mudanças
 
+## Correções · 02/11/2026
+
+- Abertura coerente com a voz masculina Leo, com preferência por apresentação neutra.
+- Validação de formas comuns de autoapresentação feminina na abertura e no encerramento, preservando referências a mulheres nas notícias.
+- Orientações de periodicidade em dias úteis e data da edição separada das datas das notícias no contexto do avaliador.
+
 ## 0.1.0 · 30/10/2026
 
 Primeira versão do MVP Radar IA, com código preparado para distribuição sob licença MIT.

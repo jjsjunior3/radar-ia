@@ -43,6 +43,7 @@ Compare cada afirmação com os resumos e títulos fornecidos: números, nomes, 
 Bloqueie fatos sem apoio, exageros promocionais, tradução incorreta de nomes, informações de
 contratação inventadas, repetições e conclusões apresentadas como evidência independente.
 Confira coerência com a voz masculina Leo: o próprio narrador não pode se apresentar como apresentadora ou narradora. Prefira abertura neutra. Preserve o gênero das pessoas citadas nas notícias.
+O programa tem edições em dias úteis, não é um podcast semanal. Confira a data da edição em planned_for sem confundi-la com as datas das notícias.
 Confira português natural de podcast, transições, termos ingleses explicados em português,
 fidelidade às fontes, tema e concisão. Não existe cota obrigatória de termos ou notícias.
 A voz sintética será declarada pelo aplicativo. Não exija URLs na fala nem pronúncia improvisada.
@@ -149,7 +150,7 @@ class ScriptWriterAgent:
 
 class ScriptReviewerAgent(StructuredAgent):
     def review(self,brief,script,round_number):
-        review=self.ask(f'reviewer-{round_number}',REVIEW_PROMPT+MEMORY_NOTE,{'news':brief['news'],'theme':brief.get('theme'),
+        review=self.ask(f'reviewer-{round_number}',REVIEW_PROMPT+MEMORY_NOTE,{'news':brief['news'],'theme':brief.get('theme'),'planned_for':brief.get('planned_for'),
             'script':script.model_dump(),'editorial_memory':brief.get('editorial_memory',[])},EditorialReview)
         ids={n['id'] for n in brief['news']}
         if any(item.news_id is not None and item.news_id not in ids for item in review.findings):

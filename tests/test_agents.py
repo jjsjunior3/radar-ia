@@ -123,3 +123,13 @@ def test_human_memory_reaches_all_three_llm_roles_as_data(tmp_path,brief,payload
         data=json.loads(call.kwargs['messages'][1]['content'])
         assert data['editorial_memory'][0]['feedback']=='Prefiro explicações curtas.'
         assert 'Prefiro explicações curtas.' not in call.kwargs['messages'][0]['content']
+
+
+def test_reviewer_receives_edition_date_separate_from_source_date(tmp_path,brief,payload):
+    brief['planned_for']='2026-11-02T08:30:00-03:00'
+    brief['news'][0]['published']='2026-10-29T10:00:00+00:00'
+    run,agents,create=setup(tmp_path,brief,[selected(),payload,review(True)])
+    agents.select();run.draft(agents.generate)
+    context=json.loads(create.call_args_list[-1].kwargs['messages'][1]['content'])
+    assert context['planned_for']==brief['planned_for']
+    assert context['news'][0]['published']==brief['news'][0]['published']
