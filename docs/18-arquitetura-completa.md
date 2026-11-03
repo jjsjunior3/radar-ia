@@ -128,3 +128,15 @@ Esse mecanismo é memória contextual. Não altera pesos do modelo, não faz fin
 | GitHub Actions | Testes e operação manual; seu cron de produção fica bloqueado quando o Scheduler AWS está ativo |
 
 Os logs não constituem, por si só, um painel de métricas de qualidade/custo. Avaliação mensurável de roteiros e observabilidade mais completa são evoluções propostas.
+
+## Checkpoint trade-offs
+
+The private ZIP is the unit of an editorial update. Its S3 ETag is used with
+`IfMatch` so a stale reviewer cannot overwrite a concurrent update. The archive
+is capped at 50 MiB. Rewriting it keeps the current workflow simple, but the
+memory and transfer costs grow with audio size. At higher volume, store audio
+as a separate private object and keep its key and checksum in the checkpoint.
+
+The editorial Lambda template allows 900 seconds. The LLM budget is 210
+seconds and covers the model calls. RSS collection, checkpoint storage, and
+notification dispatch also need time within the Lambda invocation.

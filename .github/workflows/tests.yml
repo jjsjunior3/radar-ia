@@ -12,18 +12,31 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Instalar projeto e dependências de teste
-        run: python -m pip install -e ".[test]"
+        run: python -m pip install -e ".[test,quality]"
+      - name: Lint and format
+        run: |
+          python -m ruff check src/radar_ia/agents.py src/radar_ia/hosted_api.py
+          python -m ruff format --check src/radar_ia/agents.py src/radar_ia/hosted_api.py
+      - name: Check types in editorial and speech contracts
+        run: python -m mypy --follow-imports=silent --ignore-missing-imports --check-untyped-defs src/radar_ia/agents.py src/radar_ia/speech_markup.py
       - name: Testes Python sem serviços pagos
-        run: python -m pytest -q
+        run: python -m pytest -q --cov=radar_ia --cov-branch --cov-report=term-missing --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-python-${{ matrix.python }}
+          path: coverage.xml
       - name: Testes do login no navegador (simulados)
         run: node --test tests/web/auth.test.cjs
       - name: Validar sintaxe da interface

@@ -27,3 +27,4 @@ config/iam-runtime-policy.json
 *.p12
 .coverage
 htmlcov/
+coverage.xml

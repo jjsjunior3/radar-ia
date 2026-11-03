@@ -1,5 +1,27 @@
 # Radar IA
 
+[Português](#visão-geral) · [Architecture](docs/18-arquitetura-completa.md) · [Demo guide](docs/19-demonstracao-e-divulgacao.md)
+
+Radar IA turns RSS stories into a private, Portuguese-language audio briefing.
+Python coordinates three LLM roles: relevance scoring, script writing, and editorial review.
+After two rejected drafts, the episode goes to a human reviewer with both sets of feedback.
+
+An approved news script becomes a single-host bulletin. Technical editions use an interview format.
+Amazon Polly renders the audio, Amazon S3 stores it privately, and the Android-installable web app
+offers a library, listening progress, and push notifications.
+
+Try the sample catalog and review interface locally with Python 3.12:
+
+```bash
+python -m pip install -e .
+python -m radar_ia.local_app --demo
+```
+
+Open http://127.0.0.1:8765. This demo uses sample data and needs no AWS or LLM credentials.
+Audio playback requires a configured private instance.
+
+## Visão geral
+
 **Do excesso de notícias a uma experiência de áudio que cabe na rotina.**
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](pyproject.toml)

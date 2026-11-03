@@ -17,7 +17,8 @@ Repository = "https://github.com/jjsjunior3/radar-ia"
 Documentation = "https://github.com/jjsjunior3/radar-ia/blob/main/README.md"
 
 [project.optional-dependencies]
-test = ["pytest>=8,<10"]
+test = ["pytest>=8,<10", "pytest-cov>=6,<8"]
+quality = ["ruff==0.17.3", "mypy>=1.15,<3"]
 
 [project.scripts]
 radar-ia = "radar_ia.cli:main"
