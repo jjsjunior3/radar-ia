@@ -246,6 +246,7 @@ local-output/        Arquivos privados gerados; ignorados pelo Git
 | [10 · Tarefas e automação](docs/10-tarefas-e-automacao.md) | Geração em segundo plano, aprovação temporária e caminho para publicação automática com notificação |
 | [11 · Identidade do login](docs/11-identidade-login.md) | Logo e cores do Radar IA no Cognito clássico |
 | [12 · Agendamento AWS](docs/12-agendamento-aws.md) | EventBridge Scheduler, Lambda editorial, segredo privado e diagnóstico |
+| [21 · Piloto de duas vozes](docs/21-piloto-duas-vozes.md) | Amostra Leo/Camila, cache e plano de integração do diálogo |
 | [18 · Arquitetura completa](docs/18-arquitetura-completa.md) | Todos os agentes, serviços e o ciclo de aprendizado |
 | [19 · Demonstração e divulgação](docs/19-demonstracao-e-divulgacao.md) | Dados fictícios, capturas e rascunho para LinkedIn |
 | [20 · Próximos diferenciais](docs/20-proximos-diferenciais.md) | Avaliação mensurável e observabilidade propostas |
@@ -276,6 +277,7 @@ Checkpoints reduzem retrabalho, mas armazenam rascunhos e transferem dados. Não
 - [x] Aplicar logo e cores do Radar IA ao login Cognito clássico.
 - [ ] Melhorar observabilidade, retenção de rascunhos e acompanhamento de custos.
 - [x] Revisar o repositório e disponibilizar o código publicamente.
+- [x] Criar piloto local de podcast com Leo e Camila; integração diária aguarda avaliação e adaptação do roteiro.
 - [ ] Criar um feed RSS público como canal opcional de distribuição.
 
 O feed público exigirá uma decisão própria de distribuição e acesso aos arquivos; URLs S3 temporárias do app não funcionam como endereço permanente de podcast.

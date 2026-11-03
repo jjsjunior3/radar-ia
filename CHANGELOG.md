@@ -1,5 +1,11 @@
 # Histórico de mudanças
 
+## Piloto de duas vozes · 02/11/2026
+
+- Amostra local Leo/Camila de 85,9 segundos, roteiro demonstrativo editável e cache por fala.
+- Ajuste moderado de volume, pausas, inglês contextualizado e bloqueio de repetição paga incerta.
+- Rotina de produção permanece com um narrador; diálogo diário ainda não integrado.
+
 ## Correções · 02/11/2026
 
 - Abertura coerente com a voz masculina Leo, com preferência por apresentação neutra.

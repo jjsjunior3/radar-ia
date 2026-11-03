@@ -1,0 +1,12 @@
+{
+  "is_demo": true,
+  "turns": [
+    {"speaker":"leo","text":"Este é um piloto do Radar IA, com duas vozes sintéticas. Eu sou Leo e estou com Camila. Hoje vamos conversar sobre uma pergunta: como deixar um agente de IA mais confiável?"},
+    {"speaker":"camila","text":"Oi, Leo. Para mim, o ponto de partida é simples: como a gente percebe que o agente errou antes de publicar alguma coisa?"},
+    {"speaker":"leo","text":"No nosso projeto, um agente escreve e outro avalia o roteiro. Se houver um problema, o avaliador devolve uma análise para correção. Isso cria um ciclo de revisão."},
+    {"speaker":"camila","text":"E quando essa revisão não resolve? É aí que entra o human in the loop, ou seja, a participação de uma pessoa na decisão?","english_terms":["human in the loop"]},
+    {"speaker":"leo","text":"Exatamente. Depois de duas reprovações, o roteiro espera a decisão humana. Só com aprovação ele pode seguir para a voz. A conferência técnica do áudio continua obrigatória no sistema."},
+    {"speaker":"camila","text":"Então, fica uma expressão para praticar: feedback loop, ciclo de retorno e ajuste. A gente observa o resultado, registra uma orientação e usa esse contexto nas próximas edições.","english_terms":["feedback loop"]},
+    {"speaker":"leo","text":"E observar mudanças não significa comprovar melhoria. Precisamos comparar os resultados com critérios claros. Esse foi nosso teste de conversa. Feito por jrsantosdev."}
+  ]
+}

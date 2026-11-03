@@ -14,6 +14,7 @@ config/iam-runtime-policy.json
 *.sqlite3
 *.sqlite3-*
 *.wav
+*.pcm
 *.mp3
 *.zip
 
