@@ -88,7 +88,7 @@ def test_whole_edition_survives_fresh_runner_between_steps(tmp_path):
     run,_=runner()
     def generate(brief,save):
         calls.append('llm')
-        payload={'intro_pt':'Boletim.','stories':[{'news_id':1,'title_pt':'Teste','summary_pt':'Resumo.','narration_pt':'Caching significa armazenamento para reutilização.'}],
+        payload={'intro_pt':'Boletim.','stories':[{'news_id':1,'title_pt':'Teste','summary_pt':'Resumo.','narration_pt':'O que é caching?\nCaching significa armazenamento para reutilização.'}],
             'glossary':[{'term_en':'Caching','explanation_pt':'armazenamento para reutilização','news_ids':[1]}],'outro_pt':'Até amanhã.'}
         save({'choices':[{'finish_reason':'stop','message':{'content':__import__('json').dumps(payload)}}]})
         return validate_script(payload,brief),{}
@@ -96,7 +96,7 @@ def test_whole_edition_survives_fresh_runner_between_steps(tmp_path):
     run,_=runner();run.approve_script()
     class Polly:
         def synthesize_speech(self,**kwargs):
-            calls.append('polly')
+            calls.append(kwargs['VoiceId'])
             return {'AudioStream':io.BytesIO(b'\0\0'*16000)}
     run,_=runner();run.synthesize(Polly())
     run,_=runner();run.synthesize(Polly());run.approve_audio()
@@ -104,7 +104,7 @@ def test_whole_edition_survives_fresh_runner_between_steps(tmp_path):
         return upload_episode(s3,'bucket','radar',audio=audio,script=script,narration=narration,brief=brief,date=day,title='Teste')[0]
     run,store=runner();run.publish(upload);store.save_editorial()
     run,store=runner();run.publish(upload);store.save_editorial()
-    assert calls==['llm','polly']
+    assert calls==['llm','Leo','Leo','Carolina','Leo']
     assert len(read_catalog(s3,'bucket','radar/catalog.json')[0]['episodes'])==1
     assert read_json(run.global_path)['last_covered_at']==now.isoformat()
     assert run.state['stage']=='completed'

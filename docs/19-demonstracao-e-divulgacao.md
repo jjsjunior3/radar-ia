@@ -44,3 +44,18 @@ As imagens abaixo usam exclusivamente dados fictícios. As capturas foram verifi
 > #Python #AWS #InteligenciaArtificial #OpenSource #EngenhariaDeSoftware
 
 O texto está preparado para revisão do autor. Nenhuma publicação ou mensagem no LinkedIn foi enviada.
+
+## Demonstração de ponta a ponta para o portfólio
+
+A demonstração local separa a experiência do aplicativo, a revisão editorial e a preparação dos roteiros. Execute da raiz do repositório, após instalar as dependências descritas no README.
+
+| O que mostrar | Comando no Windows |
+| --- | --- |
+| Biblioteca, progresso e aprovação no app com dados de exemplo | `.\.venv\Scripts\python.exe -m radar_ia.local_app --demo` |
+| Roteiro de exemplo sem chamada ao LLM | `.\.venv\Scripts\python.exe examples/demo_roteiro.py` |
+| Preparação da entrevista com Leo e Carolina | `.\.venv\Scripts\python.exe examples/piloto_duas_vozes.py --script examples/piloto_entrevista.json` |
+| Duas reprovações e envio dos pareceres à revisão humana | `.\.venv\Scripts\python.exe -m pytest -q tests/test_agents.py -k two_rejections` |
+
+O app local de demonstração exibe o catálogo, mas o player depende de áudio da instância privada. O comando da entrevista acima prepara o roteiro. A opção `--generate` é reservada para a síntese com credenciais AWS e usa a cota ou o crédito da conta.
+
+Para concluir a demonstração em nuvem, execute um boletim e uma entrevista. Registre o formato, a duração e se o aviso abriu o episódio no Android. Compare os caracteres cobrados pelo Polly e o gasto das chamadas de curadoria, roteiro e revisão no OpenRouter. Registre os valores em USD antes de créditos e indique quais serviços ficaram fora da medição. Só marque os resultados como verificados depois das duas execuções.

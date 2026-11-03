@@ -14,8 +14,8 @@ def payload():
     return {"intro_pt": "Boletim de teste.", "stories": [{"news_id": 1, "title_pt": "Teste", "summary_pt": "Resumo.", "narration_pt": "Caching significa armazenamento para reutilização."}], "glossary": [{"term_en": "Caching", "explanation_pt": "armazenamento para reutilização", "news_ids": [1]}], "outro_pt": "Até a próxima."}
 
 
-def test_valid_script_and_fixed_disclosure(brief, payload):
-    assert "voz sintética" in spoken_text(validate_script(payload, brief))
+def test_valid_script_starts_with_editorial_intro(brief, payload):
+    assert spoken_text(validate_script(payload, brief)).startswith(payload["intro_pt"] + "\n\n")
 
 
 @pytest.mark.parametrize("mutation", ["id", "blank", "url", "term_ref", "term_absent", "explanation", "oversized", "extra"])

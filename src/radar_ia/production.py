@@ -16,7 +16,7 @@ from .brief import build_brief
 from .collection import collect_sources
 from .news import canonical, duplicate, Fetcher
 from .review import render_report
-from .script import validate_script, spoken_text, render_script, assemble_script
+from .script import validate_script, spoken_text, render_script, assemble_script, interview_exchange
 from .speech_markup import speech_chunks,bilingual_ssml,RENDERER_VERSION
 from .weekly import plan,merge_queue
 from .windows import collection_start
@@ -220,12 +220,23 @@ class Production:
         if self.state['stage'] not in ('script_approved','audio_in_progress','audio_failed'):
             raise ValueError('Aprove o roteiro antes da voz')
         terms=[t.term_en for t in script.glossary]
-        requests=[bilingual_ssml(part,terms) for part in speech_chunks(text)]
-        if any(len(r)>6000 for r in requests):raise ValueError('SSML acima do limite')
+        sections = [(voice, text)]
+        if brief.get('format') == 'interview':
+            sections = [(voice, script.intro_pt)]
+            for story in script.stories:
+                question, answer = interview_exchange(story.narration_pt)
+                sections.extend([(voice, question), ('Carolina', answer)])
+            sections.append((voice, script.outro_pt))
+        requests = [
+            (speaker, bilingual_ssml(part, terms))
+            for speaker, section in sections
+            for part in speech_chunks(section)
+        ]
+        if any(len(ssml)>6000 for _, ssml in requests):raise ValueError('SSML acima do limite')
         chunks_dir=self.folder/'audio-chunks';chunks_dir.mkdir(exist_ok=True)
         pcm=bytearray();self.stage('audio_in_progress')
-        for index,ssml in enumerate(requests):
-            digest=fingerprint({'ssml':ssml,'voice':voice,'engine':engine})
+        for index,(speaker,ssml) in enumerate(requests):
+            digest=fingerprint({'ssml':ssml,'voice':speaker,'engine':engine})
             meta_path=chunks_dir/f'{index}.json';pcm_path=chunks_dir/f'{index}.pcm'
             previous=read_json(meta_path,{})
             if previous and previous.get('digest')!=digest:raise ValueError('Texto/voz alterado após início da síntese; usar nova revisão sem reaproveitar trechos')
@@ -237,7 +248,7 @@ class Production:
                 if previous:raise ValueError('Trecho com chamada iniciada e sem resposta salva; não repetir cobrança automaticamente')
                 self.save_json(meta_path,{'digest':digest,'status':'request_started'})
                 try:
-                    response=polly.synthesize_speech(Text=ssml,TextType='ssml',OutputFormat='pcm',SampleRate='16000',VoiceId=voice,Engine=engine,LanguageCode='pt-BR')
+                    response=polly.synthesize_speech(Text=ssml,TextType='ssml',OutputFormat='pcm',SampleRate='16000',VoiceId=speaker,Engine=engine,LanguageCode='pt-BR')
                     with closing(response['AudioStream']) as stream:data=stream.read()
                     if not data or len(data)%2:raise ValueError('Trecho PCM inválido')
                     temporary=pcm_path.with_suffix('.pcm.tmp')
@@ -245,9 +256,11 @@ class Production:
                     temporary.replace(pcm_path)
                     self.save_json(meta_path,{'digest':digest,'status':'complete','sha256':hashlib.sha256(data).hexdigest()})
                 except Exception:self.stage('audio_failed');raise
+            if index and requests[index - 1][0] != speaker:
+                pcm.extend(bytes(16000 * 2 * 380 // 1000))
             pcm.extend(data)
         audio,duration=wav_from_pcm(bytes(pcm))
-        metadata={'duration_seconds':duration,'voice':voice,'engine':engine,'renderer':RENDERER_VERSION,'duration_verified':True,'script_sha256':hashlib.sha256(text.encode()).hexdigest(),'audio_sha256':hashlib.sha256(audio).hexdigest()}
+        metadata={'duration_seconds':duration,'format':brief.get('format', 'bulletin'),'voice':voice,'engine':engine,'renderer':RENDERER_VERSION,'duration_verified':True,'script_sha256':hashlib.sha256(text.encode()).hexdigest(),'audio_sha256':hashlib.sha256(audio).hexdigest()}
         # Metadados primeiro; áudio é o marcador de cache concluído.
         write_json(self.folder/'metadados-audio.json',metadata)
         temporary=self.folder/'episode.wav.tmp'

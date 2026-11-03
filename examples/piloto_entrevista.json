@@ -1,0 +1,36 @@
+{
+  "is_demo": true,
+  "turns": [
+    {
+      "speaker": "leo",
+      "text": "Hoje no Radar IA eu converso com a Carolina sobre como avaliar sistemas de IA. Carolina, como você descobriria se um agente de notícias está inventando informações?"
+    },
+    {
+      "speaker": "carolina",
+      "text": "Eu começaria com uma notícia simples. Digamos que a fonte fale de um teste com dez pessoas. Se o roteiro transformar isso em dez mil usuários, já temos um erro bem claro. Aí eu guardo esse exemplo para testar a próxima versão."
+    },
+    {
+      "speaker": "leo",
+      "text": "E se o roteiro estiver tecnicamente correto, mas parecer que a ferramenta já funciona para todo mundo?"
+    },
+    {
+      "speaker": "carolina",
+      "text": "Também vale corrigir. Se foi só um teste, diga que foi só um teste. Essa diferença é fácil de perder quando a gente tenta deixar o texto mais empolgante. Um bom roteiro ainda pode ser interessante sem prometer mais do que a fonte mostrou."
+    },
+    {
+      "speaker": "leo",
+      "text": "Em que momento você chamaria uma pessoa para decidir?"
+    },
+    {
+      "speaker": "carolina",
+      "text": "Quando a revisão não resolveu o problema. É o human in the loop: uma pessoa entra no processo para decidir com as evidências em mãos. No Radar IA, ela recebe o roteiro e os pareceres depois de duas reprovações.",
+      "english_terms": [
+        "human in the loop"
+      ]
+    },
+    {
+      "speaker": "leo",
+      "text": "Carolina, valeu pelo exemplo. Este foi o Radar IA. Feito por jrsantosdev."
+    }
+  ]
+}

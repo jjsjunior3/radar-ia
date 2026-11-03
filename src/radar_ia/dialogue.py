@@ -12,13 +12,13 @@ from .script import StrictModel
 from .audio import wav_from_pcm
 from .speech_markup import bilingual_ssml,PARAGRAPH_PAUSE_MS
 
-VOICES={'leo':'Leo','camila':'Camila'}
+VOICES={'leo':'Leo','camila':'Camila','carolina':'Carolina'}
 RENDERER='dialogue-pilot-v1'
 GAP_MS=380
 
 
 class Turn(StrictModel):
-    speaker:Literal['leo','camila']
+    speaker:Literal['leo','camila','carolina']
     text:str=Field(min_length=1,max_length=1600)
     english_terms:list[str]=Field(default_factory=list,max_length=4)
 
@@ -30,7 +30,8 @@ class Pilot(StrictModel):
 
 def validate_pilot(payload):
     pilot=Pilot.model_validate(payload)
-    if {turn.speaker for turn in pilot.turns}!=set(VOICES):raise ValueError('Piloto exige as duas vozes')
+    speakers={turn.speaker for turn in pilot.turns}
+    if len(speakers)!=2 or 'leo' not in speakers:raise ValueError('Piloto exige as duas vozes: Leo e uma convidada')
     if sum(len(turn.text.split()) for turn in pilot.turns)>220:raise ValueError('Encurte o piloto antes de gerar')
     for turn in pilot.turns:
         if not turn.text.strip() or any(not term.strip() or term.casefold() not in turn.text.casefold() for term in turn.english_terms):raise ValueError('Texto ou termo inglês inválido')
@@ -52,6 +53,7 @@ def turn_ssml(turn):
     ending=f'<break time="{PARAGRAPH_PAUSE_MS}ms"/></speak>'
     # A pausa entre locutores é montada no PCM, sem acumular a pausa final do parágrafo.
     if text.endswith(ending):text=text[:-len(ending)]+'</speak>'
+    if turn.speaker=='carolina':text=text.replace('<break time="450ms"/>',' ')
     return text
 
 
@@ -70,7 +72,7 @@ def normalize_pcm(pcm):
 
 def synthesize_pilot(polly,payload,folder):
     pilot=validate_pilot(payload);folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
-    config={'script':pilot.model_dump(),'voices':VOICES,'engine':'generative','renderer':RENDERER,'gap_ms':GAP_MS}
+    config={'script':pilot.model_dump(),'voices':{turn.speaker:VOICES[turn.speaker] for turn in pilot.turns},'engine':'generative','renderer':RENDERER,'gap_ms':GAP_MS}
     fingerprint=digest(json.dumps(config,sort_keys=True,ensure_ascii=False).encode())
     manifest=folder/'manifest.json';audio=folder/'piloto.wav';metadata=folder/'metadata.json'
     if manifest.exists():
