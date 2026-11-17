@@ -25,6 +25,18 @@ def deliver(message,store,jobs,s3,bucket,prefix,owner,send):
         reference=message['date']+':'+message['digest'];selected=devices
         payload={'title':'Radar IA','body':'Uma edição precisa da sua revisão no Radar IA.',
                  'tag':'radar-review-'+message['date']+'-'+message['digest'][:12],'view':'review'}
+    elif kind=='production_failed' and set(message)=={'kind','date'}:
+        from .jobs import editorial_job_id
+        from .review_api import ReviewStore
+        job=jobs.get(editorial_job_id(message['date']))
+        if not job or job.get('status')!='failed':
+            return {'processed':0,'skipped':'no_longer_failed'}
+        summary=ReviewStore(s3,bucket,prefix).summary(message['date'])
+        if summary['stage']=='completed':
+            return {'processed':0,'skipped':'already_completed'}
+        reference=message['date'];selected=devices
+        payload={'title':'Radar IA','body':'A produção da edição parou e precisa de atenção. Abra o app para conferir.',
+                 'tag':'radar-failed-'+reference,'view':'review'}
     elif kind=='test' and set(message)=={'kind','user_id','subscription_id','request_id'} and message['user_id']==owner:
         reference=message['request_id'];selected={key:value for key,value in devices.items() if key==message['subscription_id']}
         payload={'title':'Radar IA','body':'Tudo certo! Os avisos estão ativados neste dispositivo.','tag':'radar-test'}

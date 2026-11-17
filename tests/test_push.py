@@ -89,3 +89,24 @@ def test_review_notification_is_bound_to_pending_digest_and_deduplicated(monkeyp
     summary['stage']='script_approved'
     assert deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)['processed']==0
     send.assert_called_once()
+
+
+def test_failed_production_notice_is_deduplicated_and_skips_completed(monkeypatch):
+    from types import SimpleNamespace
+    from radar_ia import review_api
+    from radar_ia.jobs import editorial_job_id
+    devices=PushStore(DeviceTable())
+    devices.subscribe('owner',subscription())
+    jobs=JobStore(Table())
+    day='2026-11-16'
+    jobs.create({'job_id':editorial_job_id(day),'status':'failed'})
+    summary={'stage':'prepared'}
+    monkeypatch.setattr(review_api,'ReviewStore',lambda *a:SimpleNamespace(summary=lambda day:summary))
+    send=Mock(return_value=201)
+    message={'kind':'production_failed','date':day}
+    deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)
+    deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)
+    send.assert_called_once()
+    assert send.call_args.args[1]['view']=='review'
+    summary['stage']='completed'
+    assert deliver(message,devices,jobs,Mock(),'bucket','radar','owner',send)['processed']==0

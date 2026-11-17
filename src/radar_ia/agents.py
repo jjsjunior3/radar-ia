@@ -56,7 +56,7 @@ Confira coerência com a voz masculina Leo: o próprio narrador não pode se apr
 O programa tem edições em dias úteis, não é um podcast semanal. Confira a data da edição em planned_for sem confundi-la com as datas das notícias.
 Confira português natural de podcast, transições, termos ingleses explicados em português,
 fidelidade às fontes, tema e concisão. Não existe cota obrigatória de termos ou notícias.
-A voz sintética será declarada pelo aplicativo. Não exija URLs na fala nem pronúncia improvisada.
+Na pauta principal, confira se o roteiro explica o impacto prático ou traz um exemplo claramente hipotético. Não exija esse aprofundamento nas demais pautas. Não exija URLs na fala nem pronúncia improvisada.
 A duração real será medida depois do Polly, não pode ser garantida pela leitura do texto.
 Dê instruções concretas de correção em português, com ID quando pertinente.
 Aprove somente sem problemas bloqueantes e com qualidade pelo menos 4 em 5.
@@ -170,17 +170,30 @@ class StructuredAgent:
 class RelevanceAgent(StructuredAgent):
     def select(self, brief):
         ids = validate_brief(brief)
+        payload = {
+            "theme": brief.get("theme"),
+            "news": brief["news"],
+            "editorial_memory": brief.get("editorial_memory", []),
+        }
         decision = self.ask(
-            "relevance",
-            RELEVANCE_PROMPT + MEMORY_NOTE,
-            {
-                "theme": brief.get("theme"),
-                "news": brief["news"],
-                "editorial_memory": brief.get("editorial_memory", []),
-            },
-            RelevanceDecision,
+            "relevance", RELEVANCE_PROMPT + MEMORY_NOTE, payload, RelevanceDecision
         )
         received = [item.news_id for item in decision.candidates]
+        if len(received) == len(set(received)) and set(received) < set(ids):
+            decision = self.ask(
+                "relevance-repair",
+                RELEVANCE_PROMPT
+                + MEMORY_NOTE
+                + " Corrija a resposta incompleta. Inclua todos os IDs esperados,"
+                " inclusive as candidatas com nota baixa.",
+                {
+                    **payload,
+                    "expected_ids": ids,
+                    "previous_decision": decision.model_dump(),
+                },
+                RelevanceDecision,
+            )
+            received = [item.news_id for item in decision.candidates]
         if len(received) != len(ids) or set(received) != set(ids):
             raise ValueError("Agente de relevância alterou, omitiu ou duplicou IDs")
         selected = {item.news_id for item in decision.candidates if item.score >= 3}

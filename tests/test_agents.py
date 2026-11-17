@@ -133,3 +133,20 @@ def test_reviewer_receives_edition_date_separate_from_source_date(tmp_path,brief
     context=json.loads(create.call_args_list[-1].kwargs['messages'][1]['content'])
     assert context['planned_for']==brief['planned_for']
     assert context['news'][0]['published']==brief['news'][0]['published']
+
+
+@pytest.mark.parametrize("repair_complete", [True, False])
+def test_incomplete_relevance_gets_one_persisted_repair(tmp_path, brief, repair_complete):
+    brief["news"].append({**brief["news"][0], "id": 2, "url": "https://example.org/2"})
+    repair = selected()
+    if repair_complete:
+        repair["candidates"].append({"news_id": 2, "score": 1, "reason": "Baixa relevância."})
+    run, agents, create = setup(tmp_path, brief, [selected(), repair])
+    if repair_complete:
+        assert agents.select()
+    else:
+        for _ in range(2):
+            with pytest.raises(ValueError, match="IDs"):
+                agents.select()
+    assert create.call_count == 2
+    assert (run.folder / "agents/relevance-repair/response.json").exists()

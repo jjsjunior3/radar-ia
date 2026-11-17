@@ -163,3 +163,23 @@ Referência: [GetObject e diferença entre 403 e 404 no S3](https://docs.aws.ama
 
 - [OIDC GitHub com AWS e formato de subject](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)
 - [Agendamento, timezone e possíveis atrasos](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+
+## Recuperar curadoria incompleta
+
+O agente pede uma única correção quando recebe IDs válidos, únicos e incompletos.
+IDs desconhecidos e duplicados continuam bloqueando a seleção. Cada resposta
+fica preservada no checkpoint, incluindo a tentativa de correção.
+
+Para uma edição que parou antes do roteiro, execute primeiro:
+
+```bat
+python examples/recuperar_curadoria.py --date AAAA-MM-DD
+```
+
+O diagnóstico valida as URLs, a idade da pauta e a resposta já recebida.
+Acrescente `--resume` para autorizar a correção paga e as etapas editoriais.
+A recuperação tem um registro próprio no DynamoDB e aceita uma execução por
+edição. Uma tentativa incerta exige inspeção dos registros antes de continuar.
+Ao recuperar, o registro original conserva o tipo de erro e a referência da
+recuperação. Os avisos de produção interrompida são deduplicados por edição e
+dispositivo e abrem a área de análise.

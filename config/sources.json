@@ -14,6 +14,21 @@
     ]
   },
   {
+    "name": "GitHub Changelog",
+    "url": "https://github.blog/changelog/feed/",
+    "domains": [
+      "github.blog"
+    ]
+  },
+  {
+    "name": "OpenAI News",
+    "url": "https://openai.com/news/rss.xml",
+    "domains": [
+      "openai.com",
+      "www.openai.com"
+    ]
+  },
+  {
     "name": "Google AI",
     "url": "https://blog.google/technology/ai/rss/",
     "domains": [

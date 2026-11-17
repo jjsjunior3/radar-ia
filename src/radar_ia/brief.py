@@ -11,6 +11,8 @@ Não trate um guia como lançamento nem anúncio isolado de empresa como tendên
 Apresente dois a quatro termos técnicos em inglês quando pertinentes ao conteúdo, explicando cada um em português na primeira ocorrência. Não force uma cota.
 Preserve nomes de produtos, números e grafia original dos termos. Nunca traduza marcas: Amazon Quick não é Acesso Rápido. No glossário, term_en contém a expressão inglesa (training loop), não a tradução portuguesa. explanation_pt contém somente a explicação, sem repetir a sigla ou expressão inglesa. Não escreva pronúncia improvisada.
 Abra com a principal notícia do dia. Use transições breves e naturais. Não mencione síntese de voz ou o processo de produção. Explique a data das notícias quando necessário.
+Escolha uma pauta principal e explique por que ela importa para quem trabalha ou estuda tecnologia. Nas demais, seja breve. Separe fatos de um exemplo hipotético de aplicação e não force a mesma estrutura em todas as notícias.
+Em Carreira e mercado, priorize evidências sobre contratações, demissões e competências demandadas quando houver fontes na pauta; não deduza tendência de uma única empresa.
 Evite ler URLs; as referências serão exibidas no aplicativo.
 O episódio terá no máximo 10 minutos, incluindo explicações e encerramento.
 Use até 1000 palavras como orçamento inicial, não como meta de preenchimento.

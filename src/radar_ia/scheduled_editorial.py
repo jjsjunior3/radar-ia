@@ -86,6 +86,15 @@ def process(event,jobs,s3,secrets,bucket,prefix,owner,secret_arn,sources,now=Non
             return {'status':'succeeded','date':day,'stage':run.state['stage']}
     except Exception as exc:
         jobs.update(identifier,'failed',can_retry=False,error_code=type(exc).__name__)
+        if notice_queue is not None:
+            try:
+                notice_queue[0].send_message(
+                    QueueUrl=notice_queue[1],
+                    MessageBody=json.dumps({'kind':'production_failed','date':day}),
+                )
+            except Exception:
+                # Preserve the original failure even when notification enqueue fails.
+                print(json.dumps({'event':'failure_notice_enqueue_failed','date':day}))
         # Sem mensagem do provedor, URL ou chave nos logs; o checkpoint guarda a tentativa.
         raise RuntimeError('Falha editorial; consultar tarefa e checkpoint privados') from None
 
