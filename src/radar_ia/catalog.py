@@ -55,7 +55,7 @@ def upload_episode(client, bucket, prefix, *, audio, script, narration, brief, d
         client.put_object(Bucket=bucket, Key=f"{base}/{name}", Body=body, ContentType=mime,
                           ServerSideEncryption="AES256")
     episode = {"id": episode_id, "date": date, "title": title, "theme": brief["theme"],
-               "duration_seconds": duration, "audio_key": f"{base}/episode.wav",
+               "format": brief.get("format", "bulletin"), "duration_seconds": duration, "audio_key": f"{base}/episode.wav",
                "script_key": f"{base}/roteiro.json", "sources_key": f"{base}/fontes.json",
                "sha256": digest, "visibility": "private", "news_urls": [n["url"] for n in brief["news"]]}
     client.put_object(Bucket=bucket, Key=f"{base}/manifest.json", Body=json.dumps(episode, ensure_ascii=False).encode(),

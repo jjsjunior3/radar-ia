@@ -14,6 +14,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from .editorial_learning import record_feedback
+from .episode_notes import read_notes
 from .jobs import JobQueue, JobStore, editorial_job_id, job_id, public_job
 from .push import PushStore, test_notice
 from .review_api import ReviewConflict, ReviewStore
@@ -173,6 +174,9 @@ class Backend:
         if data.get("schema_version") != 1:
             raise ValueError("Catálogo incompatível")
         return data["episodes"]
+
+    def notes(self, episode):
+        return read_notes(self.s3, self.bucket, self.prefix, episode)
 
     def states(self, user_id):
         result = {}
@@ -342,6 +346,18 @@ def handle(event, backend):
                     ],
                 },
             )
+        if route == "GET /api/episodes/{episode_id}" and method == "GET":
+            episode = next(
+                (
+                    e
+                    for e in episodes
+                    if e["id"] == event.get("pathParameters", {}).get("episode_id")
+                ),
+                None,
+            )
+            if episode is None:
+                return reply(404, {"error": "Episódio não encontrado"})
+            return reply(200, backend.notes(episode))
         if route == "GET /api/audio/{episode_id}" and method == "GET":
             episode = next(
                 (

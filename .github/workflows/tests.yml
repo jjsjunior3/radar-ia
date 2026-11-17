@@ -38,8 +38,9 @@ jobs:
           name: coverage-python-${{ matrix.python }}
           path: coverage.xml
       - name: Testes do login no navegador (simulados)
-        run: node --test tests/web/auth.test.cjs
+        run: node --test tests/web/*.test.cjs
       - name: Validar sintaxe da interface
         run: |
           node --check src/radar_ia/web/app.js
           node --check src/radar_ia/web/auth.js
+          node --check src/radar_ia/web/episode-notes.js

@@ -51,6 +51,21 @@ class Library:
         from .demo import edition as build
         return build(edition,self.demo_approved,self.demo_feedback)
 
+    def notes(self, episode):
+        from .episode_notes import build_notes, read_notes
+        if self.demo:
+            return build_notes(episode, {
+                'intro_pt': 'Demonstração fictícia do Radar IA.',
+                'stories': [{'news_id': 1, 'title_pt': 'Conferir antes de publicar',
+                    'summary_pt': 'Exemplo fictício para explorar o player.',
+                    'narration_pt': 'Este texto é um exemplo de transcrição. As fontes de cada pauta ficam ao lado da explicação.'}],
+                'outro_pt': 'Fim da demonstração.',
+                'glossary': [{'term_en': 'checkpoint',
+                    'explanation_pt': 'Registro que permite retomar uma etapa.'}]},
+                [{'id': 1, 'source': 'Fonte de demonstração',
+                  'url': 'https://example.org', 'title': 'Exemplo fictício'}])
+        return read_notes(self.s3, self.bucket, self.prefix, episode)
+
     def audio_url(self,episode):
         if self.demo: raise ValueError('Player de demonstração: execute em modo S3 para ouvir o episódio privado.')
         key=episode['audio_key']
@@ -88,11 +103,15 @@ def handler_for(library,port):
                     return self.reply(200,library.listing())
                 if library.demo and path.startswith('/api/production/'):
                     return self.reply(200,library.demo_edition(path.rsplit('/',1)[1]))
+                if path.startswith('/api/episodes/'):
+                    episode=library.episode(unquote(path[len('/api/episodes/'):]))
+                    if not episode: return self.reply(404,{'error':'Episódio não encontrado'})
+                    return self.reply(200,library.notes(episode))
                 if path.startswith('/api/audio/'):
                     episode=library.episode(unquote(path[len('/api/audio/'):]))
                     if not episode: return self.reply(404,{'error':'Episódio não encontrado'})
                     return self.reply(200,{'url':library.audio_url(episode),'expires_in':300})
-                assets={'/notifications.js':('notifications.js','text/javascript; charset=utf-8'),'/sw.js':('sw.js','text/javascript; charset=utf-8'),'/production.js':('production.js','text/javascript; charset=utf-8'),'/':('index.html','text/html; charset=utf-8'),'/auth.js':('auth.js','text/javascript; charset=utf-8'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/app.js':('app.js','text/javascript; charset=utf-8'),'/style.css':('style.css','text/css; charset=utf-8')}
+                assets={'/episode-notes.js':('episode-notes.js','text/javascript; charset=utf-8'),'/notifications.js':('notifications.js','text/javascript; charset=utf-8'),'/sw.js':('sw.js','text/javascript; charset=utf-8'),'/production.js':('production.js','text/javascript; charset=utf-8'),'/':('index.html','text/html; charset=utf-8'),'/auth.js':('auth.js','text/javascript; charset=utf-8'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/app.js':('app.js','text/javascript; charset=utf-8'),'/style.css':('style.css','text/css; charset=utf-8')}
                 if path not in assets: return self.reply(404,{'error':'Página não encontrada'})
                 name,mime=assets[path]
                 return self.reply(200,(web/name).read_bytes(),mime)

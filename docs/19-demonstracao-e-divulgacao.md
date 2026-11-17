@@ -59,3 +59,18 @@ A demonstração local separa a experiência do aplicativo, a revisão editorial
 O app local de demonstração exibe o catálogo, mas o player depende de áudio da instância privada. O comando da entrevista acima prepara o roteiro. A opção `--generate` é reservada para a síntese com credenciais AWS e usa a cota ou o crédito da conta.
 
 Para concluir a demonstração em nuvem, execute um boletim e uma entrevista. Registre o formato, a duração e se o aviso abriu o episódio no Android. Compare os caracteres cobrados pelo Polly e o gasto das chamadas de curadoria, roteiro e revisão no OpenRouter. Registre os valores em USD antes de créditos e indique quais serviços ficaram fora da medição. Só marque os resultados como verificados depois das duas execuções.
+
+## Explorar o conteúdo de um episódio
+
+O botão "Roteiro e fontes" abre a transcrição, as fontes de cada assunto e
+o glossário em inglês. A consulta usa o roteiro e as fontes publicados com
+o áudio. Ela exige a sessão autenticada na instância hospedada.
+
+Episódios novos de entrevista registram seu formato no catálogo e exibem as
+falas do apresentador e da convidada separadamente. Nos episódios antigos,
+o texto é exibido como narração. A demonstração local oferece um exemplo
+fictício para explorar essa interface sem credenciais ou novas gerações.
+
+Os assuntos são apresentados na ordem do roteiro. Capítulos com salto no áudio
+dependem de alinhamento temporal validado, pois a geração contínua do Gemini
+ainda não fornece esses tempos por pauta.
