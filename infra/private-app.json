@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Radar IA private MVP — HTTPS shell, Cognito login, JWT API and per-user progress. No public signup.",
+  "Description": "Radar IA private MVP \u2014 HTTPS shell, Cognito login, JWT API and per-user progress. No public signup.",
   "Parameters": {
     "AudioBucket": {
       "Type": "String"
@@ -52,6 +52,11 @@
         "true",
         "false"
       ]
+    },
+    "TtsSecretArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Secret for Gemini voice keys and fallback budget"
     }
   },
   "Resources": {
@@ -986,6 +991,23 @@
                       "Ref": "AWS::NoValue"
                     }
                   ]
+                },
+                {
+                  "Fn::If": [
+                    "GenerativeVoiceConfigured",
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "secretsmanager:GetSecretValue"
+                      ],
+                      "Resource": {
+                        "Ref": "TtsSecretArn"
+                      }
+                    },
+                    {
+                      "Ref": "AWS::NoValue"
+                    }
+                  ]
                 }
               ]
             }
@@ -1071,6 +1093,17 @@
             },
             "AUTOMATIC_PUBLICATION": {
               "Ref": "AutomaticPublicationEnabled"
+            },
+            "TTS_SECRET_ARN": {
+              "Fn::If": [
+                "GenerativeVoiceConfigured",
+                {
+                  "Ref": "TtsSecretArn"
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
             }
           }
         }
@@ -1835,6 +1868,18 @@
                 ""
               ]
             }
+          ]
+        }
+      ]
+    },
+    "GenerativeVoiceConfigured": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "TtsSecretArn"
+            },
+            ""
           ]
         }
       ]

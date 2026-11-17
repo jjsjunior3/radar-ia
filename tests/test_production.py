@@ -160,3 +160,24 @@ def test_failed_archive_keeps_existing_audio(run):
 def test_cannot_replace_audio_after_approval(run):
     run.stage('audio_approved')
     with pytest.raises(ValueError,match='ainda não aprovado'):run.restart_audio()
+
+
+def test_generative_audio_uses_approved_text_and_resumes_saved_output(run, monkeypatch):
+    from radar_ia import generative_tts
+    from radar_ia.audio import wav_from_pcm
+    import hashlib
+    run.approve_script()
+    audio, seconds = wav_from_pcm(bytes(32000))
+    calls = []
+    def synthesize(turns, folder, config, **kwargs):
+        calls.append(turns)
+        assert run.state["stage"] == "audio_in_progress"
+        return audio, {"provider": "gemini", "duration_seconds": seconds,
+                       "audio_sha256": hashlib.sha256(audio).hexdigest()}
+    monkeypatch.setattr(generative_tts, "synthesize", synthesize)
+    run.synthesize_generative({"gemini_api_key": "test"})
+    run.synthesize_generative({"gemini_api_key": "test"})
+    assert len(calls) == 1
+    assert calls[0][1]["text"] == "Caching significa armazenamento para reutilização."
+    assert run.state["stage"] == "awaiting_audio_review"
+    assert run.validate_audio(run.approved_bundle()[2])["provider"] == "gemini"

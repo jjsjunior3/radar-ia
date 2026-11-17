@@ -39,7 +39,8 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
             human_override=human.get('mode')=='human' and human.get('editorial_override') is True and human.get('digest')==job['script_digest'] and human.get('approved_by')==owner
             if not human_override and (approval.get('approved') is not True or approval.get('script_digest')!=job['script_digest'] or approval.get('policy')!='editorial-agents-v1'):
                 raise ValueError('Avaliador editorial não aprovou esta versão do roteiro')
-        total=len(speech_chunks(text))
+        tts_secret=os.getenv('TTS_SECRET_ARN')
+        total=1 if tts_secret else len(speech_chunks(text))
         def persist():
             store.save()
             completed=sum(read_json(path,{}).get('status')=='complete' for path in (run.folder/'audio-chunks').glob('*.json'))
@@ -59,7 +60,12 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
                 episode_notice(boto3.client("sqs"),os.environ["NOTIFICATION_QUEUE_URL"],episode["id"])
         if job['action']=='audio':
             run.revalidate(sources)
-            metadata=run.synthesize(polly,voice=DEFAULT_VOICE,engine='generative')
+            if tts_secret and not any((run.folder/'audio-chunks').glob('*.json')):
+                config=json.loads(boto3.client('secretsmanager').get_secret_value(
+                    SecretId=tts_secret)['SecretString'])
+                metadata=run.synthesize_generative(config)
+            else:
+                metadata=run.synthesize(polly,voice=DEFAULT_VOICE,engine='generative')
             key=f"{prefix}/production/previews/{job['date']}/{metadata['audio_sha256']}.wav"
             try:
                 s3.put_object(Bucket=bucket,Key=key,Body=(run.folder/'episode.wav').read_bytes(),ContentType='audio/wav',
@@ -79,7 +85,8 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
         # Marcador sem PCM salvo significa resultado pago incerto: bloquear repetição.
         uncertain=False
         if run:
-            for path in (run.folder/'audio-chunks').glob('*.json'):
+            markers=list((run.folder/'audio-chunks').glob('*.json')) + list((run.folder/'generative-audio').glob('*.json'))
+            for path in markers:
                 if read_json(path,{}).get('status')=='request_started':uncertain=True
         jobs.update(identifier,'needs_review' if uncertain else 'failed',
             can_retry=not uncertain and not isinstance(exc,ValueError),error_code=type(exc).__name__)
@@ -89,6 +96,15 @@ def process(identifier,jobs,s3,polly,bucket,prefix,owner,sources):
 
 
 def handler(event,context):
+    if event=={"voice_diagnostic":True}:
+        from .generative_tts import MODEL
+        config=json.loads(boto3.client('secretsmanager').get_secret_value(
+            SecretId=os.environ['TTS_SECRET_ARN'])['SecretString'])
+        if not config.get('gemini_api_key') or not config.get('openrouter_api_key'):
+            raise ValueError('Credenciais de voz incompletas')
+        return {'status':'voice_diagnostic_ok','model':MODEL,
+                'fallback_budget_usd':config.get('fallback_budget_usd'),'generation':False}
+
     if event=={"push_diagnostic":True}:
         from .notifications import diagnostic
         return diagnostic()

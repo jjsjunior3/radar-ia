@@ -38,7 +38,7 @@ window.radarProduction=(()=>{
     find('state').textContent=states[data.stage]||'Em preparação';
     find('theme').textContent=data.theme||'Seu próximo episódio';
     const notes={new:'A edição de hoje ainda não foi preparada.',no_content:'Nenhum conteúdo elegível foi selecionado para hoje.',
-      awaiting_human_review:'O avaliador reprovou duas versões. Confira os pareceres e o roteiro; sua aprovação retoma automaticamente Polly e publicação, com custos AWS. As observações orientarão futuras edições.',
+      awaiting_human_review:'O avaliador reprovou duas versões. Confira os pareceres e o roteiro; sua aprovação retoma automaticamente a geração do áudio e a publicação, com possível consumo de créditos. As observações orientarão futuras edições.',
       awaiting_script_review:'Leia o texto e confira as fontes antes de aprovar. A aprovação não gera áudio nem publica o episódio.',
       script_approved:'Texto aprovado. A geração e a revisão do áudio são as próximas etapas.',
       awaiting_audio_review:'O áudio está pronto para a próxima etapa de escuta e aprovação pelo fluxo acompanhado.',

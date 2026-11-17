@@ -1,0 +1,36 @@
+{
+  "is_demo": true,
+  "turns": [
+    {
+      "speaker": "leo",
+      "text": "Hoje no Radar IA, vamos falar de um problema que apareceu no próprio projeto. Carolina, o agente recebeu sete notícias, mas avaliou só quatro. Vale tentar de novo?"
+    },
+    {
+      "speaker": "carolina",
+      "text": "Nesse caso, sim. A resposta chegou, e sabemos exatamente o que faltou. Eu pediria uma correção com todos os identificadores, inclusive das notícias rejeitadas. E colocaria um limite de uma tentativa."
+    },
+    {
+      "speaker": "leo",
+      "text": "Mas, se a chamada cair por timeout, não seria a mesma solução?",
+      "english_terms": [
+        "timeout"
+      ]
+    },
+    {
+      "speaker": "carolina",
+      "text": "Aí muda. Timeout é quando o tempo de espera acaba. O provedor pode ter processado a chamada sem a resposta chegar. Repetir imediatamente pode cobrar duas vezes. Eu guardaria o registro e pediria uma verificação."
+    },
+    {
+      "speaker": "leo",
+      "text": "Então, como quem está construindo o primeiro agente pode começar?"
+    },
+    {
+      "speaker": "carolina",
+      "text": "Com três registros simples. O que foi enviado, o que foi recebido e em qual etapa a execução parou. Salve a resposta antes de validá-la. Assim, uma correção no código pode reaproveitar o que já foi pago."
+    },
+    {
+      "speaker": "leo",
+      "text": "Boa. Uma tentativa limitada quando sabemos o erro, e atenção humana quando o resultado é incerto. Esse foi o Radar IA. Projeto de jrsantosdev."
+    }
+  ]
+}

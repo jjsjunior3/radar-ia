@@ -79,7 +79,8 @@ def test_uncertain_job_cannot_be_requeued_even_after_timeout():
     assert public_job(item)['status']=='needs_review'
 
 
-def test_worker_preserves_uncertain_paid_marker_before_temporary_cleanup(monkeypatch):
+@pytest.mark.parametrize("marker_dir", ["audio-chunks", "generative-audio"])
+def test_worker_preserves_uncertain_paid_marker_before_temporary_cleanup(monkeypatch, marker_dir):
     store,sqs,queue,summary=setup();job=queue.start(summary,'audio',dict(digest=summary['digest'],confirmed=True),'owner')
     monkeypatch.setattr(worker,'verify_private',lambda *a:None)
     monkeypatch.setattr(worker,'ProductionStore',lambda *a:SimpleNamespace(load=lambda:None,save=lambda:None))
@@ -91,7 +92,7 @@ def test_worker_preserves_uncertain_paid_marker_before_temporary_cleanup(monkeyp
         def approved_bundle(self):return {},SimpleNamespace(model_dump=lambda:{}),'Olá.'
         def revalidate(self,sources):pass
         def synthesize(self,polly,**kw):
-            folder=self.folder/'audio-chunks';folder.mkdir()
+            folder=self.folder/marker_dir;folder.mkdir()
             (folder/'0.json').write_text(json.dumps({'status':'request_started'}))
             polly.synthesize_speech();raise TimeoutError('resposta perdida')
     monkeypatch.setattr(worker,'Production',Run);polly=Mock()

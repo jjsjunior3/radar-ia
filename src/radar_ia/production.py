@@ -208,6 +208,45 @@ class Production:
             'previous_audio_sha256':previous['audio_sha256'],'archive':receipt})
         self.stage('script_approved',audio_revision=revision)
 
+    def synthesize_generative(self, config):
+        from .generative_tts import synthesize
+        brief, script, text = self.approved_bundle()
+        if (self.folder / 'episode.wav').exists():
+            metadata = self.validate_audio(text)
+            if self.state['stage'] in ('audio_in_progress', 'audio_failed'):
+                self.stage('awaiting_audio_review')
+            return metadata
+        if self.state['stage'] not in ('script_approved', 'audio_in_progress', 'audio_failed'):
+            raise ValueError('Aprove o roteiro antes da voz')
+        if any((self.folder / 'audio-chunks').glob('*.json')):
+            raise ValueError('Tentativa Polly existente; retome com o provedor original')
+        turns = [{'speaker': 'leo', 'text': script.intro_pt}]
+        for story in script.stories:
+            if brief.get('format') == 'interview':
+                question, answer = interview_exchange(story.narration_pt)
+                turns.extend([{'speaker': 'leo', 'text': question},
+                              {'speaker': 'carolina', 'text': answer}])
+            else:
+                turns.append({'speaker': 'leo', 'text': story.narration_pt})
+        turns.append({'speaker': 'leo', 'text': script.outro_pt})
+        self.stage('audio_in_progress')
+        try:
+            audio, receipt = synthesize(turns, self.folder / 'generative-audio',
+                                        config, persist=self.persist)
+            metadata = dict(receipt, engine='generative', voice='Puck',
+                format=brief.get('format', 'bulletin'), renderer='gemini-tts-v1',
+                duration_verified=True,
+                script_sha256=hashlib.sha256(text.encode()).hexdigest())
+            write_json(self.folder / 'metadados-audio.json', metadata)
+            temporary = self.folder / 'episode.wav.tmp'
+            temporary.write_bytes(audio)
+            temporary.replace(self.folder / 'episode.wav')
+            self.stage('awaiting_audio_review')
+            return metadata
+        except Exception:
+            self.stage('audio_failed')
+            raise
+
     def synthesize(self,polly,voice=DEFAULT_VOICE,engine='generative'):
         brief,script,text=self.approved_bundle()
         if (self.folder/'episode.wav').exists():
@@ -219,6 +258,8 @@ class Production:
             return metadata
         if self.state['stage'] not in ('script_approved','audio_in_progress','audio_failed'):
             raise ValueError('Aprove o roteiro antes da voz')
+        if (self.folder / 'generative-audio/manifest.json').exists():
+            raise ValueError('Tentativa Gemini existente; retome com o provedor original')
         terms=[t.term_en for t in script.glossary]
         sections = [(voice, text)]
         if brief.get('format') == 'interview':
